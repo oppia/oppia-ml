@@ -28,7 +28,7 @@ Oppia-ml is written in Python and uses various machine learning libraries for cr
 
 3. Navigate to oppia-ml folder in terminal and run following commands:
   ```
-		bash scripts/deploy.sh
+    bash scripts/deploy.sh
   ```
 
 4. Add shared secret key in VM and in Oppia for secure communication.
