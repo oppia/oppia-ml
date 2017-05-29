@@ -39,6 +39,3 @@ def _fix_third_party_libs_path():
             raise Exception(
                 'Invalid path for third_party library: %s' % lib_path)
         sys.path.insert(0, lib_path)
-
-if __name__ == '__main__':
-    configure()
