@@ -124,9 +124,9 @@ METADATA = open(_METADATA_FILE_PATH, 'r')
 _PATHS_TO_INSERT = [
     os.path.join(
         os.getcwd(), 'third_party',
-        '%s-%s' % (line.strip().split()[0], line.strip().split()[1])
+        '%s-%s' % (line.split()[0], line.split()[1])
     ) for line in [x.strip() for x in METADATA.readlines()]
-    if len(line) != 0 and not line.startswith('#')
+    if line and not line.startswith('#')
 ]
 
 for path in _PATHS_TO_INSERT:

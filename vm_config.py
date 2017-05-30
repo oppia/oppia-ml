@@ -27,9 +27,9 @@ METADATA = open(METADATA_FILE_PATH, 'r')
 THIRD_PARTY_LIBS = [
     os.path.join(
         ROOT_PATH, 'third_party',
-        '%s-%s' % (line.strip().split()[0], line.strip().split()[1])
+        '%s-%s' % (line.split()[0], line.split()[1])
     ) for line in [x.strip() for x in METADATA.readlines()]
-    if len(line) != 0 and not line.startswith('#')
+    if line and not line.startswith('#')
 ]
 
 def configure():

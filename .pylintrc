@@ -2,10 +2,6 @@
 #
 #   pylint core --rcfile=.pylintrc -i y
 
-# NOTE: This file should be kept in sync with .pylintrc in
-# the main Oppia repo:
-# https://github.com/oppia/oppia/blob/develop/.pylintrc
-
 [BASIC]
 
 # Regular expression which should only match correct function names
