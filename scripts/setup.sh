@@ -15,7 +15,6 @@
 # limitations under the License.
 
 EXPECTED_PWD='oppia-ml'
-# The second option allows this script to also be run from deployment folders.
 if [[ ${PWD##*/} != $EXPECTED_PWD ]]; then
   echo ""
   echo "  WARNING   This script should be run from the oppia-ml/ root folder."
@@ -25,6 +24,7 @@ fi
 
 export OPPIA_ML_DIR=$(pwd)
 export THIRD_PARTY_DIR=$OPPIA_ML_DIR/third_party
+export METADATA_FILE=$OPPIA_ML_DIR/metadata.txt 
 
 export OS=`uname`
 

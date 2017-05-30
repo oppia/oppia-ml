@@ -27,6 +27,11 @@ On Vagrant under Windows it will still copy the hook to the .git/hooks dir
 but it will have no effect.
 """
 
+# NOTE: This file should be kept in sync with scripts/pre_push_hook.py in
+# the main Oppia repo:
+# https://github.com/oppia/oppia/blob/develop/scripts/pre_push_hook.py
+
+
 # Pylint has issues with the import order of argparse.
 # pylint: disable=wrong-import-order
 import os
@@ -57,7 +62,7 @@ PYTHON_CMD = 'python'
 GIT_IS_DIRTY_CMD = 'git status --porcelain --untracked-files=no'
 
 
-class ChangedBranch(object):
+class ChangedBranch(object): # pylint: disable = missing-docstring
     def __init__(self, new_branch):
         get_branch_cmd = 'git symbolic-ref -q --short HEAD'.split()
         self.old_branch = subprocess.check_output(get_branch_cmd).strip()
@@ -245,6 +250,7 @@ def _install_hook():
 
 
 def main():
+    """Main function"""
     parser = argparse.ArgumentParser()
     parser.add_argument('remote', nargs='?', help='provided by git before push')
     parser.add_argument('url', nargs='?', help='provided by git before push')

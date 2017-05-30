@@ -5,7 +5,7 @@ If you'd like to report a bug, please include the following information:
 - the observed behaviour
 - steps to reproduce the problem
 - which operating system you're using, if relevant
-- (if possible) copies of the console logs
+- (if possible) copies of the server logs
 
 On the other hand, if you'd like to propose a new feature:
 - please describe, as clearly as possible, what you'd like to see

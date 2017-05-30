@@ -40,41 +40,19 @@ fi
 
 echo Installing third party libraries
 
-# Install scikit-learn
-SKLEARN_VERSION=0.18.1
-SKLEARN_DIR=$THIRD_PARTY_DIR/sklearn-$SKLEARN_VERSION
-echo Checking if scikit-learn is installed in $SKLEARN_DIR
-if [ ! -d "$SKLEARN_DIR" ]; then
-  echo Installing scikit-learn
-  pip install scikit-learn==$SKLEARN_VERSION --target="$SKLEARN_DIR"
-fi
-
-# Install numpy
-NUMPY_VERSION=1.12.1
-NUMPY_DIR=$THIRD_PARTY_DIR/numpy-$NUMPY_VERSION
-echo Checking if numpy is installed in $NUMPY_DIR
-if [ ! -d "$NUMPY_DIR" ]; then
-  echo Installing numpy
-  pip install numpy==$NUMPY_VERSION --target="$NUMPY_DIR"
-fi
-
-# Install scipy
-SCIPY_VERSION=0.19.0
-SCIPY_DIR=$THIRD_PARTY_DIR/scipy-$SCIPY_VERSION
-echo Checking if scipy is installed in $SCIPY_DIR
-if [ ! -d "$SCIPY_DIR" ]; then
-  echo Installing scipy
-  pip install scipy==$SCIPY_VERSION --target="$SCIPY_DIR"
-fi
-
-# Install pylint
-PYLINT_VERSION=1.7.1
-PYLINT_DIR=$THIRD_PARTY_DIR/pylint-$PYLINT_VERSION
-echo Checking if pylint is installed in $PYLINT_DIR
-if [ ! -d "$PYLINT_DIR" ]; then
-  echo Installing pylint
-  pip install pylint==$PYLINT_VERSION --target="$PYLINT_DIR"
-fi
+while read -r line; do
+  if [ "${line:0:1}" = '#' ] || [ "${#line}" = "0" ] ; then
+    continue
+  fi
+  NAME=${line% *}
+  VERSION=${line#* }
+  LIB_PATH=$THIRD_PARTY_DIR/$NAME-$VERSION
+  echo Checking if $NAME is installed in $LIB_PATH
+  if [ ! -d "$LIB_PATH" ]; then
+    echo Installing $NAME
+    pip install $NAME==$VERSION --target="$LIB_PATH"
+  fi
+done < "$METADATA_FILE"
 
 # install pre-push script
 echo Installing pre-push hook for git

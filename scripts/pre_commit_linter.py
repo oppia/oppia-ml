@@ -45,7 +45,11 @@ CUSTOMIZATION OPTIONS
         python scripts/pre_commit_linter.py --files file_1 file_2 ... file_n
 
 Note that the root folder MUST be named 'oppia-ml'.
- """
+"""
+
+# NOTE: This file should be kept in sync with scripts/pre_commit_linter.py in
+# the main Oppia repo:
+# https://github.com/oppia/oppia/blob/develop/scripts/pre_commit_linter.py
 
 # Pylint has issues with the import order of argparse.
 # pylint: disable=wrong-import-order
@@ -105,20 +109,24 @@ if not os.getcwd().endswith('oppia-ml'):
     print ''
     print 'ERROR    Please run this script from the oppia root directory.'
 
-_PARENT_DIR = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
 _PYLINT_PATH = os.path.join(os.getcwd(), 'third_party', 'pylint-1.7.1')
+_METADATA_FILE_PATH = os.path.join(os.getcwd(), 'metadata.txt')
+
 if not os.path.exists(_PYLINT_PATH):
     print ''
     print 'ERROR    Please run start.sh first to install pylint '
     print '         and its dependencies.'
     sys.exit(1)
 
+# Fix third-party library paths.
+METADATA = open(_METADATA_FILE_PATH, 'r')
+
 _PATHS_TO_INSERT = [
-    _PYLINT_PATH,
-    os.getcwd(),
-    os.path.join(os.getcwd() ,'third_party', 'sklearn-0.18.1'),
-    os.path.join(os.getcwd() ,'third_party', 'numpy-1.12.1'),
-    os.path.join(os.getcwd() ,'third_party', 'scipy-0.19.0'),
+    os.path.join(
+        os.getcwd(), 'third_party',
+        '%s-%s' % (line.strip().split()[0], line.strip().split()[1])
+    ) for line in [x.strip() for x in METADATA.readlines()]
+    if len(line) != 0 and not line.startswith('#')
 ]
 
 for path in _PATHS_TO_INSERT:

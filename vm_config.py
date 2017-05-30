@@ -19,20 +19,25 @@ import sys
 
 # Root path of the repo.
 ROOT_PATH = os.path.dirname(__file__)
+METADATA_FILE_PATH = os.path.join(ROOT_PATH, 'metadata.txt')
 
-# Third party libraris path.
+METADATA = open(METADATA_FILE_PATH, 'r')
+
+# Third-party library paths.
 THIRD_PARTY_LIBS = [
-    os.path.join(ROOT_PATH, 'third_party', 'sklearn-0.18.1'),
-    os.path.join(ROOT_PATH, 'third_party', 'numpy-1.12.1'),
-    os.path.join(ROOT_PATH, 'third_party', 'scipy-0.19.0'),
+    os.path.join(
+        ROOT_PATH, 'third_party',
+        '%s-%s' % (line.strip().split()[0], line.strip().split()[1])
+    ) for line in [x.strip() for x in METADATA.readlines()]
+    if len(line) != 0 and not line.startswith('#')
 ]
 
 def configure():
     """This function configures python environment."""
-    _fix_third_party_libs_path()
+    _fix_third_party_lib_paths()
 
 
-def _fix_third_party_libs_path():
+def _fix_third_party_lib_paths():
     """Fixes third party libraries path in python environment."""
     for lib_path in THIRD_PARTY_LIBS:
         if not os.path.isdir(lib_path):

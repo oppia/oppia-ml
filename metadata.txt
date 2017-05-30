@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Main process for training classifiers."""
+# This file contains name and versions of third party libraries used in repo.
+# To add any new 3rd party library add its name and version in following format:
+# NAME VERSION
 
-# Preconfigure before starting main worker process.
-# This step should be performed before importing any of the
-# third party libraries.
-
-import vm_config
-vm_config.configure()
+scikit-learn 0.18.1
+numpy 1.12.1
+scipy 0.19.0
+pylint 1.7.1

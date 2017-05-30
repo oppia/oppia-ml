@@ -2,6 +2,10 @@
 #
 #   pylint core --rcfile=.pylintrc -i y
 
+# NOTE: This file should be kept in sync with .pylintrc in
+# the main Oppia repo:
+# https://github.com/oppia/oppia/blob/develop/.pylintrc
+
 [BASIC]
 
 # Regular expression which should only match correct function names
@@ -61,8 +65,6 @@ ignore-imports=yes
 #    too-many-public-methods
 #    too-many-statements
 # and fix those issues.
-
-disable=consider-using-ternary,locally-disabled,locally-enabled,logging-not-lazy,abstract-method,arguments-differ,broad-except,duplicate-code,fixme,len-as-condition,missing-docstring,no-else-return,no-member,no-self-use,not-context-manager,redefined-variable-type,too-many-arguments,too-many-boolean-expressions,too-many-branches,too-many-instance-attributes,too-many-lines,too-many-locals,too-many-public-methods,too-many-nested-blocks,too-many-statements
 
 [REPORTS]
 
