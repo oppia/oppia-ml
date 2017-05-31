@@ -1,6 +1,6 @@
 # coding: utf-8
 #
-# Copyright 2016 The Oppia Authors. All Rights Reserved.
+# Copyright 2017 The Oppia Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -46,10 +46,6 @@ CUSTOMIZATION OPTIONS
 
 Note that the root folder MUST be named 'oppia-ml'.
 """
-
-# NOTE: This file should be kept in sync with scripts/pre_commit_linter.py in
-# the main Oppia repo:
-# https://github.com/oppia/oppia/blob/develop/scripts/pre_commit_linter.py
 
 # Pylint has issues with the import order of argparse.
 # pylint: disable=wrong-import-order
@@ -110,7 +106,7 @@ if not os.getcwd().endswith('oppia-ml'):
     print 'ERROR    Please run this script from the oppia root directory.'
 
 _PYLINT_PATH = os.path.join(os.getcwd(), 'third_party', 'pylint-1.7.1')
-_METADATA_FILE_PATH = os.path.join(os.getcwd(), 'metadata.txt')
+_MANIFEST_FILE_PATH = os.path.join(os.getcwd(), 'manifest.txt')
 
 if not os.path.exists(_PYLINT_PATH):
     print ''
@@ -119,13 +115,13 @@ if not os.path.exists(_PYLINT_PATH):
     sys.exit(1)
 
 # Fix third-party library paths.
-METADATA = open(_METADATA_FILE_PATH, 'r')
+MANIFEST = open(_MANIFEST_FILE_PATH, 'r')
 
 _PATHS_TO_INSERT = [
     os.path.join(
         os.getcwd(), 'third_party',
         '%s-%s' % (line.split()[0], line.split()[1])
-    ) for line in [x.strip() for x in METADATA.readlines()]
+    ) for line in [x.strip() for x in MANIFEST.readlines()]
     if line and not line.startswith('#')
 ]
 

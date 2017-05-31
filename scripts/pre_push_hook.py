@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-#
-# Copyright 2016 The Oppia Authors. All Rights Reserved.
+
+# Copyright 2017 The Oppia Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the 'License');
 # you may not use this file except in compliance with the License.
@@ -26,11 +26,6 @@ This hook works only on Unix like systems as of now.
 On Vagrant under Windows it will still copy the hook to the .git/hooks dir
 but it will have no effect.
 """
-
-# NOTE: This file should be kept in sync with scripts/pre_push_hook.py in
-# the main Oppia repo:
-# https://github.com/oppia/oppia/blob/develop/scripts/pre_push_hook.py
-
 
 # Pylint has issues with the import order of argparse.
 # pylint: disable=wrong-import-order

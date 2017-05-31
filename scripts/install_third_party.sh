@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright 2016 The Oppia Authors. All Rights Reserved.
+# Copyright 2017 The Oppia Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,6 +13,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+##########################################################################
+
+# This script installs all necessary third party libraries in
+# "third_party" folder.
 
 set -e
 source $(dirname $0)/setup.sh || exit 1
@@ -52,7 +57,7 @@ while read -r line; do
     echo Installing $NAME
     pip install $NAME==$VERSION --target="$LIB_PATH"
   fi
-done < "$METADATA_FILE"
+done < "$MANIFEST_FILE"
 
 # install pre-push script
 echo Installing pre-push hook for git

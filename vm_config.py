@@ -1,4 +1,4 @@
-# Copyright 2016 The Oppia Authors. All Rights Reserved.
+# Copyright 2017 The Oppia Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,16 +19,16 @@ import sys
 
 # Root path of the repo.
 ROOT_PATH = os.path.dirname(__file__)
-METADATA_FILE_PATH = os.path.join(ROOT_PATH, 'metadata.txt')
+MANIFEST_FILE_PATH = os.path.join(ROOT_PATH, 'manifest.txt')
 
-METADATA = open(METADATA_FILE_PATH, 'r')
+MANIFEST = open(MANIFEST_FILE_PATH, 'r')
 
 # Third-party library paths.
 THIRD_PARTY_LIBS = [
     os.path.join(
         ROOT_PATH, 'third_party',
         '%s-%s' % (line.split()[0], line.split()[1])
-    ) for line in [x.strip() for x in METADATA.readlines()]
+    ) for line in [x.strip() for x in MANIFEST.readlines()]
     if line and not line.startswith('#')
 ]
 

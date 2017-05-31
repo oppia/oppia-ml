@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright 2016 The Oppia Authors. All Rights Reserved.
+# Copyright 2017 The Oppia Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,6 +14,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+##########################################################################
+
+# This file should not be invoked directly, but sourced from other sh scripts.
+# Bash execution environent set up for all scripts.
+
 EXPECTED_PWD='oppia-ml'
 if [[ ${PWD##*/} != $EXPECTED_PWD ]]; then
   echo ""
@@ -24,7 +29,7 @@ fi
 
 export OPPIA_ML_DIR=$(pwd)
 export THIRD_PARTY_DIR=$OPPIA_ML_DIR/third_party
-export METADATA_FILE=$OPPIA_ML_DIR/metadata.txt 
+export MANIFEST_FILE=$OPPIA_ML_DIR/manifest.txt 
 
 export OS=`uname`
 
