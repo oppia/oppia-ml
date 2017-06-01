@@ -47,7 +47,7 @@ FileDiff = collections.namedtuple('FileDiff', ['status', 'name'])
 # git hash of /dev/null, refers to an 'empty' commit
 GIT_NULL_COMMIT = '4b825dc642cb6eb9a060e54bf8d69288fbee4904'
 
-# caution, __file__ is here *OPPiA/.git/hooks* and not in *OPPIA/scripts*
+# caution, __file__ is here *OPPIA-ML/.git/hooks* and not in *OPPIA-ML/scripts*
 FILE_DIR = os.path.abspath(os.path.dirname(__file__))
 OPPIA_ML_DIR = os.path.join(FILE_DIR, os.pardir, os.pardir)
 SCRIPTS_DIR = os.path.join(OPPIA_ML_DIR, 'scripts')

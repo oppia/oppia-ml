@@ -115,15 +115,14 @@ if not os.path.exists(_PYLINT_PATH):
     sys.exit(1)
 
 # Fix third-party library paths.
-MANIFEST = open(_MANIFEST_FILE_PATH, 'r')
-
-_PATHS_TO_INSERT = [
-    os.path.join(
-        os.getcwd(), 'third_party',
-        '%s-%s' % (line.split()[0], line.split()[1])
-    ) for line in [x.strip() for x in MANIFEST.readlines()]
-    if line and not line.startswith('#')
-]
+with open(_MANIFEST_FILE_PATH, 'r') as f:
+    _PATHS_TO_INSERT = [
+        os.path.join(
+            os.getcwd(), 'third_party',
+            '%s-%s' % (line.split()[0], line.split()[1])
+        ) for line in [x.strip() for x in f.readlines()]
+        if line and not line.startswith('#')
+    ]
 
 for path in _PATHS_TO_INSERT:
     sys.path.insert(0, path)

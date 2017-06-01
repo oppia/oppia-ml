@@ -18,19 +18,18 @@ import os
 import sys
 
 # Root path of the repo.
-ROOT_PATH = os.path.dirname(__file__)
+ROOT_PATH = os.path.abspath(os.path.dirname(__file__))
 MANIFEST_FILE_PATH = os.path.join(ROOT_PATH, 'manifest.txt')
 
-MANIFEST = open(MANIFEST_FILE_PATH, 'r')
-
 # Third-party library paths.
-THIRD_PARTY_LIBS = [
-    os.path.join(
-        ROOT_PATH, 'third_party',
-        '%s-%s' % (line.split()[0], line.split()[1])
-    ) for line in [x.strip() for x in MANIFEST.readlines()]
-    if line and not line.startswith('#')
-]
+with open(MANIFEST_FILE_PATH, 'r') as f:
+    THIRD_PARTY_LIB_PATHS = [
+        os.path.join(
+            ROOT_PATH, 'third_party',
+            '%s-%s' % (line.split()[0], line.split()[1])
+        ) for line in [x.strip() for x in f.readlines()]
+        if line and not line.startswith('#')
+    ]
 
 def configure():
     """This function configures python environment."""
@@ -39,7 +38,7 @@ def configure():
 
 def _fix_third_party_lib_paths():
     """Fixes third party libraries path in python environment."""
-    for lib_path in THIRD_PARTY_LIBS:
+    for lib_path in THIRD_PARTY_LIB_PATHS:
         if not os.path.isdir(lib_path):
             raise Exception(
                 'Invalid path for third_party library: %s' % lib_path)
