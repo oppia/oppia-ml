@@ -1,3 +1,5 @@
+# coding: utf-8
+#
 # Copyright 2017 The Oppia Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,13 +14,30 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# This file contains name and versions of third party libraries used in repo.
-# To add any new 3rd party library add its name and version in following format:
-# NAME VERSION
+"""Functions for retrieving metadata of GCE."""
 
-scikit-learn 0.18.1
-numpy 1.12.1
-scipy 0.19.0
-pylint 1.7.1
-requests 2.17.1
-responses 0.5.1
+import requests
+
+
+METADATA_ATTRIBUTES_URL = (
+    'http://metadata.google.internal/computeMetadata/v1/instance/attributes/')
+
+
+METADATA_HEADERS = {
+    'Metadata-Flavor': 'Google'
+}
+
+
+def get_metadata_param(param_name):
+    """Fetch value of metadata parameter.
+
+    Args:
+        param_name: str. Name of the parameter to be fetched.
+    """
+
+    # Send a request to get param details.
+    value = requests.get(
+        '%s/%s' % (METADATA_ATTRIBUTES_URL, param_name),
+        headers=METADATA_HEADERS)
+
+    return value
