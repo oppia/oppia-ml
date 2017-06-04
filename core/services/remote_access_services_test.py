@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Tests for remote access services"""
+"""Tests for remote access services."""
 
 import json
 
@@ -34,9 +34,9 @@ class RemoteAccessServicesTests(test_utils.GenericTestBase):
         with self.swap(vmconf, 'DEFAULT_VM_SHARED_SECRET', '1a2b3c4e'):
             sign = remote_access_services.generate_signature(data)
 
-        expcted_sign = (
+        expected_sign = (
             '45a6a6200a11d13d56ad5c505005e294f675f8c79943e5afd14b922e2f7a287d')
-        self.assertEqual(sign, expcted_sign)
+        self.assertEqual(sign, expected_sign)
 
     def test_next_job_gets_fetched(self):
         """Test that next job is fetched correctly."""
@@ -96,7 +96,6 @@ class RemoteAccessServicesTests(test_utils.GenericTestBase):
         classifier_data = {
             'job_request_id': 'id'
         }
-
 
         with self.assertRaisesRegexp(
             Exception, 'classifier_data must contain \'training_result\'.'):

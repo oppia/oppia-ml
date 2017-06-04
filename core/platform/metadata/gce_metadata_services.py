@@ -19,8 +19,11 @@
 import requests
 
 
+# Following URL is used to retrieve metadata of gce instance.
+# For more information check following link:
+# https://cloud.google.com/compute/docs/storing-retrieving-metadata
 METADATA_ATTRIBUTES_URL = (
-    'http://metadata.google.internal/computeMetadata/v1/instance/attributes/')
+    'https://metadata.google.internal/computeMetadata/v1/instance/attributes/')
 
 
 METADATA_HEADERS = {

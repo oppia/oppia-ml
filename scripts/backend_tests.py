@@ -37,7 +37,6 @@ ALL_ERRORS = []
 # This should be the same as core.test_utils.LOG_LINE_PREFIX.
 LOG_LINE_PREFIX = 'LOG_INFO_TEST: '
 
-
 _PARSER = argparse.ArgumentParser()
 _PARSER.add_argument(
     '--test_target',
@@ -52,6 +51,7 @@ _PARSER.add_argument(
     '--verbose',
     help='optional; if specified, display the output of the tests being run',
     action='store_true')
+# pylint: enable=duplicate-code
 
 
 def log(message, show_time=False):
@@ -59,7 +59,7 @@ def log(message, show_time=False):
 
     If show_time is True, prefixes the message with the current time.
     """
-    with LOG_LOCK:
+    with LOG_LOCK: # pylint: disable=not-context-manager
         if show_time:
             print datetime.datetime.utcnow().strftime('%H:%M:%S'), message
         else:
@@ -113,7 +113,7 @@ class TaskThread(threading.Thread):
             log('FINISHED %s: %.1f secs' %
                 (self.name, time.time() - self.start_time), show_time=True)
             self.finished = True
-        except Exception as e:
+        except Exception as e: # pylint: disable=broad-except
             self.exception = e
             if 'KeyboardInterrupt' not in str(self.exception):
                 log('ERROR %s: %.1f secs' %
@@ -210,7 +210,7 @@ def _get_all_test_targets(test_path=None):
     return result
 
 
-def main():
+def main(): # pylint: disable=too-many-branches
     """Run the tests."""
     parsed_args = _PARSER.parse_args()
     if parsed_args.test_target and parsed_args.test_path:
@@ -239,7 +239,7 @@ def main():
     task_execution_failed = False
     try:
         _execute_tasks(tasks)
-    except Exception:
+    except Exception: # pylint: disable=broad-except
         task_execution_failed = True
 
     for task in tasks:
@@ -300,7 +300,7 @@ def main():
                 test_time = float(tests_run_regex_match.group(2))
                 print ('SUCCESS   %s: %d tests (%.1f secs)' %
                        (spec.test_target, test_count, test_time))
-            except Exception:
+            except Exception: # pylint: disable=broad-except
                 print (
                     'An unexpected error occurred. '
                     'Task output:\n%s' % task.output)

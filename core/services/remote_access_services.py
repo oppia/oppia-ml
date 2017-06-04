@@ -16,8 +16,8 @@
 
 """This module provides interface to communicate with Oppia remotely."""
 
-import hmac
 import hashlib
+import hmac
 import json
 import requests
 
@@ -93,11 +93,19 @@ def fetch_next_job_request():
 
 
 def store_trained_classifier_model(classifier_data):
-    """Stored the result of processed job request.
+    """Stores the result of processed job request.
 
     Args:
         classifier_data: dict. A dictionary containing result of training
             of classifier.
+
+    Returns:
+        response: response object containing the server's response.
+
+    Raises:
+        Exception: classifier_data is not of dict type.
+        Exception: classifier_data does not contain 'job_request_id' key.
+        Exception: classifier_data does not contain 'training_result' key.
     """
 
     # Make sure that classifier_data is in proper foramt.

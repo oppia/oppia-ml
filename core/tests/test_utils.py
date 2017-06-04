@@ -23,9 +23,6 @@ import responses
 
 import vmconf
 
-# Prefix to append to all lines printed by tests to the console.
-LOG_LINE_PREFIX = 'LOG_INFO_TEST: '
-
 
 class TestBase(unittest.TestCase):
     """Base class for all tests."""
@@ -38,14 +35,8 @@ class TestBase(unittest.TestCase):
         """tearDown method which is run after executing every test case."""
         pass
 
-    def log_line(self, line):
-        """Print the line with a prefix that can be identified by the
-        script that calls the test.
-        """
-        print '%s%s' % (LOG_LINE_PREFIX, line)
-
     def save_new_job_request(
-            self, job_request_id, algorithm_id, training_data={}):
+            self, job_request_id, algorithm_id, training_data=None):
         """Puts a new job request with job_request_id.
 
         Args:
@@ -66,7 +57,7 @@ class TestBase(unittest.TestCase):
         }
         return self.put_get_request(request_url, response_data, 200)
 
-    def put_get_request(self, url, data, status_code, headers={}):
+    def put_get_request(self, url, data, status_code, headers=None):
         """Puts a mock get request for given url.
 
         Args:
