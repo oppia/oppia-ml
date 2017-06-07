@@ -63,7 +63,10 @@ def generate_signature(data):
     """Generates digital signature for given data.
 
     Args:
-        data: dict. A dictionary data to be transferred over network.`
+        data: dict. A dictionary data to be transferred over network.
+
+    Returns:
+        str. The digital signature generated from request data.
     """
     msg = json.dumps(data)
     key = _get_shared_secret()
@@ -92,33 +95,33 @@ def fetch_next_job_request():
     return response.json()
 
 
-def store_trained_classifier_model(classifier_data):
+def store_trained_classifier_model(job_result_dict):
     """Stores the result of processed job request.
 
     Args:
-        classifier_data: dict. A dictionary containing result of training
+        job_result_dict: dict. A dictionary containing result of training
             of classifier.
 
     Returns:
         response: response object containing the server's response.
 
     Raises:
-        Exception: classifier_data is not of dict type.
-        Exception: classifier_data does not contain 'job_request_id' key.
-        Exception: classifier_data does not contain 'training_result' key.
+        Exception: job_result_dict is not of dict type.
+        Exception: job_result_dict does not contain 'job_request_id' key.
+        Exception: job_result_dict does not contain 'training_result' key.
     """
 
-    # Make sure that classifier_data is in proper foramt.
-    if not isinstance(classifier_data, dict):
-        raise Exception('classifier_data must be in dict format.')
+    # Make sure that job_result_dict is in proper foramt.
+    if not isinstance(job_result_dict, dict):
+        raise Exception('job_result_dict must be in dict format.')
 
-    if 'job_request_id' not in classifier_data.keys():
-        raise Exception('classifier_data must contain \'job_request_id\'.')
+    if 'job_request_id' not in job_result_dict.keys():
+        raise Exception('job_result_dict must contain \'job_request_id\'.')
 
-    if 'training_result' not in classifier_data.keys():
-        raise Exception('classifier_data must contain \'training_result\'.')
+    if 'classifier_data' not in job_result_dict.keys():
+        raise Exception('job_result_dict must contain \'classifier_data\'.')
 
-    payload = classifier_data
+    payload = job_result_dict
     payload['vm_id'] = _get_vm_id()
     signature = generate_signature(payload)
     payload['signature'] = signature

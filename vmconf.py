@@ -53,7 +53,7 @@ METADATA_VM_ID_PARAM_NAME = 'vm_id'
 METADATA_SHARED_SECRET_PARAM_NAME = 'shared_secret_key'
 
 # Handler URL of Oppia which is used to retrieve jobs.
-FETCH_NEXT_JOB_REQUEST_HANDLER = '/fetchnextjobhandler'
+FETCH_NEXT_JOB_REQUEST_HANDLER = 'oppia-ml/fetch/job-request'
 
 # Handler URL of Oppia which is used to store job result.
-STORE_TRAINED_CLASSIFIER_MODEL_HANDLER = '/storetrainedclassifierhandler'
+STORE_TRAINED_CLASSIFIER_MODEL_HANDLER = 'oppia-ml/store/trained-classifier'

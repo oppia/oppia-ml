@@ -54,9 +54,9 @@ class RemoteAccessServicesTests(test_utils.GenericTestBase):
     def test_result_gets_stored_correctly(self):
         """Test that correct results are stored."""
 
-        classifier_data = {
+        job_result_dict = {
             'job_request_id': '123',
-            'training_result': {
+            'classifier_data': {
                 'param': 'val'
             }
         }
@@ -67,37 +67,37 @@ class RemoteAccessServicesTests(test_utils.GenericTestBase):
             """Callback for post request."""
             payload = json.loads(request.body)
             self.assertEqual(payload['job_request_id'], '123')
-            training_result = {
+            classifier_data = {
                 'param': 'val'
             }
-            self.assertDictEqual(training_result, payload['training_result'])
+            self.assertDictEqual(classifier_data, payload['classifier_data'])
 
         with self.set_job_result_post_callback(post_callback):
             resp = remote_access_services.store_trained_classifier_model(
-                classifier_data)
+                job_result_dict)
         self.assertEqual(resp.status_code, 200)
 
     def test_exception_is_raised_when_classifier_data_is_inappropriate(self):
         """Test that correct results are stored."""
-        classifier_data = 123
+        job_result_dict = 123
 
         with self.assertRaisesRegexp(
-            Exception, 'classifier_data must be in dict format'):
+            Exception, 'job_result_dict must be in dict format'):
             remote_access_services.store_trained_classifier_model(
-                classifier_data)
+                job_result_dict)
 
-        classifier_data = {}
+        job_result_dict = {}
 
         with self.assertRaisesRegexp(
-            Exception, 'classifier_data must contain \'job_request_id\'.'):
+            Exception, 'job_result_dict must contain \'job_request_id\'.'):
             remote_access_services.store_trained_classifier_model(
-                classifier_data)
+                job_result_dict)
 
-        classifier_data = {
+        job_result_dict = {
             'job_request_id': 'id'
         }
 
         with self.assertRaisesRegexp(
-            Exception, 'classifier_data must contain \'training_result\'.'):
+            Exception, 'job_result_dict must contain \'classifier_data\'.'):
             remote_access_services.store_trained_classifier_model(
-                classifier_data)
+                job_result_dict)

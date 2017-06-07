@@ -24,6 +24,7 @@ class MetadataServicesTests(test_utils.GenericTestBase):
 
     def test_that_metadata_is_fetched(self):
         """Test that metadata param is fetched correctly."""
+        # Get value of 'param' parameter.
         param_name = 'param'
         metadata_url = '%s/%s' % (
             gce_metadata_services.METADATA_ATTRIBUTES_URL, param_name)

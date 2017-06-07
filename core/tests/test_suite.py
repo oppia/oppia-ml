@@ -28,26 +28,14 @@ from the oppia/ root folder.
 #pylint: disable=wrong-import-order
 import argparse
 import os
-import sys
 import unittest
 #pylint: enable=wrong-import-order
 
+import vm_config
 import vmconf
 
 CURR_DIR = os.path.abspath(os.getcwd())
 THIRD_PARTY_DIR = os.path.join(CURR_DIR, 'third_party')
-MANIFEST_FILE_PATH = os.path.join(os.getcwd(), 'manifest.txt')
-
-with open(MANIFEST_FILE_PATH, 'r') as f:
-    DIRS_TO_ADD_TO_SYS_PATH = [
-        os.path.join(
-            os.getcwd(), 'third_party',
-            '%s-%s' % (line.split()[0], line.split()[1])
-        ) for line in [x.strip() for x in f.readlines()]
-        if line and not line.startswith('#')
-    ]
-
-DIRS_TO_ADD_TO_SYS_PATH.append(CURR_DIR)
 
 _PARSER = argparse.ArgumentParser()
 _PARSER.add_argument(
@@ -87,10 +75,7 @@ def main():
     # and port.
     vmconf.DEV_MODE = True
 
-    for directory in DIRS_TO_ADD_TO_SYS_PATH:
-        if not os.path.exists(os.path.dirname(directory)):
-            raise Exception('Directory %s does not exist.' % directory)
-        sys.path.insert(0, directory)
+    vm_config.configure()
 
     parsed_args = _PARSER.parse_args()
     suites = create_test_suites(parsed_args.test_target)
