@@ -57,7 +57,8 @@ class TestBase(unittest.TestCase):
         }
         return self.put_get_request(request_url, response_data, 200)
 
-    def put_get_request(self, url, data, status_code, headers=None):
+    @staticmethod
+    def put_get_request(url, data, status_code, headers=None):
         """Puts a mock get request for given url.
 
         Args:
@@ -83,7 +84,8 @@ class TestBase(unittest.TestCase):
             vmconf.STORE_TRAINED_CLASSIFIER_MODEL_HANDLER)
         return self.set_post_callback(request_url, callback)
 
-    def set_post_callback(self, url, callback):
+    @staticmethod
+    def set_post_callback(url, callback):
         """Sets a callback for store job result post request.
 
         Args:
@@ -96,8 +98,9 @@ class TestBase(unittest.TestCase):
             response.POST, url, callback=callback)
         return response
 
+    @staticmethod
     @contextlib.contextmanager
-    def swap(self, obj, attr, newvalue):
+    def swap(obj, attr, newvalue):
         """Swap an object's attribute value within the context of a
         'with' statement. The object can be anything that supports
         getattr and setattr, such as class instances, modules, ...
@@ -130,8 +133,8 @@ class TestBase(unittest.TestCase):
         finally:
             setattr(obj, attr, original)
 
-    @classmethod
-    def callback(cls, func):
+    @staticmethod
+    def callback(func):
         """Decorator for callback method.
 
         Use this function as decorator when you are defining your own

@@ -210,16 +210,83 @@ def _get_all_test_targets(test_path=None):
     return result
 
 
+def _validate_parsed_args(args):
+    if args.test_target and args.test_path:
+        raise Exception('At most one of test_path and test_target '
+                        'should be specified.')
+    if args.test_path and '.' in args.test_path:
+        raise Exception('The delimiter in test_path should be a slash (/)')
+    if args.test_target and '/' in args.test_target:
+        raise Exception('The delimiter in test_target should be a dot (.)')
+
+
+def _prepate_tasks_to_be_executed(args, all_test_targets):
+    task_to_taskspec = {}
+    tasks = []
+    for test_target in all_test_targets:
+        test = TestingTaskSpec(test_target)
+        task = TaskThread(test.run, args.verbose, name=test_target)
+        task_to_taskspec[task] = test
+        tasks.append(task)
+
+    return tasks, task_to_taskspec
+
+
+def _print_task_summary(task, spec):
+    """Prints summary for task."""
+    test_count = 0
+    errors = 0
+    failures = 0
+
+    if not task.finished:
+        print 'CANCELED  %s' % spec.test_target
+    elif 'No tests were run' in str(task.exception):
+        print 'ERROR     %s: No tests found.' % spec.test_target
+    elif task.exception:
+        exc_str = str(task.exception).decode('utf-8')
+        print exc_str[exc_str.find('=') : exc_str.rfind('-')]
+
+        tests_failed_regex_match = re.search(
+            r'Test suite failed: ([0-9]+) tests run, ([0-9]+) errors, '
+            '([0-9]+) failures',
+            str(task.exception))
+
+        try:
+            test_count = int(tests_failed_regex_match.group(1))
+            errors = int(tests_failed_regex_match.group(2))
+            failures = int(tests_failed_regex_match.group(3))
+            print 'FAILED    %s: %s errors, %s failures' % (
+                spec.test_target, errors, failures)
+        except AttributeError:
+            # There was an internal error, and the tests did not run. (The
+            # error message did not match `tests_failed_regex_match`.)
+            test_count = 0
+            print ''
+            print '------------------------------------------------------'
+            print '    WARNING: FAILED TO RUN TESTS.'
+            print ''
+            print '    This is most likely due to an import error.'
+            print '------------------------------------------------------'
+    else:
+        try:
+            tests_run_regex_match = re.search(
+                r'Ran ([0-9]+) tests? in ([0-9\.]+)s', task.output)
+            test_count = int(tests_run_regex_match.group(1))
+            test_time = float(tests_run_regex_match.group(2))
+            print ('SUCCESS   %s: %d tests (%.1f secs)' %
+                   (spec.test_target, test_count, test_time))
+        except Exception: # pylint: disable=broad-except
+            print (
+                'An unexpected error occurred. '
+                'Task output:\n%s' % task.output)
+
+    return test_count, errors, failures
+
+
 def main(): # pylint: disable=too-many-branches
     """Run the tests."""
     parsed_args = _PARSER.parse_args()
-    if parsed_args.test_target and parsed_args.test_path:
-        raise Exception('At most one of test_path and test_target '
-                        'should be specified.')
-    if parsed_args.test_path and '.' in parsed_args.test_path:
-        raise Exception('The delimiter in test_path should be a slash (/)')
-    if parsed_args.test_target and '/' in parsed_args.test_target:
-        raise Exception('The delimiter in test_target should be a dot (.)')
+    _validate_parsed_args(parsed_args)
 
     if parsed_args.test_target:
         all_test_targets = [parsed_args.test_target]
@@ -228,13 +295,8 @@ def main(): # pylint: disable=too-many-branches
             test_path=parsed_args.test_path)
 
     # Prepare tasks.
-    task_to_taskspec = {}
-    tasks = []
-    for test_target in all_test_targets:
-        test = TestingTaskSpec(test_target)
-        task = TaskThread(test.run, parsed_args.verbose, name=test_target)
-        task_to_taskspec[task] = test
-        tasks.append(task)
+    tasks, task_to_taskspec = _prepate_tasks_to_be_executed(
+        parsed_args, all_test_targets)
 
     task_execution_failed = False
     try:
@@ -258,54 +320,10 @@ def main(): # pylint: disable=too-many-branches
     total_failures = 0
     for task in tasks:
         spec = task_to_taskspec[task]
-
-        if not task.finished:
-            print 'CANCELED  %s' % spec.test_target
-            test_count = 0
-        elif 'No tests were run' in str(task.exception):
-            print 'ERROR     %s: No tests found.' % spec.test_target
-            test_count = 0
-        elif task.exception:
-            exc_str = str(task.exception).decode('utf-8')
-            print exc_str[exc_str.find('=') : exc_str.rfind('-')]
-
-            tests_failed_regex_match = re.search(
-                r'Test suite failed: ([0-9]+) tests run, ([0-9]+) errors, '
-                '([0-9]+) failures',
-                str(task.exception))
-
-            try:
-                test_count = int(tests_failed_regex_match.group(1))
-                errors = int(tests_failed_regex_match.group(2))
-                failures = int(tests_failed_regex_match.group(3))
-                total_errors += errors
-                total_failures += failures
-                print 'FAILED    %s: %s errors, %s failures' % (
-                    spec.test_target, errors, failures)
-            except AttributeError:
-                # There was an internal error, and the tests did not run. (The
-                # error message did not match `tests_failed_regex_match`.)
-                test_count = 0
-                print ''
-                print '------------------------------------------------------'
-                print '    WARNING: FAILED TO RUN TESTS.'
-                print ''
-                print '    This is most likely due to an import error.'
-                print '------------------------------------------------------'
-        else:
-            try:
-                tests_run_regex_match = re.search(
-                    r'Ran ([0-9]+) tests? in ([0-9\.]+)s', task.output)
-                test_count = int(tests_run_regex_match.group(1))
-                test_time = float(tests_run_regex_match.group(2))
-                print ('SUCCESS   %s: %d tests (%.1f secs)' %
-                       (spec.test_target, test_count, test_time))
-            except Exception: # pylint: disable=broad-except
-                print (
-                    'An unexpected error occurred. '
-                    'Task output:\n%s' % task.output)
-
+        test_count, error, failures = _print_task_summary(task, spec)
         total_count += test_count
+        total_errors += error
+        total_failures += failures
 
     print ''
     if total_count == 0:

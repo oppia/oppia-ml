@@ -62,7 +62,7 @@ class RemoteAccessServicesTests(test_utils.GenericTestBase):
         }
 
         # Callback for post request.
-        @test_utils.GenericTestBase.callback
+        @self.callback
         def post_callback(request):
             """Callback for post request."""
             payload = json.loads(request.body)
