@@ -36,7 +36,7 @@ SERVER_COMMUNICATION_URL = 'https://www.oppia.org'
 
 # Communication PORT which is to be used in production environment to
 # communicate with Oppia server.
-SERVER_COMMUNICATION_PORT = 80
+SERVER_COMMUNICATION_PORT = 443
 
 # Default ID which is to be used in local development environment.
 DEFAULT_VM_ID = 'vm_default'
