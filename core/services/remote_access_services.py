@@ -107,7 +107,7 @@ def store_trained_classifier_model(job_result_dict):
 
     Raises:
         Exception: job_result_dict is not of dict type.
-        Exception: job_result_dict does not contain 'job_request_id' key.
+        Exception: job_result_dict does not contain 'job_id' key.
         Exception: job_result_dict does not contain 'training_result' key.
     """
 
@@ -115,8 +115,8 @@ def store_trained_classifier_model(job_result_dict):
     if not isinstance(job_result_dict, dict):
         raise Exception('job_result_dict must be in dict format.')
 
-    if 'job_request_id' not in job_result_dict.keys():
-        raise Exception('job_result_dict must contain \'job_request_id\'.')
+    if 'job_id' not in job_result_dict.keys():
+        raise Exception('job_result_dict must contain \'job_id\'.')
 
     if 'classifier_data' not in job_result_dict.keys():
         raise Exception('job_result_dict must contain \'classifier_data\'.')

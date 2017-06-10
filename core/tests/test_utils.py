@@ -36,11 +36,11 @@ class TestBase(unittest.TestCase):
         pass
 
     def save_new_job_request(
-            self, job_request_id, algorithm_id, training_data=None):
-        """Puts a new job request with job_request_id.
+            self, job_id, algorithm_id, training_data=None):
+        """Puts a new job request with job_id.
 
         Args:
-            job_request_id: str. Unicode string representing ID of
+            job_id: str. Unicode string representing ID of
                 new job request.
             algorithm_id: str. Unicode string representing ID of classifier
                 algorithm.
@@ -51,7 +51,7 @@ class TestBase(unittest.TestCase):
             vmconf.DEFAULT_COMMUNICATION_URL, vmconf.DEFAULT_COMMUNICATION_PORT,
             vmconf.FETCH_NEXT_JOB_REQUEST_HANDLER)
         response_data = {
-            'job_request_id': job_request_id,
+            'job_id': job_id,
             'algorithm_id': algorithm_id,
             'training_data': training_data
         }

@@ -43,11 +43,11 @@ class RemoteAccessServicesTests(test_utils.GenericTestBase):
         with self.save_new_job_request('1', 'ab', {}):
             resp = remote_access_services.fetch_next_job_request()
 
-        self.assertIn('job_request_id', resp.keys())
+        self.assertIn('job_id', resp.keys())
         self.assertIn('algorithm_id', resp.keys())
         self.assertIn('training_data', resp.keys())
 
-        self.assertEqual(resp['job_request_id'], '1')
+        self.assertEqual(resp['job_id'], '1')
         self.assertEqual(resp['algorithm_id'], 'ab')
         self.assertDictEqual(resp['training_data'], {})
 
@@ -55,7 +55,7 @@ class RemoteAccessServicesTests(test_utils.GenericTestBase):
         """Test that correct results are stored."""
 
         job_result_dict = {
-            'job_request_id': '123',
+            'job_id': '123',
             'classifier_data': {
                 'param': 'val'
             }
@@ -66,7 +66,7 @@ class RemoteAccessServicesTests(test_utils.GenericTestBase):
         def post_callback(request):
             """Callback for post request."""
             payload = json.loads(request.body)
-            self.assertEqual(payload['job_request_id'], '123')
+            self.assertEqual(payload['job_id'], '123')
             classifier_data = {
                 'param': 'val'
             }
@@ -89,12 +89,12 @@ class RemoteAccessServicesTests(test_utils.GenericTestBase):
         job_result_dict = {}
 
         with self.assertRaisesRegexp(
-            Exception, 'job_result_dict must contain \'job_request_id\'.'):
+            Exception, 'job_result_dict must contain \'job_id\'.'):
             remote_access_services.store_trained_classifier_model(
                 job_result_dict)
 
         job_result_dict = {
-            'job_request_id': 'id'
+            'job_id': 'id'
         }
 
         with self.assertRaisesRegexp(
