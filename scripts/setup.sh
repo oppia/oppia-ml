@@ -68,12 +68,12 @@ if ! test_python_version $PYTHON_CMD; then
     echo "Could not find a suitable Python environment. Exiting."
     # If OS is Windows, print helpful error message about adding Python to path.
     if [ ! "${OS}" == "Darwin" -a ! "${OS}" == "Linux" ]; then
-        echo "It looks like you are using Windows. If you have Python installed,"
-        echo "make sure it is in your PATH and that PYTHONPATH is set."
-        echo "If you have two versions of Python (ie, Python 2.7 and 3), specify 2.7 before other versions of Python when setting the PATH."
-        echo "Here are some helpful articles:"
-        echo "http://docs.python-guide.org/en/latest/starting/install/win/"
-        echo "https://stackoverflow.com/questions/3701646/how-to-add-to-the-pythonpath-in-windows-7"
+      echo "It looks like you are using Windows. If you have Python installed,"
+      echo "make sure it is in your PATH and that PYTHONPATH is set."
+      echo "If you have two versions of Python (ie, Python 2.7 and 3), specify 2.7 before other versions of Python when setting the PATH."
+      echo "Here are some helpful articles:"
+      echo "http://docs.python-guide.org/en/latest/starting/install/win/"
+      echo "https://stackoverflow.com/questions/3701646/how-to-add-to-the-pythonpath-in-windows-7"
     fi
     # Exit when no suitable Python environment can be found.
     return 1

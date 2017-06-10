@@ -25,8 +25,12 @@ source $(dirname $0)/setup.sh || exit 1
 # Checking if pip is installed. If you are having
 # trouble, please ensure that you have pip installed (see "Installing Oppia"
 # on the Oppia developers' wiki page).
+PIP_CMD="pip"
 echo Checking if pip is installed on the local machine
-if ! type pip > /dev/null 2>&1 ; then
+if ! type $PIP_CMD > /dev/null 2>&1 ; then
+  echo "Unable to find 'pip'. Trying pip2 instead..."
+  PIP_CMD="pip2"
+  if ! type $PIP_CMD > /dev/null 2>&1 ; then
     echo ""
     echo "  Pip is required to install Oppia-ml dependencies, but pip wasn't"
     echo "  found on your local machine."
@@ -41,6 +45,7 @@ if ! type pip > /dev/null 2>&1 ; then
 
     # If pip is not installed, quit.
     exit 1
+  fi
 fi
 
 echo Installing third party libraries
@@ -55,7 +60,7 @@ while read -r line; do
   echo Checking if $NAME is installed in $LIB_PATH
   if [ ! -d "$LIB_PATH" ]; then
     echo Installing $NAME
-    pip install $NAME==$VERSION --target="$LIB_PATH"
+    $PIP_CMD install $NAME==$VERSION --target="$LIB_PATH"
   fi
 done < "$MANIFEST_FILE"
 
