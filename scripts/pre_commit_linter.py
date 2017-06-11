@@ -21,8 +21,6 @@ list of lint errors to the terminal. If the directory path is passed,
 it will lint all Python files in that directory; otherwise,
 it will only lint files that have been touched in this commit.
 
-This script ignores all filepaths contained within .eslintignore.
-
 IMPORTANT NOTES:
 
 1.  Before running this script, you must install third-party dependencies by
@@ -164,22 +162,7 @@ def _get_changed_filenames():
     return unstaged_files + staged_files
 
 
-def _get_glob_patterns_excluded_from_eslint(eslintignore_path):
-    """Collects excludeFiles from .eslintignore file.
-
-    Args:
-        eslintignore_path: str. Path to .eslintignore file.
-
-    Returns:
-        a list of files in excludeFiles.
-    """
-    file_data = []
-    with open(eslintignore_path) as f:
-        file_data.extend(f.readlines())
-    return file_data
-
-
-def _get_all_files_in_directory(dir_path, excluded_glob_patterns):
+def _get_all_files_in_directory(dir_path):
     """Recursively collects all files in directory and
     subdirectories of specified path.
 
@@ -196,9 +179,8 @@ def _get_all_files_in_directory(dir_path, excluded_glob_patterns):
         for file_name in files:
             filename = os.path.relpath(
                 os.path.join(_dir, file_name), os.getcwd())
-            if not any([fnmatch.fnmatch(filename, gp) for gp in
-                        excluded_glob_patterns]):
-                files_in_directory.append(filename)
+
+            files_in_directory.append(filename)
     return files_in_directory
 
 
@@ -259,7 +241,6 @@ def _get_all_files():
     root directory and to return a list of all the files for linting and
     pattern checks.
     """
-    eslintignore_path = os.path.join(os.getcwd(), '.eslintignore')
     parsed_args = _PARSER.parse_args()
     if parsed_args.path:
         input_path = os.path.join(os.getcwd(), parsed_args.path)
@@ -270,10 +251,8 @@ def _get_all_files():
         if os.path.isfile(input_path):
             all_files = [input_path]
         else:
-            excluded_glob_patterns = _get_glob_patterns_excluded_from_eslint(
-                eslintignore_path)
             all_files = _get_all_files_in_directory(
-                input_path, excluded_glob_patterns)
+                input_path)
     elif parsed_args.files:
         valid_filepaths = []
         invalid_filepaths = []
@@ -296,9 +275,6 @@ def _get_all_files():
 
 
 def _pre_commit_linter(all_files):
-    """This function is used to check if node-eslint dependencies are installed
-    and pass ESLint binary path.
-    """
     print 'Starting linter...'
 
     pylintrc_path = os.path.join(os.getcwd(), '.pylintrc')
