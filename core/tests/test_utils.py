@@ -17,6 +17,7 @@
 """Common utilities for test classes."""
 
 import contextlib
+import json
 import unittest
 
 import responses
@@ -55,7 +56,7 @@ class TestBase(unittest.TestCase):
             'algorithm_id': algorithm_id,
             'training_data': training_data
         }
-        return self.put_get_request(request_url, response_data, 200)
+        return self.put_get_request(request_url, json.dumps(response_data), 200)
 
     @staticmethod
     def put_get_request(url, data, status_code, headers=None):
@@ -68,7 +69,7 @@ class TestBase(unittest.TestCase):
         """
         response = responses.RequestsMock()
         response.add(
-            response.GET, url, json=data, status=status_code,
+            response.GET, url, body=data, status=status_code,
             adding_headers=headers)
         return response
 

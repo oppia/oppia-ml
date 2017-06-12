@@ -33,5 +33,5 @@ class MetadataServicesTests(test_utils.GenericTestBase):
 
         with self.put_get_request(
             metadata_url, metadata_value, 200, metadata_headers):
-            resp = gce_metadata_services.get_metadata_param(param_name)
-            self.assertEqual(resp.json(), 'value')
+            value = gce_metadata_services.get_metadata_param(param_name)
+            self.assertEqual(value, 'value')

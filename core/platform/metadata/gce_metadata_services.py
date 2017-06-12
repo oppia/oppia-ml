@@ -39,8 +39,8 @@ def get_metadata_param(param_name):
     """
 
     # Send a request to get param details.
-    value = requests.get(
+    resp = requests.get(
         '%s/%s' % (METADATA_ATTRIBUTES_URL, param_name),
         headers=METADATA_HEADERS)
 
-    return value
+    return resp.text
