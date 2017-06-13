@@ -82,4 +82,7 @@ fi
 
 export PYTHON_CMD
 
+# Set PYTHONPATH.
+export PYTHONPATH=$OPPIA_ML_DIR:$PYTHONPATH
+
 export SETUP_DONE=true

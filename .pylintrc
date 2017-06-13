@@ -62,6 +62,7 @@ ignore-imports=yes
 #    too-many-statements
 # and fix those issues.
 
+disable=duplicate-code
 [REPORTS]
 
 # Hide statistics, external dependencies and overall rating.
