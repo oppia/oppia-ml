@@ -17,10 +17,9 @@ matrix:
 notifications:
   email:
     recipients:
-     - prasannapatil08@gmail.com
-#    - sean@seanlip.org
-#    - henning.benmax@gmail.com
-#    - wxy.xinyu@gmail.com
+    - sean@seanlip.org
+    - henning.benmax@gmail.com
+    - wxy.xinyu@gmail.com
     on_success: change
     on_failure: change
 
