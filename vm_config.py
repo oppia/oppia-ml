@@ -14,6 +14,7 @@
 
 """Functions for configuration of python environment."""
 
+import logging
 import os
 import sys
 
@@ -33,7 +34,13 @@ with open(MANIFEST_FILE_PATH, 'r') as f:
 
 def configure():
     """This function configures python environment."""
-    _fix_third_party_lib_paths()
+    log_format = ('%(levelname)s\t%(asctime)s %(module)s:%(lineno)d]'
+                  ' %(name)s: "%(message)s"')
+    logging.basicConfig(format=log_format, level=logging.INFO)
+    try:
+        _fix_third_party_lib_paths()
+    except Exception as e:  # pylint: disable=broad-except
+        logging.info('Failed to configure VM: \'%s\'', e.message)
 
 
 def _fix_third_party_lib_paths():

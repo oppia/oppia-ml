@@ -23,10 +23,10 @@ import vmconf
 
 
 class Registry(object):
-    """Registry of all classification classes."""
+    """Registry of all classifier classes."""
 
-    # Dict mapping algorithm IDs to instances of the classification classes.
-    _classifier_instances = {}
+    # Dict mapping algorithm IDs to classifier classes.
+    _classifier_classes = {}
 
     @classmethod
     def get_all_classifier_algorithm_ids(cls):
@@ -43,7 +43,7 @@ class Registry(object):
         """Refreshes the dict mapping algorithm IDs to instances of
         classifiers.
         """
-        cls._classifier_instances.clear()
+        cls._classifier_classes.clear()
 
         all_classifier_ids = cls.get_all_classifier_algorithm_ids()
 
@@ -61,7 +61,7 @@ class Registry(object):
             ancestor_names = [
                 base_class.__name__ for base_class in clazz.__bases__]
             if 'BaseClassifier' in ancestor_names:
-                cls._classifier_instances[clazz.__name__] = clazz()
+                cls._classifier_classes[clazz.__name__] = clazz
 
     @classmethod
     def get_all_classifiers(cls):
@@ -70,9 +70,9 @@ class Registry(object):
         Returns:
             A list of instances of all the classification algorithms.
         """
-        if not cls._classifier_instances:
+        if not cls._classifier_classes:
             cls._refresh()
-        return cls._classifier_instances.values()
+        return [clazz() for clazz in cls._classifier_classes.values()]
 
     @classmethod
     def get_classifier_by_algorithm_id(cls, classifier_algorithm_id):
@@ -90,6 +90,7 @@ class Registry(object):
         Returns:
             An instance of the classifier.
         """
-        if classifier_algorithm_id not in cls._classifier_instances:
+        if classifier_algorithm_id not in cls._classifier_classes:
             cls._refresh()
-        return cls._classifier_instances[classifier_algorithm_id]
+        clazz = cls._classifier_classes[classifier_algorithm_id]
+        return clazz()

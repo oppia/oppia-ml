@@ -26,10 +26,9 @@ class BaseClassifier(object):
     answer, it predicts the answer group.
 
     Below are some concepts used in this class.
-    training_data: list of 'training_data'. Each training_data is represented
-        by a 2-element list. The first item of the list is the single training
-        data, and the second item is a list of labels that the data should
-        be matched.
+    training_data: list(dict). The training data that is used for training
+        the classifier. This field is populated lazily when the job request
+        is picked up by the VM.
     predicting_data: list of 'predicting_data'. Each element of the list
         represents a single 'predicting_data'.
     label - An answer group that the training sample should correspond to. If a
@@ -37,10 +36,6 @@ class BaseClassifier(object):
         sample is being added for prediction purposes, no labels are provided.
         If a sample does not match any label, the sample should have only one
         label, '_default'.
-
-    Attributes:
-        DEFAULT_LABEL: str. The label used to characterize a word with no label
-            assigned to it.
     """
 
     __metaclass__ = abc.ABCMeta
@@ -63,10 +58,21 @@ class BaseClassifier(object):
         """Loads examples for training.
 
         Args:
-            training_data: list of 'training_data'. Each training_data is
-                represented by a 2-element list. The first item of the list
-                is the single training data, and the second item is a list
-                of labels that the data should be matched.
+            training_data: list(dict). The training data that is used for
+                training the classifier. This field is populated lazily
+                when the job request is picked up by the VM. The list
+                contains dicts where each dict represents a single training
+                data group, for example:
+                training_data = [
+                    {
+                        'answer_group_index': 1,
+                        'answers': ['a1', 'a2']
+                    },
+                    {
+                        'answer_group_index': 2,
+                        'answers': ['a2', 'a3']
+                    }
+                ]
         """
         raise NotImplementedError
 

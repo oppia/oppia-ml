@@ -18,5 +18,45 @@
 # This step should be performed before importing any of the
 # third party libraries.
 
+import logging
+import sys
+import time
+
 import vm_config
 vm_config.configure()
+
+# pylint: disable=wrong-import-position
+from core.services import job_services
+import vmconf
+
+def main():
+    """Main process of VM."""
+    try:
+        job_data = job_services.get_next_job()
+        if job_data is None:
+            logging.info('No pending job requests.')
+            if vmconf.DEFAULT_WAITING_METHOD == vmconf.FIXED_TIME_WAITING:
+                time.sleep(vmconf.FIXED_TIME_WAITING_SECS)
+            return
+        classifier_data = job_services.train_classifier(
+            job_data['algorithm_id'], job_data['training_data'])
+        status = job_services.store_job_result(
+            job_data['job_id'], classifier_data)
+
+        if status != 200:
+            logging.warning(
+                'Failed to store result of the job with \'%s\' job_id',
+                job_data['job_id'])
+        return
+
+    except KeyboardInterrupt:
+        logging.info('Exiting')
+        sys.exit(0)
+
+    except Exception as e: # pylint: disable=broad-except
+        # Log any exceptions that arises during processing of job.
+        logging.error(e.message)
+
+if __name__ == '__main__':
+    while True:
+        main()
