@@ -57,3 +57,10 @@ FETCH_NEXT_JOB_REQUEST_HANDLER = 'oppia-ml/fetch/job-request'
 
 # Handler URL of Oppia which is used to store job result.
 STORE_TRAINED_CLASSIFIER_MODEL_HANDLER = 'oppia-ml/store/trained-classifier'
+
+# Algorithm IDs of different classifier algorithms. These IDs are used to obtain
+# instance of classifier algorithm using algorithm_registry.
+ALGORITHM_IDS = []
+
+# Path of the directory which stores classifiers.
+CLASSIFIERS_DIR = os.path.join('core', 'classifiers')
