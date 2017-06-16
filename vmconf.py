@@ -71,7 +71,7 @@ CLASSIFIERS_DIR = os.path.join('core', 'classifiers')
 FIXED_TIME_WAITING = 'fixed_time_wait'
 
 # Seconds to wait in case of fixed time waiting approach.
-FIXED_TIME_WAITING_SECS = 60
+FIXED_TIME_WAITING_PERIOD = 60
 
 # Default waiting method to be used when there are no pending job requests.
 DEFAULT_WAITING_METHOD = FIXED_TIME_WAITING
