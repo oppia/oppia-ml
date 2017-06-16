@@ -27,15 +27,9 @@ class BaseClassifier(object):
 
     Below are some concepts used in this class.
     training_data: list(dict). The training data that is used for training
-        the classifier. This field is populated lazily when the job request
-        is picked up by the VM.
-    predicting_data: list of 'predicting_data'. Each element of the list
-        represents a single 'predicting_data'.
+        the classifier.
     label - An answer group that the training sample should correspond to. If a
-        sample is being added to train a model, labels are provided. If a
-        sample is being added for prediction purposes, no labels are provided.
-        If a sample does not match any label, the sample should have only one
-        label, '_default'.
+        sample is being added to train a model, labels are provided.
     """
 
     __metaclass__ = abc.ABCMeta
@@ -55,14 +49,12 @@ class BaseClassifier(object):
 
     @abc.abstractmethod
     def train(self, training_data):
-        """Loads examples for training.
+        """Trains classifier using given training_data.
 
         Args:
             training_data: list(dict). The training data that is used for
-                training the classifier. This field is populated lazily
-                when the job request is picked up by the VM. The list
-                contains dicts where each dict represents a single training
-                data group, for example:
+                training the classifier. The list contains dicts where each dict
+                represents a single training data group, for example:
                 training_data = [
                     {
                         'answer_group_index': 1,

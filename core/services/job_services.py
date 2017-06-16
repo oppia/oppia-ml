@@ -21,7 +21,7 @@ from core.classifiers import algorithm_registry
 
 # pylint: disable=too-many-branches
 def _validate_job_data(job_data):
-    if not isinstance(job_data):
+    if not isinstance(job_data, dict):
         raise Exception('Invalid format of job data')
 
     if 'job_id' not in job_data:
