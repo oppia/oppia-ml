@@ -36,7 +36,7 @@ def main():
         if job_data is None:
             logging.info('No pending job requests.')
             if vmconf.DEFAULT_WAITING_METHOD == vmconf.FIXED_TIME_WAITING:
-                time.sleep(vmconf.FIXED_TIME_WAITING_SECS)
+                time.sleep(vmconf.FIXED_TIME_WAITING_PERIOD)
             return
         classifier_data = job_services.train_classifier(
             job_data['algorithm_id'], job_data['training_data'])
