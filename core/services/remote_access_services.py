@@ -68,7 +68,7 @@ def generate_signature(data):
     Returns:
         str. The digital signature generated from request data.
     """
-    msg = json.dumps(sorted(data))
+    msg = json.dumps({key: data[key] for key in sorted(data)})
     key = _get_shared_secret()
 
     # Generate signature and return it.
