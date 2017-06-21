@@ -25,6 +25,10 @@ import vmconf
 class Registry(object):
     """Registry of all classifier classes."""
 
+    # pylint: disable=fixme
+    # TODO (prasanna08): Add unittest for algorithm registry when we have
+    # classifier(s) to test it.
+
     # Dict mapping algorithm IDs to classifier classes.
     _classifier_classes = {}
 

@@ -16,8 +16,8 @@
 
 """This module contains functions used for polling, training and saving jobs."""
 
-from core.services import remote_access_services
 from core.classifiers import algorithm_registry
+from core.services import remote_access_services
 
 # pylint: disable=too-many-branches
 def _validate_job_data(job_data):
@@ -86,7 +86,8 @@ def train_classifier(algorithm_id, training_data):
 
     Args:
         algorithm_id: str. ID of classifier algorithm.
-        training_data: dict. A dictionary containing training data.
+        training_data: list(dict). A list containing training data. Each dict
+            stores 'answer_group_index' and 'answers'.
 
     Returns:
         dict. Result of trained classifier algorithm.
