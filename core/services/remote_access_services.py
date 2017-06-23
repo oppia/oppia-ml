@@ -115,10 +115,10 @@ def store_trained_classifier_model(job_result_dict):
     if not isinstance(job_result_dict, dict):
         raise Exception('job_result_dict must be in dict format.')
 
-    if 'job_id' not in job_result_dict.keys():
+    if 'job_id' not in job_result_dict:
         raise Exception('job_result_dict must contain \'job_id\'.')
 
-    if 'classifier_data' not in job_result_dict.keys():
+    if 'classifier_data' not in job_result_dict:
         raise Exception('job_result_dict must contain \'classifier_data\'.')
 
     payload = job_result_dict
@@ -128,4 +128,4 @@ def store_trained_classifier_model(job_result_dict):
     request_url = "%s:%s/%s" % (
         _get_url(), _get_port(), vmconf.STORE_TRAINED_CLASSIFIER_MODEL_HANDLER)
     response = requests.post(request_url, json=payload)
-    return response
+    return response.status_code

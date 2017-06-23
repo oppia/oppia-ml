@@ -14,6 +14,8 @@
 
 """Stores various configuration options and constants for Oppia-ml."""
 
+import os
+
 # The platform for the storage backend. This is used in the model-switching
 # code in core/platform.
 PLATFORM = 'gce'
@@ -53,7 +55,23 @@ METADATA_VM_ID_PARAM_NAME = 'vm_id'
 METADATA_SHARED_SECRET_PARAM_NAME = 'shared_secret_key'
 
 # Handler URL of Oppia which is used to retrieve jobs.
-FETCH_NEXT_JOB_REQUEST_HANDLER = 'oppia-ml/fetch/job-request'
+FETCH_NEXT_JOB_REQUEST_HANDLER = 'ml/trainingjobhandler'
 
 # Handler URL of Oppia which is used to store job result.
-STORE_TRAINED_CLASSIFIER_MODEL_HANDLER = 'oppia-ml/store/trained-classifier'
+STORE_TRAINED_CLASSIFIER_MODEL_HANDLER = 'ml/trainedclassifierhandler'
+
+# Algorithm IDs of different classifier algorithms. These IDs are used to obtain
+# instance of classifier algorithm using algorithm_registry.
+ALGORITHM_IDS = []
+
+# Path of the directory which stores classifiers.
+CLASSIFIERS_DIR = os.path.join('core', 'classifiers')
+
+# Wait for fixed amount of time when there are no pending job requests.
+FIXED_TIME_WAITING = 'fixed_time_wait'
+
+# Seconds to wait in case of fixed time waiting approach.
+FIXED_TIME_WAITING_PERIOD = 60
+
+# Default waiting method to be used when there are no pending job requests.
+DEFAULT_WAITING_METHOD = FIXED_TIME_WAITING

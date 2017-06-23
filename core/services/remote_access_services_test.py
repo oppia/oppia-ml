@@ -73,9 +73,9 @@ class RemoteAccessServicesTests(test_utils.GenericTestBase):
             self.assertDictEqual(classifier_data, payload['classifier_data'])
 
         with self.set_job_result_post_callback(post_callback):
-            resp = remote_access_services.store_trained_classifier_model(
+            status = remote_access_services.store_trained_classifier_model(
                 job_result_dict)
-        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(status, 200)
 
     def test_exception_is_raised_when_classifier_data_is_inappropriate(self):
         """Test that correct results are stored."""
