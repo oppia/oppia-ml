@@ -23,7 +23,7 @@ import requests
 # For more information check following link:
 # https://cloud.google.com/compute/docs/storing-retrieving-metadata
 METADATA_ATTRIBUTES_URL = (
-    'https://metadata.google.internal/computeMetadata/v1/instance/attributes/')
+    'http://metadata.google.internal/computeMetadata/v1/instance/attributes/')
 
 
 METADATA_HEADERS = {
