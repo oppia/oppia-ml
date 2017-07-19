@@ -66,11 +66,12 @@ class RemoteAccessServicesTests(test_utils.GenericTestBase):
         def post_callback(request):
             """Callback for post request."""
             payload = json.loads(request.body)
-            self.assertEqual(payload['job_id'], '123')
+            self.assertEqual(payload['message']['job_id'], '123')
             classifier_data = {
                 'param': 'val'
             }
-            self.assertDictEqual(classifier_data, payload['classifier_data'])
+            self.assertDictEqual(
+                classifier_data, payload['message']['classifier_data'])
 
         with self.set_job_result_post_callback(post_callback):
             status = remote_access_services.store_trained_classifier_model(
