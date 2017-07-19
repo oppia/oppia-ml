@@ -125,7 +125,7 @@ def store_trained_classifier_model(job_result_dict):
         'message': job_result_dict,
         'vm_id': _get_vm_id()
     }
-    signature = generate_signature(payload)
+    signature = generate_signature(payload['message'])
     payload['signature'] = signature
     request_url = "%s:%s/%s" % (
         _get_url(), _get_port(), vmconf.STORE_TRAINED_CLASSIFIER_MODEL_HANDLER)
