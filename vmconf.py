@@ -62,7 +62,7 @@ STORE_TRAINED_CLASSIFIER_MODEL_HANDLER = 'ml/trainedclassifierhandler'
 
 # Algorithm IDs of different classifier algorithms. These IDs are used to obtain
 # instance of classifier algorithm using algorithm_registry.
-ALGORITHM_IDS = []
+ALGORITHM_IDS = ['CodeClassifier']
 
 # Path of the directory which stores classifiers.
 CLASSIFIERS_DIR = os.path.join('core', 'classifiers')

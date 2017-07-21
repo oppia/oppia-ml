@@ -64,7 +64,7 @@ class Registry(object):
 
             ancestor_names = [
                 base_class.__name__ for base_class in clazz.__bases__]
-            if 'BaseClassifier' in ancestor_names:
+            if 'BaseClassifierClass' in ancestor_names:
                 cls._classifier_classes[clazz.__name__] = clazz
 
     @classmethod
