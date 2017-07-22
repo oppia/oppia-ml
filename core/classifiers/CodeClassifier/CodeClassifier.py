@@ -331,7 +331,7 @@ class CodeClassifier(BaseClassifier.BaseClassifierClass):
         data, token_to_id = _tokenize_data(data)
 
         # No. of nearest neighbours to consider for classification using KNN.
-        top = int(len(answer_group_index) / 2)
+        top = int(len(answer_group_to_class_mapping) / 2)
 
         # T is minimum length of a substring that winnowing should match when
         # comparing two programs.
