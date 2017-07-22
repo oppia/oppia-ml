@@ -19,7 +19,7 @@
 import abc
 
 
-class BaseClassifierClass(object):
+class BaseClassifier(object):
     """A base class for classifiers that uses supervised learning to match
     free-form text answers to answer groups. The classifier trains on answers
     that exploration editors have assigned to an answer group.
