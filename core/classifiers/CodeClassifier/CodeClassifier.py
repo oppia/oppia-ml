@@ -41,7 +41,7 @@ def _cv_tokenizer(program):
     """Tokenize Python program for CountVectorizer."""
     token_program = []
     for tid, tname in _get_tokens(program):
-        if tid == token.N_TOKENS or tid == 54:
+        if tid == token.N_TOKENS or tid == 54 or tname.strip() == '':
             continue
         elif tid == token.NAME:
             if tname in keyword.kwlist:
@@ -54,7 +54,7 @@ def _cv_tokenizer(program):
     return token_program
 
 
-def _generate_token_to_id(data, threshold=5):
+def _generate_token_to_id(data, threshold):
     """Generates a list of valid tokens and assigns a unique ID to each
     token."""
     # All unique tokens and number of time they occur in dataset. A token
@@ -66,7 +66,7 @@ def _generate_token_to_id(data, threshold=5):
         for tid, tname in _get_tokens(program):
             # If tid is tokens.NAME then only add if it is a python keyword.
             # Treat all variables and methods same.
-            if tid == token.N_TOKENS or tid == 54:
+            if tid == token.N_TOKENS or tid == 54 or tname.strip() == '':
                 continue
             elif tid == token.NAME:
                 if tname in keyword.kwlist:
@@ -89,16 +89,16 @@ def _generate_token_to_id(data, threshold=5):
     return token_to_id
 
 
-def _tokenize_data(data):
+def _tokenize_data(data, threshold=5):
     """Tokenize Python programs in dataset for winnowing."""
-    token_to_id = _generate_token_to_id(data)
+    token_to_id = _generate_token_to_id(data, threshold)
 
     # Tokenize all programs in dataset.
     for program_id in data:
         program = data[program_id]['source']
         token_program = []
         for tid, tname in _get_tokens(program):
-            if tid == token.N_TOKENS or tid == 54:
+            if tid == token.N_TOKENS or tid == 54 or tname.strip() == '':
                 continue
             elif tid == token.NAME:
                 if tname in keyword.kwlist:
@@ -133,7 +133,7 @@ def _k_gram_hash_generator(token_program, token_to_id, K):
     """Generate all k-gram hashes for tokenized program."""
     generated_hashes = [
         _hash_generator(token_to_id, token_program[i: i+K])
-        for i in xrange(0, len(token_program) - K)]
+        for i in xrange(0, len(token_program) - K + 1)]
     return generated_hashes
 
 
@@ -148,7 +148,7 @@ def _generate_k_gram_hashes(data, token_to_id, K=3):
 def _get_fingerprint_from_hashes(k_gram_hashes, window_size):
     """Generate document fingerprint from k-gram hashes of given program."""
     generated_fingerprint = set()
-    for i in xrange(0, len(k_gram_hashes) - window_size):
+    for i in xrange(0, len(k_gram_hashes) - window_size + 1):
         window_hashes = k_gram_hashes[i: i + window_size]
         min_hash_index = i + min(
             xrange(window_size), key=window_hashes.__getitem__)
@@ -249,7 +249,7 @@ def _run_knn(data):
 
 
 # pylint: disable=too-many-instance-attributes, attribute-defined-outside-init
-class CodeClassifier(BaseClassifier.BaseClassifierClass):
+class CodeClassifier(BaseClassifier.BaseClassifier):
     """A class for code classifier that uses supervised learning to match
     Python programs to an answer group. The classifier trains on programs
     that exploration editors have assigned to an answer group.
@@ -397,7 +397,7 @@ class CodeClassifier(BaseClassifier.BaseClassifierClass):
         param_grid = [{
             'C': [1, 3, 5, 8, 12],
             'kernel': ['rbf'],
-            'gamma': [0.001, 0.01, 3, 7]
+            'gamma': [0.001, 0.01, 1, 3, 7]
         }]
 
         fit_params = {
