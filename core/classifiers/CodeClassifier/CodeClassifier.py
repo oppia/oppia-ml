@@ -30,17 +30,17 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.svm import SVC
 
 # pylint: disable=invalid-name
-def _get_tokens(program):
+def get_token(program):
     """Generate tokens for program using tokenize module."""
     for tid, tname, _, _, _ in tokenize.generate_tokens(
             StringIO(program).readline):
         yield (tid, tname)
 
 
-def _cv_tokenizer(program):
+def cv_tokenizer(program):
     """Tokenize Python program for CountVectorizer."""
     token_program = []
-    for tid, tname in _get_tokens(program):
+    for tid, tname in get_token(program):
         if tid == token.N_TOKENS or tid == 54 or tname.strip() == '':
             continue
         elif tid == token.NAME:
@@ -54,7 +54,7 @@ def _cv_tokenizer(program):
     return token_program
 
 
-def _generate_token_to_id(data, threshold):
+def generate_token_to_id(data, threshold):
     """Generates a list of valid tokens and assigns a unique ID to each
     token."""
     # All unique tokens and number of time they occur in dataset. A token
@@ -63,7 +63,7 @@ def _generate_token_to_id(data, threshold):
 
     for pid in data:
         program = data[pid]['source']
-        for tid, tname in _get_tokens(program):
+        for tid, tname in get_token(program):
             # If tid is tokens.NAME then only add if it is a python keyword.
             # Treat all variables and methods same.
             if tid == token.N_TOKENS or tid == 54 or tname.strip() == '':
@@ -89,15 +89,15 @@ def _generate_token_to_id(data, threshold):
     return token_to_id
 
 
-def _tokenize_data(data, threshold=5):
+def tokenize_data(data, threshold=5):
     """Tokenize Python programs in dataset for winnowing."""
-    token_to_id = _generate_token_to_id(data, threshold)
+    token_to_id = generate_token_to_id(data, threshold)
 
     # Tokenize all programs in dataset.
     for program_id in data:
         program = data[program_id]['source']
         token_program = []
-        for tid, tname in _get_tokens(program):
+        for tid, tname in get_token(program):
             if tid == token.N_TOKENS or tid == 54 or tname.strip() == '':
                 continue
             elif tid == token.NAME:
@@ -119,7 +119,7 @@ def _tokenize_data(data, threshold=5):
     return data, token_to_id
 
 
-def _hash_generator(token_to_id, tokens):
+def hash_generator(token_to_id, tokens):
     """Generate hash for tokens in 'tokens' using token_to_id."""
     hash_val = 0
     n = len(tokens) - 1
@@ -129,23 +129,23 @@ def _hash_generator(token_to_id, tokens):
     return hash_val
 
 
-def _k_gram_hash_generator(token_program, token_to_id, K):
+def k_gram_hash_generator(token_program, token_to_id, K):
     """Generate all k-gram hashes for tokenized program."""
     generated_hashes = [
-        _hash_generator(token_to_id, token_program[i: i+K])
+        hash_generator(token_to_id, token_program[i: i+K])
         for i in xrange(0, len(token_program) - K + 1)]
     return generated_hashes
 
 
-def _generate_k_gram_hashes(data, token_to_id, K=3):
+def generate_k_gram_hashes(data, token_to_id, K=3):
     """Generate k-gram hashes for all programs in dataset."""
     for program_id in data:
-        data[program_id]['k_gram_hashes'] = _k_gram_hash_generator(
+        data[program_id]['k_gram_hashes'] = k_gram_hash_generator(
             data[program_id]['tokens'], token_to_id, K)
     return data
 
 
-def _get_fingerprint_from_hashes(k_gram_hashes, window_size):
+def get_fingerprint_from_hashes(k_gram_hashes, window_size):
     """Generate document fingerprint from k-gram hashes of given program."""
     generated_fingerprint = set()
     for i in xrange(0, len(k_gram_hashes) - window_size + 1):
@@ -162,12 +162,12 @@ def _generate_program_fingerprints(data, T, K):
     """Generate document fingerprints for all programs in entire dataset."""
     window_size = T - K + 1
     for program_id in data:
-        data[program_id]['fingerprint'] = _get_fingerprint_from_hashes(
+        data[program_id]['fingerprint'] = get_fingerprint_from_hashes(
             data[program_id]['k_gram_hashes'], window_size)
     return data
 
 
-def _calc_jaccard_index(A, B):
+def calc_jaccard_index(A, B):
     """Calculate jaccard's coefficient for two sets A and B."""
     small_set = A[:] if len(A) < len(B) else B[:]
     union_set = B[:] if len(A) < len(B) else A[:]
@@ -191,19 +191,19 @@ def _calc_jaccard_index(A, B):
     return coeff
 
 
-def _get_program_similarity(fingerprint_a, fingerprint_b):
+def get_program_similarity(fingerprint_a, fingerprint_b):
     """Find similarity between fingerprint of two programs."""
     A = [h for (h, _) in fingerprint_a]
     B = [h for (h, _) in fingerprint_b]
-    return _calc_jaccard_index(A, B)
+    return calc_jaccard_index(A, B)
 
 
-def _generate_top_similars(data, top):
+def generate_top_similars(data, top):
     """Find 'top' nearest neighbours for all programs in dataset."""
     for program_id_1 in data:
         overlaps = []
         for program_id_2 in data:
-            overlap = _get_program_similarity(
+            overlap = get_program_similarity(
                 data[program_id_1]['fingerprint'],
                 data[program_id_2]['fingerprint'])
             overlaps.append((program_id_2, overlap))
@@ -212,7 +212,7 @@ def _generate_top_similars(data, top):
     return data
 
 
-def _run_knn(data):
+def run_knn(data):
     """Predict classes for each program in dataset using KNN."""
 
     # No. of times a class has to appear in nearest neighbours of a program
@@ -328,7 +328,7 @@ class CodeClassifier(BaseClassifier.BaseClassifier):
                 }
                 count += 1
 
-        data, token_to_id = _tokenize_data(data)
+        data, token_to_id = tokenize_data(data)
 
         # No. of nearest neighbours to consider for classification using KNN.
         top = int(len(answer_group_to_class_mapping) / 2)
@@ -345,10 +345,10 @@ class CodeClassifier(BaseClassifier.BaseClassifier):
         results = []
         for T in range(4, T_max):
             for K in range(3, T):
-                data = _generate_k_gram_hashes(data, token_to_id, K)
+                data = generate_k_gram_hashes(data, token_to_id, K)
                 data = _generate_program_fingerprints(data, T, K)
-                data = _generate_top_similars(data, top)
-                occurrence, missclassified_points = _run_knn(data)
+                data = generate_top_similars(data, top)
+                occurrence, missclassified_points = run_knn(data)
                 accuracy = (
                     len(data) - len(missclassified_points)) / float(len(data))
                 results.append((accuracy, T, K))
@@ -358,17 +358,17 @@ class CodeClassifier(BaseClassifier.BaseClassifier):
         K = best_score[2]
 
         # Run KNN for best value of T and K.
-        data = _generate_k_gram_hashes(data, token_to_id, K)
+        data = generate_k_gram_hashes(data, token_to_id, K)
         data = _generate_program_fingerprints(data, T, K)
-        data = _generate_top_similars(data, top)
-        occurrence, missclassified_points = _run_knn(data)
+        data = generate_top_similars(data, top)
+        occurrence, missclassified_points = run_knn(data)
 
         # Create a new dataset for missclassified points.
         programs = [data[pid]['source'] for pid in sorted(data.keys())]
 
         # Build vocabulary for programs in dataset. This vocabulary will be
         # used to generate Bag-of-Words vector for python programs.
-        cv = CountVectorizer(tokenizer=_cv_tokenizer, min_df=5)
+        cv = CountVectorizer(tokenizer=cv_tokenizer, min_df=5)
         cv.fit(programs)
 
         # Get BoW vectors for missclassified python programs.

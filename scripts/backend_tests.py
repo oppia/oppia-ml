@@ -202,7 +202,7 @@ def _get_all_test_targets(test_path=None):
                 os.path.join(base_path, root)))
         for subroot, _, files in os.walk(os.path.join(base_path, root)):
             for f in files:
-                if (f.endswith('_test.py') and
+                if (f.endswith('_test.py') or f.endswith('Test.py') and
                         os.path.join('core', 'tests') not in subroot):
                     result.append(_convert_to_test_target(
                         os.path.join(subroot, f)))
