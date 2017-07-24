@@ -439,6 +439,7 @@ class CodeClassifier(base.BaseClassifier):
         self.occurrence = None
         self.class_to_answer_group_mapping = None
         self.top = None
+        self.count_vector = None
 
     def to_dict(self):
         """Returns a dict representing this classifier.
@@ -465,6 +466,7 @@ class CodeClassifier(base.BaseClassifier):
             },
             'SVM': self.clf.__dict__,
             'class_to_answer_group_mapping': self.class_to_answer_group_mapping,
+            'cv_vocabulary': self.count_vector.__dict__['vocabulary_']
         }
         return classifier_data
 
@@ -539,11 +541,12 @@ class CodeClassifier(base.BaseClassifier):
 
         # Build vocabulary for programs in dataset. This vocabulary will be
         # used to generate Bag-of-Words vector for python programs.
-        cv = sklearn_text.CountVectorizer(tokenizer=cv_tokenizer, min_df=5)
-        cv.fit(programs)
+        count_vector = sklearn_text.CountVectorizer(
+            tokenizer=cv_tokenizer, min_df=5)
+        count_vector.fit(programs)
 
         # Get BoW vectors for missclassified python programs.
-        program_vecs = cv.transform(programs)
+        program_vecs = count_vector.transform(programs)
         # Store BoW vector for each program in data.
         for (i, pid) in enumerate(sorted(data.keys())):
             data[pid]['vector'] = program_vecs[i].todense()
@@ -588,6 +591,7 @@ class CodeClassifier(base.BaseClassifier):
         self.occurrence = occurrence
         self.clf = clf
         self.class_to_answer_group_mapping = class_to_answer_group_mapping
+        self.count_vector = count_vector
 
     # pylint: enable=too-many-locals
     # pylint: disable=too-many-branches, no-self-use
@@ -598,11 +602,18 @@ class CodeClassifier(base.BaseClassifier):
             classifier_data: dict of the classifier attributes specific to
                 the classifier algorithm used.
         """
-        allowed_top_level_keys = ['KNN', 'SVM', 'class_to_answer_group_mapping']
+        allowed_top_level_keys = [
+            'KNN', 'SVM', 'class_to_answer_group_mapping', 'cv_vocabulary']
         for key in allowed_top_level_keys:
             if key not in classifier_data:
                 raise Exception(
                     '\'%s\' key not found in classifier_data.' % key)
+
+            if not isinstance(classifier_data[key], dict):
+                raise Exception(
+                    'Expected  \'%s\' to be dict but found \'%s\'.'
+                    % (key, type(classifier_data[key])))
+
 
         allowed_knn_keys = ['T', 'K', 'top', 'occurrence',
                             'token_to_id', 'data']
