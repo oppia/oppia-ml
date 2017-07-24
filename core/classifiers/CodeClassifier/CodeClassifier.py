@@ -190,7 +190,7 @@ def tokenize_data(data, threshold=5, var_token=VAR_TOKEN, unk_token=UNK_TOKEN):
             else:
                 # Add token only if it present in token_to_id. Otherwise replace
                 # the token with UNK_TOKEN.
-                if token_name not in token_to_id:
+                if token_name in token_to_id:
                     token_program.append(token_name)
                 else:
                     token_program.append(unk_token)
