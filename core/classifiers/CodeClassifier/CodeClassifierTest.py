@@ -109,8 +109,8 @@ class CodeClassifierTests(test_utils.GenericTestBase):
     def test_that_jaccard_index_is_calculated_correctly(self):
         """Make sure that correct jaccard index is calculated between
         two sets."""
-        set1 = [1, 2, 2, 3]
-        set2 = [2, 3, 4]
+        set_a = [1, 2, 2, 3]
+        set_b = [2, 3, 4]
         expected_index = 0.4
-        jaccard_index = CodeClassifier.calc_jaccard_index(set1, set2)
+        jaccard_index = CodeClassifier.calc_jaccard_index(set_a, set_b)
         self.assertEqual(expected_index, jaccard_index)

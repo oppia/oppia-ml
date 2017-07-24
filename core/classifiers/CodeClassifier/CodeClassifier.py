@@ -14,65 +14,122 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Base class for classification algorithms"""
+"""Base class for classification algorithms."""
 
-from collections import Counter
+import collections
 import keyword
-from StringIO import StringIO
+import StringIO
 import token
 import tokenize
 
-from core.classifiers.BaseClassifier import BaseClassifier
+from core.classifiers import base
 
 import numpy as np
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.model_selection import GridSearchCV
-from sklearn.svm import SVC
+from sklearn.feature_extraction import text as sklearn_text
+from sklearn import model_selection
+from sklearn import svm
 
-# pylint: disable=invalid-name
+# Token which will be used to replace variable and method name when tokenizing
+# program.
+VAR_TOKEN = 'V'
+
+# Token which will be used to replace unkownn token when tokenizing
+# program.
+UNK_TOKEN = 'UNK'
+
+# T is minimum length of a substring that winnowing should match when
+# comparing two programs.
+# Minimum value of T. T is model parameter of winnowing algorithm.
+T_MIN = 3
+# Maximum value of T. T is model parameter of winnowing algorithm.
+T_MAX = 11
+
+# K is length of substring for which hash value is to be generated. Each
+# substring of length K in program will be converted to equivalent hash
+# value (K <= T).
+# Minimum value of K (K <= T). K is model parameter of winnowing algorithm.
+K_MIN = 3
+
 def get_token(program):
-    """Generate tokens for program using tokenize module."""
-    for tid, tname, _, _, _ in tokenize.generate_tokens(
-            StringIO(program).readline):
-        yield (tid, tname)
+    """Generate tokens for program using tokenize module.
+
+    Args:
+        program: str. Input program for which tokens are to be generated.
+
+    Yields:
+        int. Integer value which represents type of token.
+        str. Token.
+    """
+    for token_id, token_name, _, _, _ in tokenize.generate_tokens(
+            StringIO.StringIO(program).readline):
+        yield (token_id, token_name)
 
 
-def cv_tokenizer(program):
-    """Tokenize Python program for CountVectorizer."""
+def cv_tokenizer(program, var_token=VAR_TOKEN):
+    """Custom tokenizer of Python program for CountVectorizer in sci-kit.
+
+    Args:
+        program: str. Input program for which tokens are to be generated.
+        var_token: str. Replace variable and method names with this string when
+            tokenizing data.
+
+    Returns:
+        list(str). A list containing tokens of input program.
+    """
     token_program = []
-    for tid, tname in get_token(program):
-        if tid == token.N_TOKENS or tid == 54 or tname.strip() == '':
+    for token_id, token_name in get_token(program):
+        # Ignore all newline, comment and empty string tokens.
+        if (token_id == token.N_TOKENS or token_id == 54
+                or token_name.strip() == ''):
             continue
-        elif tid == token.NAME:
-            if tname in keyword.kwlist:
-                token_program.append(tname)
+        elif token_id == token.NAME:
+            # If token_id is tokens.NAME then only add if it is a python
+            # keyword. Treat all variables and methods same.
+            if token_name in keyword.kwlist:
+                token_program.append(token_name)
             else:
-                token_program.append('V')
+                token_program.append(var_token)
         else:
-            token_program.append(tname)
+            token_program.append(token_name)
 
     return token_program
 
 
-def generate_token_to_id(data, threshold):
+def generate_token_to_id(
+        data, threshold, var_token=VAR_TOKEN, unk_token=UNK_TOKEN):
     """Generates a list of valid tokens and assigns a unique ID to each
-    token."""
+    token.
+
+    Args:
+        data: dict. A dictionary containing training_data.
+        threshold: int. Ignore a token if it appears less than 'threshold' times
+            in dataset.
+        var_token: str. Replace variable and method names with this string when
+            tokenizing data.
+        unk_token: ste. Replace unknown tokens (ignored tokens) with this string
+            when tokenizing the data.
+
+    Returns:
+        dict. A dictionary containing tokens mapped to a unique ID.
+    """
     # All unique tokens and number of time they occur in dataset. A token
     # can be a keyword, an identifier, a constant, an operator.
     alphabet = {}
 
     for pid in data:
         program = data[pid]['source']
-        for tid, tname in get_token(program):
-            # If tid is tokens.NAME then only add if it is a python keyword.
-            # Treat all variables and methods same.
-            if tid == token.N_TOKENS or tid == 54 or tname.strip() == '':
+        for token_id, token_name in get_token(program):
+            # Ignore all newline, comment and empty string tokens.
+            if (token_id == token.N_TOKENS or token_id == 54
+                    or token_name.strip() == ''):
                 continue
-            elif tid == token.NAME:
-                if tname in keyword.kwlist:
-                    alphabet[tname] = alphabet.get(tname, 0) + 1
+            # If token_id is tokens.NAME then only add if it is a python
+            # keyword.
+            elif token_id == token.NAME:
+                if token_name in keyword.kwlist:
+                    alphabet[token_name] = alphabet.get(token_name, 0) + 1
             else:
-                alphabet[tname] = alphabet.get(tname, 0) + 1
+                alphabet[token_name] = alphabet.get(token_name, 0) + 1
 
     # Consider only those tokens which occur for more than threshold times
     # in entire dataset.
@@ -81,38 +138,62 @@ def generate_token_to_id(data, threshold):
 
     # Add 'UNK' in token_to_id. This will be used to replace any token
     # occurring in program which is not in valid_token.
-    token_to_id['UNK'] = len(token_to_id)
+    token_to_id[unk_token] = len(token_to_id)
 
     # Add 'V' in token_to_id. This token will be used to replace all
     # variables and methods in program.
-    token_to_id['V'] = len(token_to_id)
+    token_to_id[var_token] = len(token_to_id)
     return token_to_id
 
 
-def tokenize_data(data, threshold=5):
-    """Tokenize Python programs in dataset for winnowing."""
+def tokenize_data(data, threshold=5, var_token=VAR_TOKEN, unk_token=UNK_TOKEN):
+    """Tokenize Python programs in dataset for winnowing.
+
+    Args:
+        data: dict. A dictionary containing training_data.
+        threshold: int. Ignore a token if it appears less than 'threshold' times
+            in dataset.
+        var_token: str. Replace variable and method names with this string when
+            tokenizing data.
+        unk_token: ste. Replace unknown tokens (ignored tokens) with this string
+            when tokenizing the data.
+
+    Returns:
+        dict. A dictionary containing training data with additional key 'tokens'
+        for each data point which stores tokens of corresponding data point.
+    """
     token_to_id = generate_token_to_id(data, threshold)
 
     # Tokenize all programs in dataset.
     for program_id in data:
         program = data[program_id]['source']
         token_program = []
-        for tid, tname in get_token(program):
-            if tid == token.N_TOKENS or tid == 54 or tname.strip() == '':
+        for token_id, token_name in get_token(program):
+            # Ignore all newline, comment and empty string tokens.
+            if (token_id == token.N_TOKENS or token_id == 54
+                    or token_name.strip() == ''):
                 continue
-            elif tid == token.NAME:
-                if tname in keyword.kwlist:
-                    if tname not in token_to_id:
-                        token_program.append('UNK')
+            elif token_id == token.NAME:
+                if token_name in keyword.kwlist:
+                    # If token_id is tokens.NAME then only add if it is a python
+                    # keyword and is present in token_to_id else replace it
+                    # with UNK_TOKEN.
+                    if token_name in token_to_id:
+                        token_program.append(token_name)
                     else:
-                        token_program.append(tname)
+                        token_program.append(unk_token)
                 else:
-                    token_program.append('V')
+                    # If token_id is tokens.NAME and it is not a python keyword
+                    # then it is a variable or method.
+                    # Treat all methods and variables same.
+                    token_program.append(var_token)
             else:
-                if tname not in token_to_id:
-                    token_program.append('UNK')
+                # Add token only if it present in token_to_id. Otherwise replace
+                # the token with UNK_TOKEN.
+                if token_name not in token_to_id:
+                    token_program.append(token_name)
                 else:
-                    token_program.append(tname)
+                    token_program.append(unk_token)
 
         data[program_id]['tokens'] = token_program
 
@@ -120,7 +201,15 @@ def tokenize_data(data, threshold=5):
 
 
 def hash_generator(token_to_id, tokens):
-    """Generate hash for tokens in 'tokens' using token_to_id."""
+    """Generate hash for tokens in 'tokens' using 'token_to_id'.
+
+    Args:
+        token_to_id: dict. A dictionary which maps each token to a unique ID.
+        tokens: list(str). A list of tokens.
+
+    Returns:
+        int. Hash value generated for tokens in 'tokens' using 'token_to_id'.
+    """
     hash_val = 0
     n = len(tokens) - 1
     for x in tokens:
@@ -130,15 +219,37 @@ def hash_generator(token_to_id, tokens):
 
 
 def k_gram_hash_generator(token_program, token_to_id, K):
-    """Generate all k-gram hashes for tokenized program."""
+    """Generate all k-gram hashes for tokenized program.
+
+    Args:
+        token_program: list(str). A list of tokens.
+        token_to_id: dict. A dictionary which maps each token to a unique ID.
+        K: int. Model parameter 'K' of winnowing.
+
+    Returns:
+        list(int). k-gram hashes generated from 'token_program' using
+        'token_to_id'.
+
+    """
     generated_hashes = [
         hash_generator(token_to_id, token_program[i: i+K])
         for i in xrange(0, len(token_program) - K + 1)]
     return generated_hashes
 
 
-def generate_k_gram_hashes(data, token_to_id, K=3):
-    """Generate k-gram hashes for all programs in dataset."""
+def generate_k_gram_hashes(data, token_to_id, K):
+    """Generate k-gram hashes for all programs in dataset.
+
+    Args:
+        data: dict. A dictionary containing training data.
+        token_to_id: dict. A dictionary which maps each token to a unique ID.
+        K: int. Model parameter 'K' of winnowing.
+
+    Returns:
+        dict. A dictionary containing training data with additional key
+        'k_gram_hashes' for each data point, storing k-gram hashes corresponding
+        to that data point.
+    """
     for program_id in data:
         data[program_id]['k_gram_hashes'] = k_gram_hash_generator(
             data[program_id]['tokens'], token_to_id, K)
@@ -146,7 +257,18 @@ def generate_k_gram_hashes(data, token_to_id, K=3):
 
 
 def get_fingerprint_from_hashes(k_gram_hashes, window_size):
-    """Generate document fingerprint from k-gram hashes of given program."""
+    """Generate document fingerprint from k-gram hashes of given program.
+
+    Args:
+        k_gram_hashes: list(int). k-gram hashes of program from which
+            fingerprint is to be obtained.
+        window_size: int. Size of the window from which fingerprints are to be
+            obtained.
+
+    Returns:
+        list(int). Fingerprint obtained from k-gram hashes over 'window_size' of
+        window.
+    """
     generated_fingerprint = set()
     for i in xrange(0, len(k_gram_hashes) - window_size + 1):
         window_hashes = k_gram_hashes[i: i + window_size]
@@ -158,8 +280,19 @@ def get_fingerprint_from_hashes(k_gram_hashes, window_size):
     return list(generated_fingerprint)
 
 
-def _generate_program_fingerprints(data, T, K):
-    """Generate document fingerprints for all programs in entire dataset."""
+def generate_program_fingerprints(data, T, K):
+    """Generate document fingerprints for all programs in entire dataset.
+
+    Args:
+        data: dict. A dictionary containing training data.
+        T: int. Model parameter 'T' of winnowing.
+        K: int. Model parameter 'K' of winnowing.
+
+    Returns:
+        dict. A dictionary containing training data with additional key
+        'fingerprint' for each program which stores generated fingerprint
+        of program.
+    """
     window_size = T - K + 1
     for program_id in data:
         data[program_id]['fingerprint'] = get_fingerprint_from_hashes(
@@ -167,10 +300,24 @@ def _generate_program_fingerprints(data, T, K):
     return data
 
 
-def calc_jaccard_index(A, B):
-    """Calculate jaccard's coefficient for two sets A and B."""
-    small_set = A[:] if len(A) < len(B) else B[:]
-    union_set = B[:] if len(A) < len(B) else A[:]
+def calc_jaccard_index(set_a, set_b):
+    """Calculate jaccard's coefficient for two sets set_a and set_b.
+
+    Jaccard index of two set is equal to:
+        (no. of elements in intersection of two sets)
+        _____________________________________________
+        (no. of elements in union of two sets)
+
+    Args:
+        set_a: list(int). First set.
+        set_b: list(int). Second set.
+
+    Returns:
+        float. Jaccard index of two sets.
+
+    """
+    small_set = set_a[:] if len(set_a) < len(set_b) else set_b[:]
+    union_set = set_b[:] if len(set_a) < len(set_b) else set_a[:]
     for elem in union_set:
         if elem in small_set:
             small_set.remove(elem)
@@ -179,27 +326,45 @@ def calc_jaccard_index(A, B):
     if union_set == []:
         return 0
 
-    small_set = A[:] if len(A) < len(B) else B[:]
+    small_set = set_a[:] if len(set_a) < len(set_b) else set_b[:]
     intersection_set = []
     for elem in small_set:
-        if elem in A and elem in B:
+        if elem in set_a and elem in set_b:
             intersection_set.append(elem)
-            A.remove(elem)
-            B.remove(elem)
+            set_a.remove(elem)
+            set_b.remove(elem)
 
     coeff = float(len(intersection_set)) / len(union_set)
     return coeff
 
 
 def get_program_similarity(fingerprint_a, fingerprint_b):
-    """Find similarity between fingerprint of two programs."""
-    A = [h for (h, _) in fingerprint_a]
-    B = [h for (h, _) in fingerprint_b]
-    return calc_jaccard_index(A, B)
+    """Find similarity between fingerprint of two programs.
+
+    Args:
+        fingerprint_a: list((int, int)). Fingerprint of first data point.
+        fingerprint_b: list((int, int)). Fingerprint of second data point.
+
+    Returns:
+        float. Similarity between first and second program.
+    """
+    set_a = [h for (h, _) in fingerprint_a]
+    set_b = [h for (h, _) in fingerprint_b]
+    return calc_jaccard_index(set_a, set_b)
 
 
 def generate_top_similars(data, top):
-    """Find 'top' nearest neighbours for all programs in dataset."""
+    """Find 'top' nearest neighbours for all programs in dataset.
+
+    Args:
+        data: dict. A dictionary containing training data.
+        top: int. No. of nearest neighbours to be identified.
+
+    Returns:
+        dict. Dictionary containing training data with additional attribute
+        'top_similar' in each data point which contains nearest 'top' no. of
+        data points for each data point.
+    """
     for program_id_1 in data:
         overlaps = []
         for program_id_2 in data:
@@ -212,8 +377,19 @@ def generate_top_similars(data, top):
     return data
 
 
-def run_knn(data):
-    """Predict classes for each program in dataset using KNN."""
+def run_knn(data, top_neighbours):
+    """Predict classes for each program in dataset using KNN.
+
+    Args:
+        data: dict. A dictionary containing training data.
+        top_neighbours: int. No. of nearest neighbours to consider for KNN.
+
+    Returns:
+        float. Average no. of times a class has to appear in nearest neighbour
+            for it to be correct prediction.
+        list(int). IDs of data points which are missclassified by KNN.
+    """
+    data = generate_top_similars(data, top_neighbours)
 
     # No. of times a class has to appear in nearest neighbours of a program
     # so that prediction is correct.
@@ -227,7 +403,7 @@ def run_knn(data):
         if pid in similars:
             similars.remove(pid)
         nearest_classes = [data[i]['class'] for (i, _) in similars]
-        cnt = Counter(nearest_classes)
+        cnt = collections.Counter(nearest_classes)
         common = cnt.most_common(1)
         data[pid]['prediction'] = common[0][0]
 
@@ -248,17 +424,21 @@ def run_knn(data):
     return occurrence, missclassified_points
 
 
-# pylint: disable=too-many-instance-attributes, attribute-defined-outside-init
-class CodeClassifier(BaseClassifier.BaseClassifier):
+class CodeClassifier(base.BaseClassifier):
     """A class for code classifier that uses supervised learning to match
     Python programs to an answer group. The classifier trains on programs
     that exploration editors have assigned to an answer group.
     """
-    # pylint: disable=useless-super-delegation
     def __init__(self):
         super(CodeClassifier, self).__init__()
-
-    # pylint: enable=useless-super-delegation
+        self.data = None
+        self.clf = None
+        self.token_to_id = None
+        self.T = None
+        self.K = None
+        self.occurrence = None
+        self.class_to_answer_group_mapping = None
+        self.top = None
 
     def to_dict(self):
         """Returns a dict representing this classifier.
@@ -284,7 +464,7 @@ class CodeClassifier(BaseClassifier.BaseClassifier):
                 'data': winnowing_data
             },
             'SVM': self.clf.__dict__,
-            'class_to_answer_group_mapping': self.class_to_answer_group_mapping
+            'class_to_answer_group_mapping': self.class_to_answer_group_mapping,
         }
         return classifier_data
 
@@ -331,24 +511,16 @@ class CodeClassifier(BaseClassifier.BaseClassifier):
         data, token_to_id = tokenize_data(data)
 
         # No. of nearest neighbours to consider for classification using KNN.
-        top = int(len(answer_group_to_class_mapping) / 2)
+        top = len(answer_group_to_class_mapping) / 2
 
-        # T is minimum length of a substring that winnowing should match when
-        # comparing two programs.
-        # K is length of substring for which hash value is to be generated. Each
-        # substring of length K in program will be converted to equivalent hash
-        # value.
-        # Maximum allowed value of T.
-        T_max = 10
-
-        # GRID search for best value of T and K.
+        # GRID search for best value of T and K. T and K are model parameters
+        # of winnowing algorithm.
         results = []
-        for T in range(4, T_max):
-            for K in range(3, T):
+        for T in range(T_MIN, T_MAX):
+            for K in range(K_MIN, T + 1):
                 data = generate_k_gram_hashes(data, token_to_id, K)
-                data = _generate_program_fingerprints(data, T, K)
-                data = generate_top_similars(data, top)
-                occurrence, missclassified_points = run_knn(data)
+                data = generate_program_fingerprints(data, T, K)
+                occurrence, missclassified_points = run_knn(data, top)
                 accuracy = (
                     len(data) - len(missclassified_points)) / float(len(data))
                 results.append((accuracy, T, K))
@@ -359,16 +531,15 @@ class CodeClassifier(BaseClassifier.BaseClassifier):
 
         # Run KNN for best value of T and K.
         data = generate_k_gram_hashes(data, token_to_id, K)
-        data = _generate_program_fingerprints(data, T, K)
-        data = generate_top_similars(data, top)
-        occurrence, missclassified_points = run_knn(data)
+        data = generate_program_fingerprints(data, T, K)
+        occurrence, missclassified_points = run_knn(data, top)
 
         # Create a new dataset for missclassified points.
         programs = [data[pid]['source'] for pid in sorted(data.keys())]
 
         # Build vocabulary for programs in dataset. This vocabulary will be
         # used to generate Bag-of-Words vector for python programs.
-        cv = CountVectorizer(tokenizer=cv_tokenizer, min_df=5)
+        cv = sklearn_text.CountVectorizer(tokenizer=cv_tokenizer, min_df=5)
         cv.fit(programs)
 
         # Get BoW vectors for missclassified python programs.
@@ -403,10 +574,10 @@ class CodeClassifier(BaseClassifier.BaseClassifier):
         fit_params = {
             'sample_weight': sample_weight
         }
-        search = GridSearchCV(SVC(), param_grid, fit_params=fit_params)
+        search = model_selection.GridSearchCV(
+            svm.SVC(), param_grid, fit_params=fit_params)
         search.fit(train_data, train_result)
         clf = search.best_estimator_
-
 
         # Set attributes and their values.
         self.data = data

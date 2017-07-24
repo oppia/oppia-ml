@@ -14,7 +14,8 @@ method-rgx=^([_a-z][a-z0-9_]*|__[a-z0-9]+__)$
 const-rgx=^(([A-Z_][A-Z0-9_]*)|(__.*__)|([a-z_]+_models)|([a-z_]+_services))$
 
 # Good variable names which should always be accepted, separated by a comma
-good-names=e,_,d,f,i,l,p,w,fn,fs,id,pc,sc,zf,setUp,tearDown,longMessage,maxDiff
+good-names=e,_,d,f,i,l,p,w,fn,fs,id,pc,sc,zf,setUp,tearDown,longMessage,maxDiff,
+    T,K
 
 # Regex for dummy variables (to prevent 'unused argument' errors)
 dummy-variables-rgx=_|unused_*
@@ -29,6 +30,9 @@ min-public-methods=0
 
 # List of builtin function names that should not be used, separated by a comma
 bad-functions=apply,input
+
+# Maximum number of attributes for a class (see R0902).
+max-attributes=15
 
 [FORMAT]
 
