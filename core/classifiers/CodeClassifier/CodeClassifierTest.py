@@ -16,8 +16,20 @@
 
 """Tests for code classifier."""
 
+import json
+import os
+
 from core.classifiers.CodeClassifier import CodeClassifier
 from core.tests import test_utils
+import vmconf
+
+
+def _load_training_data():
+    file_path = os.path.join(vmconf.DATASETS_DIR, 'CodeClassifier.json')
+    with open(file_path, 'r') as f:
+        training_data = json.loads(f.read())
+    return training_data
+
 
 class CodeClassifierTests(test_utils.GenericTestBase):
     """Tests for code classifier and related preprocessing functions."""
@@ -49,6 +61,8 @@ class CodeClassifierTests(test_utils.GenericTestBase):
             }
         }
 
+        self.clf = CodeClassifier.CodeClassifier()
+
     def test_that_cv_tokenizer_works(self):
         """Make sure that custom tokenizer used for CountVectorizer is
         working as expected."""
@@ -64,47 +78,11 @@ class CodeClassifierTests(test_utils.GenericTestBase):
 
     def test_that_token_to_id_is_correct(self):
         """Make sure that correct token_to_id map is generated."""
-        token_to_id = CodeClassifier.generate_token_to_id(self.data, 0)
+        token_to_id = CodeClassifier.map_tokens_to_ids(self.data, 0)
         expected_tokens = [
             'and', 'UNK', '%', 'for', ')', '(', '+', 'V', 'else', '==', '0',
             '3', '5', '1000', 'in', 'print', ':', '=', 'or', '+=', 'if']
         self.assertListEqual(token_to_id.keys(), expected_tokens)
-
-    def test_that_hash_generator_works(self):
-        """Make sure that hash generator function works as expected."""
-        token_to_id = CodeClassifier.generate_token_to_id(self.data, 0)
-        id_to_token = dict(zip(token_to_id.values(), token_to_id.keys()))
-        tokens = [id_to_token[0], id_to_token[1], id_to_token[2]]
-        hash_value = CodeClassifier.hash_generator(token_to_id, tokens)
-
-        n = len(token_to_id)
-        expected_hash_value = 0 * (n ** 2) + 1 * (n ** 1) + 2 * (n ** 0)
-
-        self.assertEqual(hash_value, expected_hash_value)
-
-    def test_that_k_gram_hash_generator_works(self):
-        """Make sure that k-gram hash generator function works as expected."""
-        token_to_id = CodeClassifier.generate_token_to_id(self.data, 0)
-        id_to_token = dict(zip(token_to_id.values(), token_to_id.keys()))
-        tokens = [
-            id_to_token[0], id_to_token[1], id_to_token[2], id_to_token[3],
-            id_to_token[4], id_to_token[5]]
-        k_grams = CodeClassifier.k_gram_hash_generator(tokens, token_to_id, 3)
-        expected_k_grams = [23, 486, 949, 1412]
-        self.assertListEqual(expected_k_grams, k_grams)
-
-    def test_that_correct_fingerprints_are_obtained(self):
-        """Make sire that fingerprint generator generates correct fingerprint.
-        """
-        token_to_id = CodeClassifier.generate_token_to_id(self.data, 0)
-        id_to_token = dict(zip(token_to_id.values(), token_to_id.keys()))
-        tokens = [
-            id_to_token[0], id_to_token[1], id_to_token[2], id_to_token[3],
-            id_to_token[4], id_to_token[5]]
-        k_grams = CodeClassifier.k_gram_hash_generator(tokens, token_to_id, 3)
-        fingerprint = CodeClassifier.get_fingerprint_from_hashes(k_grams, 3)
-        expected_fingerprint = [(486, 1), (23, 0)]
-        self.assertListEqual(fingerprint, expected_fingerprint)
 
     def test_that_jaccard_index_is_calculated_correctly(self):
         """Make sure that correct jaccard index is calculated between
@@ -114,3 +92,10 @@ class CodeClassifierTests(test_utils.GenericTestBase):
         expected_index = 0.4
         jaccard_index = CodeClassifier.calc_jaccard_index(set_a, set_b)
         self.assertEqual(expected_index, jaccard_index)
+
+    def test_that_code_classifier_works(self):
+        """Test that entire classifier is working from end-to-end."""
+        training_data = _load_training_data()
+        self.clf.train(training_data)
+        classifier_data = self.clf.to_dict()
+        self.clf.validate(classifier_data)

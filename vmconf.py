@@ -67,6 +67,9 @@ ALGORITHM_IDS = ['CodeClassifier']
 # Path of the directory which stores classifiers.
 CLASSIFIERS_DIR = os.path.join('core', 'classifiers')
 
+# Path of directory which stores datasets for testing.
+DATASETS_DIR = os.path.join('core', 'tests', 'datasets')
+
 # Wait for fixed amount of time when there are no pending job requests.
 FIXED_TIME_WAITING = 'fixed_time_wait'
 
