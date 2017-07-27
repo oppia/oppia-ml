@@ -18,6 +18,7 @@
 
 import collections
 import keyword
+import math
 import StringIO
 import token
 import tokenize
@@ -49,6 +50,14 @@ T_MAX = 11
 # value (K <= T).
 # Minimum value of K (K <= T). K is model parameter of winnowing algorithm.
 K_MIN = 3
+
+# ID of the token which is a comment.
+COMMENT_TOKEN = 54
+
+# Threshold used when generating vocabulary for dataset. If token appears less
+# than threshold times then vocabulary ignores the token.
+VOCABULARY_THRESHOLD = 5
+
 
 def get_tokens(program):
     """Generate tokens for program using tokenize module.
@@ -83,7 +92,7 @@ def cv_tokenizer(program):
         # Ignore all newline, comment and empty string tokens.
         # token_id is token.N_TOKENS for empty line / newline token.
         # token_id is 54 for comments.
-        if (token_id == token.N_TOKENS or token_id == 54
+        if (token_id == token.N_TOKENS or token_id == COMMENT_TOKEN
                 or token_name.strip() == ''):
             continue
         elif token_id == token.NAME:
@@ -126,7 +135,7 @@ def map_tokens_to_ids(training_data, threshold):
         program = training_data[pid]['source']
         for token_id, token_name in get_tokens(program):
             # Ignore all newline, comment and empty string tokens.
-            if (token_id == token.N_TOKENS or token_id == 54
+            if (token_id == token.N_TOKENS or token_id == COMMENT_TOKEN
                     or token_name.strip() == ''):
                 continue
             # If token_id is tokens.NAME then only add if it is a python
@@ -152,9 +161,8 @@ def map_tokens_to_ids(training_data, threshold):
     return token_to_id
 
 
-def tokenize_data(training_data, threshold=5):
+def tokenize_data(training_data, threshold=VOCABULARY_THRESHOLD):
     """Tokenize Python programs in dataset for winnowing.
-
     Args:
         training_data: dict. A dictionary containing training_data. Structure of
             training_data is as follows,
@@ -187,7 +195,7 @@ def tokenize_data(training_data, threshold=5):
         token_program = []
         for token_id, token_name in get_tokens(program):
             # Ignore all newline, comment and empty string tokens.
-            if (token_id == token.N_TOKENS or token_id == 54
+            if (token_id == token.N_TOKENS or token_id == COMMENT_TOKEN
                     or token_name.strip() == ''):
                 continue
             elif token_id == token.NAME:
@@ -417,7 +425,7 @@ def run_knn(training_data, top_neighbours):
     Returns:
         float. Average no. of times a class has to appear in nearest neighbour
             for it to be correct prediction.
-        list(int). IDs of training_data points which are missclassified by KNN.
+        list(int). IDs of training_data points which are misclassified by KNN.
     """
     training_data = generate_top_similars(training_data, top_neighbours)
 
@@ -425,8 +433,8 @@ def run_knn(training_data, top_neighbours):
     # so that prediction is correct.
     occurrence = 0
 
-    # Keep record of missclassified programs' ID.
-    missclassified_points = []
+    # Keep record of misclassified programs' ID.
+    misclassified_points = []
 
     for pid in training_data:
         similars = training_data[pid]['top_similar']
@@ -444,14 +452,14 @@ def run_knn(training_data, top_neighbours):
         else:
             # Else mark the ID fo program so that it will be
             # trained using SVM later.
-            missclassified_points.append(pid)
+            misclassified_points.append(pid)
 
     # Calculate average of occurrence. This is used during prediction so
     # that if winner of nearest neighbours appears less than the occurrence
     # we consider that KNN has failed in prediction.
     occurrence /= float(len(training_data))
 
-    return occurrence, missclassified_points
+    return occurrence, misclassified_points
 
 
 class CodeClassifier(base.BaseClassifier):
@@ -467,7 +475,6 @@ class CodeClassifier(base.BaseClassifier):
         self.T = None
         self.K = None
         self.occurrence = None
-        self.class_to_answer_group_mapping = None
         self.top = None
         self.count_vector = None
 
@@ -495,7 +502,6 @@ class CodeClassifier(base.BaseClassifier):
                 'fingerprint_data': fingerprint_data
             },
             'SVM': self.clf.__dict__,
-            'class_to_answer_group_mapping': self.class_to_answer_group_mapping,
             'cv_vocabulary': self.count_vector.__dict__['vocabulary_']
         }
         return classifier_data
@@ -519,54 +525,48 @@ class CodeClassifier(base.BaseClassifier):
                     }
                 ]
         """
-        # Answer group index to classifier class mapping.
-        answer_group_to_class_mapping = {
-            training_data[i]['answer_group_index']: i
-            for i in range(len(training_data))
-        }
-
-        class_to_answer_group_mapping = dict(zip(
-            answer_group_to_class_mapping.values(),
-            answer_group_to_class_mapping.keys()))
-
         data = {}
         count = 0
         for answer_group in training_data:
-            answer_group_index = answer_group['answer_group_index']
             for answer in answer_group['answers']:
                 data[count] = {
                     'source': answer,
-                    'class': answer_group_to_class_mapping[answer_group_index]
+                    'class': answer_group['answer_group_index']
                 }
                 count += 1
 
         data, token_to_id = tokenize_data(data)
 
         # No. of nearest neighbours to consider for classification using KNN.
-        top = len(answer_group_to_class_mapping) / 2
+        top = int(math.ceil(math.sqrt(float(len(training_data)))))
 
         # GRID search for best value of T and K. T and K are model parameters
         # of winnowing algorithm.
-        results = []
+        best_t = T_MIN
+        best_k = K_MIN
+        previous_best_score = 0.0
         for T in range(T_MIN, T_MAX):
             for K in range(K_MIN, T + 1):
                 data = generate_k_gram_hashes(data, token_to_id, K)
                 data = generate_program_fingerprints(data, T, K)
-                occurrence, missclassified_points = run_knn(data, top)
+                occurrence, misclassified_points = run_knn(data, top)
                 accuracy = (
-                    len(data) - len(missclassified_points)) / float(len(data))
-                results.append((accuracy, T, K))
+                    len(data) - len(misclassified_points)) / float(len(data))
+                if accuracy > previous_best_score:
+                    previous_best_score = accuracy
+                    best_t = T
+                    best_k = K
 
-        best_score = sorted(results, key=lambda e: e[0], reverse=True)[0]
-        T = best_score[1]
-        K = best_score[2]
+        # Set T and K to the values which has highest accuracy in KNN.
+        T = best_t
+        K = best_k
 
         # Run KNN for best value of T and K.
         data = generate_k_gram_hashes(data, token_to_id, K)
         data = generate_program_fingerprints(data, T, K)
-        occurrence, missclassified_points = run_knn(data, top)
+        occurrence, misclassified_points = run_knn(data, top)
 
-        # Create a new dataset for missclassified points.
+        # Create a new dataset for misclassified points.
         programs = [data[pid]['source'] for pid in sorted(data.keys())]
 
         # Build vocabulary for programs in dataset. This vocabulary will be
@@ -575,7 +575,7 @@ class CodeClassifier(base.BaseClassifier):
             tokenizer=cv_tokenizer, min_df=5)
         count_vector.fit(programs)
 
-        # Get BoW vectors for missclassified python programs.
+        # Get BoW vectors for misclassified python programs.
         program_vecs = count_vector.transform(programs)
         # Store BoW vector for each program in data.
         for (i, pid) in enumerate(sorted(data.keys())):
@@ -590,8 +590,8 @@ class CodeClassifier(base.BaseClassifier):
         # Higher weights force the classifier to put more emphasis on these
         # points.
         sample_weight = np.ones(len(data))
-        # Increase weight of missclassified points.
-        sample_weight[missclassified_points] = 3
+        # Increase weight of misclassified points.
+        sample_weight[misclassified_points] = 3
 
         # Fix dimension of train_data. Sometime there is an extra redundant
         # axis generated when list is transformed in array.
@@ -620,7 +620,6 @@ class CodeClassifier(base.BaseClassifier):
         self.top = top
         self.occurrence = occurrence
         self.clf = clf
-        self.class_to_answer_group_mapping = class_to_answer_group_mapping
         self.count_vector = count_vector
 
     # pylint: enable=too-many-locals
@@ -632,8 +631,7 @@ class CodeClassifier(base.BaseClassifier):
             classifier_data: dict of the classifier attributes specific to
                 the classifier algorithm used.
         """
-        allowed_top_level_keys = [
-            'KNN', 'SVM', 'class_to_answer_group_mapping', 'cv_vocabulary']
+        allowed_top_level_keys = ['KNN', 'SVM', 'cv_vocabulary']
         for key in allowed_top_level_keys:
             if key not in classifier_data:
                 raise Exception(
