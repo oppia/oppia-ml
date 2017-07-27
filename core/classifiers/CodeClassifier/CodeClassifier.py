@@ -225,7 +225,7 @@ def tokenize_data(training_data, threshold=VOCABULARY_THRESHOLD):
     return training_data, token_to_id
 
 
-def generate_k_gram_hashes(training_data, token_to_id, K):
+def add_k_gram_hashes(training_data, token_to_id, K):
     """Generate k-gram hashes for all programs in dataset.
 
     Args:
@@ -261,7 +261,7 @@ def generate_k_gram_hashes(training_data, token_to_id, K):
     return training_data
 
 
-def generate_program_fingerprints(training_data, T, K):
+def add_program_fingerprints(training_data, T, K):
     """Generate document fingerprints for all programs in entire dataset.
 
     Args:
@@ -354,7 +354,7 @@ def get_program_similarity(fingerprint_a, fingerprint_b):
     return calc_jaccard_index(set_a, set_b)
 
 
-def generate_top_similars(training_data, top):
+def add_top_similars(training_data, top):
     """Find 'top' nearest neighbours for all programs in dataset.
 
     Args:
@@ -427,7 +427,7 @@ def run_knn(training_data, top_neighbours):
             for it to be correct prediction.
         list(int). IDs of training_data points which are misclassified by KNN.
     """
-    training_data = generate_top_similars(training_data, top_neighbours)
+    training_data = add_top_similars(training_data, top_neighbours)
 
     # No. of times a class has to appear in nearest neighbours of a program
     # so that prediction is correct.
@@ -525,7 +525,7 @@ class CodeClassifier(base.BaseClassifier):
                     }
                 ]
         """
-        data = {}
+        data = collections.OrderedDict()
         count = 0
         for answer_group in training_data:
             for answer in answer_group['answers']:
@@ -547,8 +547,8 @@ class CodeClassifier(base.BaseClassifier):
         previous_best_score = 0.0
         for T in range(T_MIN, T_MAX):
             for K in range(K_MIN, T + 1):
-                data = generate_k_gram_hashes(data, token_to_id, K)
-                data = generate_program_fingerprints(data, T, K)
+                data = add_k_gram_hashes(data, token_to_id, K)
+                data = add_program_fingerprints(data, T, K)
                 occurrence, misclassified_points = run_knn(data, top)
                 accuracy = (
                     len(data) - len(misclassified_points)) / float(len(data))
@@ -562,12 +562,12 @@ class CodeClassifier(base.BaseClassifier):
         K = best_k
 
         # Run KNN for best value of T and K.
-        data = generate_k_gram_hashes(data, token_to_id, K)
-        data = generate_program_fingerprints(data, T, K)
+        data = add_k_gram_hashes(data, token_to_id, K)
+        data = add_program_fingerprints(data, T, K)
         occurrence, misclassified_points = run_knn(data, top)
 
         # Create a new dataset for misclassified points.
-        programs = [data[pid]['source'] for pid in sorted(data.keys())]
+        programs = [data[pid]['source'] for pid in data.keys()]
 
         # Build vocabulary for programs in dataset. This vocabulary will be
         # used to generate Bag-of-Words vector for python programs.
@@ -578,7 +578,7 @@ class CodeClassifier(base.BaseClassifier):
         # Get BoW vectors for misclassified python programs.
         program_vecs = count_vector.transform(programs)
         # Store BoW vector for each program in data.
-        for (i, pid) in enumerate(sorted(data.keys())):
+        for (i, pid) in enumerate(data.keys()):
             data[pid]['vector'] = program_vecs[i].todense()
 
         train_data = np.array(
