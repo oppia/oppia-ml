@@ -319,21 +319,32 @@ def calc_jaccard_index(set_a, set_b):
     """
     small_set = set_a[:] if len(set_a) < len(set_b) else set_b[:]
     union_set = set_b[:] if len(set_a) < len(set_b) else set_a[:]
-    for elem in union_set:
-        if elem in small_set:
-            small_set.remove(elem)
-    union_set.extend(small_set)
+    small_set = sorted(small_set)
+    union_set = sorted(union_set)
+    index = 0
+    extra_elements = []
+    for elem in small_set:
+        while index < len(union_set) and elem > union_set[index]:
+            index += 1
+        if index >= len(union_set) or elem < union_set[index]:
+            extra_elements.append(elem)
+        elif elem == union_set[index]:
+            index += 1
 
+    union_set.extend(extra_elements)
     if union_set == []:
         return 0
 
-    small_set = set_a[:] if len(set_a) < len(set_b) else set_b[:]
+    set_a = sorted(set_a[:])
+    set_b = sorted(set_b[:])
+    index = 0
     intersection_set = []
-    for elem in small_set:
-        if elem in set_a and elem in set_b:
+    for elem in set_a:
+        while index < len(set_b) and elem > set_b[index]:
+            index += 1
+        if index < len(set_b) and elem == set_b[index]:
+            index += 1
             intersection_set.append(elem)
-            set_a.remove(elem)
-            set_b.remove(elem)
 
     coeff = float(len(intersection_set)) / len(union_set)
     return coeff
