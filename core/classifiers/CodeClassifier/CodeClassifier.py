@@ -301,24 +301,30 @@ def add_program_fingerprints(training_data, T, K):
     return training_data
 
 
-def calc_jaccard_index(set_a, set_b):
-    """Calculate jaccard's coefficient for two sets set_a and set_b.
+def calc_jaccard_index(multiset_a, multiset_b):
+    """Calculate jaccard's coefficient for two multisets mutliset_a
+    and multiset_b.
 
     Jaccard index of two set is equal to:
-        (no. of elements in intersection of two sets)
+        (no. of elements in intersection of two multisets)
         _____________________________________________
-        (no. of elements in union of two sets)
+        (no. of elements in union of two multisets)
+
+    Note: intersection and union of two multisets is similar to union-all and
+    intersect-all operations in SQL.
 
     Args:
-        set_a: list(int). First set.
-        set_b: list(int). Second set.
+        multiset_a: list(int). First set.
+        multiset_b: list(int). Second set.
 
     Returns:
         float. Jaccard index of two sets.
 
     """
-    small_set = set_a[:] if len(set_a) < len(set_b) else set_b[:]
-    union_set = set_b[:] if len(set_a) < len(set_b) else set_a[:]
+    small_set = (
+        multiset_a[:] if len(multiset_a) < len(multiset_b) else multiset_b[:])
+    union_set = (
+        multiset_b[:] if len(multiset_a) < len(multiset_b) else multiset_a[:])
     small_set = sorted(small_set)
     union_set = sorted(union_set)
     index = 0
@@ -335,14 +341,14 @@ def calc_jaccard_index(set_a, set_b):
     if union_set == []:
         return 0
 
-    set_a = sorted(set_a[:])
-    set_b = sorted(set_b[:])
+    multiset_a = sorted(multiset_a[:])
+    multiset_b = sorted(multiset_b[:])
     index = 0
     intersection_set = []
-    for elem in set_a:
-        while index < len(set_b) and elem > set_b[index]:
+    for elem in multiset_a:
+        while index < len(multiset_b) and elem > multiset_b[index]:
             index += 1
-        if index < len(set_b) and elem == set_b[index]:
+        if index < len(multiset_b) and elem == multiset_b[index]:
             index += 1
             intersection_set.append(elem)
 
@@ -360,9 +366,9 @@ def get_program_similarity(fingerprint_a, fingerprint_b):
     Returns:
         float. Similarity between first and second program.
     """
-    set_a = [h for (h, _) in fingerprint_a]
-    set_b = [h for (h, _) in fingerprint_b]
-    return calc_jaccard_index(set_a, set_b)
+    multiset_a = [h for (h, _) in fingerprint_a]
+    multiset_b = [h for (h, _) in fingerprint_b]
+    return calc_jaccard_index(multiset_a, multiset_b)
 
 
 def add_top_similars(training_data, top):
