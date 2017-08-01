@@ -32,11 +32,11 @@ from sklearn import model_selection
 from sklearn import svm
 
 # The string with which all the variable and method names need to be replaced.
-VAR_TOKEN = 'V'
+VAR_TOKEN_NAME = 'V'
 
-# The string with which will all unkown tokens (tokens which are ignored because
+# The string with which all unknown tokens (tokens which are ignored because
 # they appear rarely in a program) will be replaced.
-UNK_TOKEN = 'UNK'
+UNK_TOKEN_NAME = 'UNK'
 
 # T is the model parameter of winnowing algorithm. It is the minimum length of a
 # substring that winnowing should match when comparing two programs.
@@ -51,11 +51,8 @@ T_MAX = 11
 # Minimum value of K (K <= T). K is model parameter of winnowing algorithm.
 K_MIN = 3
 
-# ID of the token which is a comment.
-COMMENT_TOKEN = 54
-
 # Threshold used when generating vocabulary for dataset. If token appears less
-# than threshold times then vocabulary ignores the token.
+# than threshold times then we ignore the token.
 VOCABULARY_THRESHOLD = 5
 
 
@@ -74,6 +71,25 @@ def get_tokens(program):
         yield (token_id, token_name)
 
 
+def token_is_ignorable(token_id, token_name):
+    """Check whether given token can be ignored.
+
+    Ignore all newline, comment and empty string tokens.
+    token_id is tokenize.NL for newline token.
+    token_id is tokenize.COMMENT for comments.
+
+    Args:
+        token_id: int. ID of the token. This ID is assigned by tokenize
+            module.
+        token_name: str. The actual token value.
+
+    Returns:
+        bool. True if token can be ignored otherwise False.
+    """
+    return (token_id == tokenize.NL or token_id == tokenize.COMMENT
+            or token_name.strip() == '')
+
+
 def cv_tokenizer(program):
     """Custom tokenizer for tokenizing Python programs.
 
@@ -81,19 +97,13 @@ def cv_tokenizer(program):
 
     Args:
         program: str. Input program for which tokens are to be generated.
-        VAR_TOKEN: str. Replace variable and method names with this string when
-            tokenizing data.
 
     Returns:
         list(str). A list containing tokens of input program.
     """
     tokenized_program = []
     for token_id, token_name in get_tokens(program):
-        # Ignore all newline, comment and empty string tokens.
-        # token_id is token.N_TOKENS for empty line / newline token.
-        # token_id is 54 for comments.
-        if (token_id == token.N_TOKENS or token_id == COMMENT_TOKEN
-                or token_name.strip() == ''):
+        if token_is_ignorable(token_id, token_name):
             continue
         elif token_id == token.NAME:
             # If token_id is tokens.NAME then only add if it is a python
@@ -101,7 +111,7 @@ def cv_tokenizer(program):
             if token_name in keyword.kwlist:
                 tokenized_program.append(token_name)
             else:
-                tokenized_program.append(VAR_TOKEN)
+                tokenized_program.append(VAR_TOKEN_NAME)
         else:
             tokenized_program.append(token_name)
 
@@ -129,22 +139,20 @@ def map_tokens_to_ids(training_data, threshold):
     """
     # All unique tokens and number of time they occur in dataset. A token
     # can be a keyword, an identifier, a constant, an operator.
-    vocabulary = {}
+    vocabulary = collections.defaultdict(int)
 
     for pid in training_data:
         program = training_data[pid]['source']
         for token_id, token_name in get_tokens(program):
-            # Ignore all newline, comment and empty string tokens.
-            if (token_id == token.N_TOKENS or token_id == COMMENT_TOKEN
-                    or token_name.strip() == ''):
+            if token_is_ignorable(token_id, token_name):
                 continue
             # If token_id is tokens.NAME then only add if it is a python
             # keyword.
             elif token_id == token.NAME:
                 if token_name in keyword.kwlist:
-                    vocabulary[token_name] = vocabulary.get(token_name, 0) + 1
+                    vocabulary[token_name] = vocabulary[token_name] + 1
             else:
-                vocabulary[token_name] = vocabulary.get(token_name, 0) + 1
+                vocabulary[token_name] = vocabulary[token_name] + 1
 
     # Consider only those tokens which occur for more than threshold times
     # in entire dataset.
@@ -153,11 +161,11 @@ def map_tokens_to_ids(training_data, threshold):
 
     # Add 'UNK' in token_to_id. This will be used to replace any token
     # occurring in program which is not in valid_token.
-    token_to_id[UNK_TOKEN] = len(token_to_id)
+    token_to_id[UNK_TOKEN_NAME] = len(token_to_id)
 
     # Add 'V' in token_to_id. This token will be used to replace all
     # variables and methods in program.
-    token_to_id[VAR_TOKEN] = len(token_to_id)
+    token_to_id[VAR_TOKEN_NAME] = len(token_to_id)
     return token_to_id
 
 
@@ -177,7 +185,7 @@ def tokenize_data(training_data, threshold=VOCABULARY_THRESHOLD):
 
     Returns:
         dict. A dictionary containing training data with additional key 'tokens'
-        for each data point which stores tokens of corresponding data point.
+        for each program which stores tokens of corresponding program.
         Structure of dict is as follows,
             {
                 ID: {
@@ -192,35 +200,24 @@ def tokenize_data(training_data, threshold=VOCABULARY_THRESHOLD):
     # Tokenize all programs in dataset.
     for program_id in training_data:
         program = training_data[program_id]['source']
-        token_program = []
+        tokenized_program = []
         for token_id, token_name in get_tokens(program):
-            # Ignore all newline, comment and empty string tokens.
-            if (token_id == token.N_TOKENS or token_id == COMMENT_TOKEN
-                    or token_name.strip() == ''):
+            if token_is_ignorable(token_id, token_name):
                 continue
-            elif token_id == token.NAME:
-                if token_name in keyword.kwlist:
-                    # If token_id is tokens.NAME then only add if it is a python
-                    # keyword and is present in token_to_id else replace it
-                    # with UNK_TOKEN.
-                    if token_name in token_to_id:
-                        token_program.append(token_name)
-                    else:
-                        token_program.append(UNK_TOKEN)
-                else:
-                    # If token_id is tokens.NAME and it is not a python keyword
-                    # then it is a variable or method.
-                    # Treat all methods and variables same.
-                    token_program.append(VAR_TOKEN)
+            elif token_id == token.NAME and token_name not in keyword.kwlist:
+                # If token_id is tokens.NAME and it is not a python keyword
+                # then it is a variable or method.
+                # Treat all methods and variables same.
+                tokenized_program.append(VAR_TOKEN_NAME)
             else:
                 # Add token only if it present in token_to_id. Otherwise replace
-                # the token with UNK_TOKEN.
+                # the token with UNK_TOKEN_NAME.
                 if token_name in token_to_id:
-                    token_program.append(token_name)
+                    tokenized_program.append(token_name)
                 else:
-                    token_program.append(UNK_TOKEN)
+                    tokenized_program.append(UNK_TOKEN_NAME)
 
-        training_data[program_id]['tokens'] = token_program
+        training_data[program_id]['tokens'] = tokenized_program
 
     return training_data, token_to_id
 
@@ -243,8 +240,8 @@ def add_k_gram_hashes(training_data, token_to_id, K):
 
     Returns:
         dict. A dictionary containing training data with additional key
-        'k_gram_hashes' for each data point, storing k-gram hashes corresponding
-        to that data point. Structure of dict is as follows,
+        'k_gram_hashes' for each program, storing k-gram hashes corresponding
+        to that program. Structure of dict is as follows,
             {
                 ID: {
                     'source': str. Source code of program.
@@ -321,12 +318,12 @@ def calc_jaccard_index(multiset_a, multiset_b):
         float. Jaccard index of two sets.
 
     """
+    multiset_a = sorted(multiset_a[:])
+    multiset_b = sorted(multiset_b[:])
     small_set = (
         multiset_a[:] if len(multiset_a) < len(multiset_b) else multiset_b[:])
     union_set = (
         multiset_b[:] if len(multiset_a) < len(multiset_b) else multiset_a[:])
-    small_set = sorted(small_set)
-    union_set = sorted(union_set)
     index = 0
     extra_elements = []
     for elem in small_set:
@@ -341,8 +338,6 @@ def calc_jaccard_index(multiset_a, multiset_b):
     if union_set == []:
         return 0
 
-    multiset_a = sorted(multiset_a[:])
-    multiset_b = sorted(multiset_b[:])
     index = 0
     intersection_set = []
     for elem in multiset_a:
@@ -360,8 +355,8 @@ def get_program_similarity(fingerprint_a, fingerprint_b):
     """Find similarity between fingerprint of two programs.
 
     Args:
-        fingerprint_a: list((int, int)). Fingerprint of first data point.
-        fingerprint_b: list((int, int)). Fingerprint of second data point.
+        fingerprint_a: list((int, int)). Fingerprint of first program.
+        fingerprint_b: list((int, int)). Fingerprint of second program.
 
     Returns:
         float. Similarity between first and second program.
@@ -371,8 +366,8 @@ def get_program_similarity(fingerprint_a, fingerprint_b):
     return calc_jaccard_index(multiset_a, multiset_b)
 
 
-def add_top_similars(training_data, top):
-    """Find 'top' nearest neighbours for all programs in dataset.
+def add_k_nearest_neighbours(training_data, K):
+    """Find 'K' nearest neighbours for all programs in dataset.
 
     Args:
         training_data: dict. A dictionary containing training training_data.
@@ -388,12 +383,12 @@ def add_top_similars(training_data, top):
                             program.
                     } for each program in training_data.
                 }
-        top: int. No. of nearest neighbours to be identified.
+        K: int. No. of nearest neighbours to be identified.
 
     Returns:
         dict. Dictionary containing training data with additional attribute
-        'top_similar' in each data point which contains nearest 'top' no. of
-        data points for each data point. Structure of dict is as follows,
+        'nearest_neighbours' in each program which contains nearest 'K' no.
+        of programs for each program. Structure of dict is as follows,
             {
                 ID: {
                     'source': str. Source code of program.
@@ -401,8 +396,8 @@ def add_top_similars(training_data, top):
                     'tokens': list(str). Token list of program.
                     'k_gram_hashes': list(int). K-gram hash values of program.
                     'fingerprint': list(int). Extracted fingerprint of program.
-                    'top_similar': list(int). Most similar programs to this
-                        program.
+                    'nearest_neighbours': list(int). The indices of the programs
+                        that are most similar to this one
                 } for each program in training_data.
             }
     """
@@ -413,8 +408,8 @@ def add_top_similars(training_data, top):
                 training_data[program_id_1]['fingerprint'],
                 training_data[program_id_2]['fingerprint'])
             overlaps.append((program_id_2, overlap))
-        training_data[program_id_1]['top_similar'] = sorted(
-            overlaps, key=lambda e: e[1], reverse=True)[:top]
+        training_data[program_id_1]['nearest_neighbours'] = sorted(
+            overlaps, key=lambda e: e[1], reverse=True)[:K]
     return training_data
 
 
@@ -433,8 +428,8 @@ def run_knn(training_data, top_neighbours):
                             program.
                         'fingerprint': list(int). Extracted fingerprint of
                             program.
-                        'top_similar': list(int). Most similar programs to this
-                            program.
+                        'nearest_neighbours': list(int). The indices of the
+                            programs that are most similar to this one
                     } for each program in training_data.
                 }
         top_neighbours: int. No. of nearest neighbours to consider for KNN.
@@ -442,9 +437,9 @@ def run_knn(training_data, top_neighbours):
     Returns:
         float. Average no. of times a class has to appear in nearest neighbour
             for it to be correct prediction.
-        list(int). IDs of training_data points which are misclassified by KNN.
+        list(int). IDs of training_data programs which are misclassified by KNN.
     """
-    training_data = add_top_similars(training_data, top_neighbours)
+    training_data = add_k_nearest_neighbours(training_data, top_neighbours)
 
     # No. of times a class has to appear in nearest neighbours of a program
     # so that prediction is correct.
@@ -454,20 +449,22 @@ def run_knn(training_data, top_neighbours):
     misclassified_points = []
 
     for pid in training_data:
-        similars = training_data[pid]['top_similar']
-        if pid in similars:
-            similars.remove(pid)
-        nearest_classes = [training_data[i]['class'] for (i, _) in similars]
+        nearest_neighbours = training_data[pid]['nearest_neighbours']
+        if pid in nearest_neighbours:
+            nearest_neighbours.remove(pid)
+        nearest_classes = [
+            training_data[i]['class'] for (i, _) in nearest_neighbours]
         cnt = collections.Counter(nearest_classes)
         common = cnt.most_common(1)
         training_data[pid]['prediction'] = common[0][0]
 
         if training_data[pid]['prediction'] == training_data[pid]['class']:
-            # If prediction is correct then add no. of times the correct
-            # class has to appear in nearest neighbours to occurrence.
+            # If the prediction is correct, then increment 'occurrence' by the
+            # number of times the correct class has to appear in nearest
+            # neighbours.
             occurrence += common[0][1]
         else:
-            # Else mark the ID fo program so that it will be
+            # Else mark the ID of program so that it will be
             # trained using SVM later.
             misclassified_points.append(pid)
 
@@ -486,13 +483,43 @@ class CodeClassifier(base.BaseClassifier):
     """
     def __init__(self):
         super(CodeClassifier, self).__init__()
+        # The structure of training_data is as follows,
+        # {
+        #    ID: {
+        #        'source': str. Source code of program.
+        #        'class': int. Associated feedback class with program.
+        #        'tokens': list(str). Token list of program.
+        #        'k_gram_hashes': list(int). K-gram hash values of
+        #            program.
+        #        'fingerprint': list(int). Extracted fingerprint of
+        #            program.
+        #        'nearest_neighbours': list(int). The indices of the
+        #            programs that are most similar to this one
+        #        } for each program in training_data.
+        # }
         self.training_data = None
+
+        # sklearn.SVM.SVC classifier object.
         self.clf = None
+
+        # A dictionary mapping each token_name to a unique token_id.
         self.token_to_id = None
+
+        # Winnowing model parameter T.
         self.T = None
+
+        # Winnowing model parameter T.
         self.K = None
+
+        # No. of time a class has to appear in nearest neighbours during
+        # prediction so that it is classified as correct class.
         self.occurrence = None
+
+        # Value of K in K nearest neighbours.
         self.top = None
+
+        # sklearn.feature_extraction.text.CountVectorizer object. It converts
+        # text into a feature a vector.
         self.count_vector = None
 
     def to_dict(self):
@@ -503,10 +530,10 @@ class CodeClassifier(base.BaseClassifier):
             'classifier_data'. This data is used for prediction.
         """
         fingerprint_data = {
-            i: {
-                'fingerprint': self.training_data[i]['fingerprint'],
-                'class': self.training_data[i]['class']
-            } for i in self.training_data
+            index: {
+                'fingerprint': self.training_data[index]['fingerprint'],
+                'class': self.training_data[index]['class']
+            } for index in self.training_data
         }
 
         classifier_data = {

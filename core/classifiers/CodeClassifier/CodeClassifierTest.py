@@ -63,6 +63,32 @@ class CodeClassifierTests(test_utils.GenericTestBase):
 
         self.clf = CodeClassifier.CodeClassifier()
 
+    def test_that_correct_tokens_are_generated(self):
+        """Make sure that get_tokens function returns correct tokens."""
+        tokens = list(CodeClassifier.get_tokens(self.program_a))
+        expected_tokens = [
+            (53, '# In Python, the code'), (54, '\n'), (53, '#'), (54, '\n'),
+            (53, "#     for letter in ['a', 'b']:"), (54, '\n'),
+            (53, '#         print letter'), (54, '\n'), (53, '#'), (54, '\n'),
+            (53, '# prints:'), (54, '\n'), (53, '#'), (54, '\n'),
+            (53, '#     a'), (54, '\n'), (53, '#     b'), (54, '\n'),
+            (1, 'sum'), (51, '='), (2, '0'), (4, '\n'), (1, 'for'), (1, 'num'),
+            (1, 'in'), (1, 'range'), (51, '('), (2, '1000'), (51, ')'),
+            (51, ':'), (4, '\n'), (5, '  '), (1, 'if'), (1, 'num'), (51, '%'),
+            (2, '3'), (51, '=='), (2, '0'), (1, 'and'), (1, 'num'), (51, '%'),
+            (2, '5'), (51, '=='), (2, '0'), (51, ':'), (4, '\n'), (5, '\t'),
+            (1, 'sum'), (51, '='), (1, 'sum'), (51, '+'), (1, 'num'), (4, '\n'),
+            (6, ''), (1, 'else'), (51, ':'), (4, '\n'), (5, '\t'), (1, 'if'),
+            (1, 'num'), (51, '%'), (2, '3'), (51, '=='), (2, '0'), (51, ':'),
+            (4, '\n'), (5, '\t  '), (1, 'sum'), (51, '='), (1, 'sum'),
+            (51, '+'), (1, 'num'), (4, '\n'), (6, ''), (1, 'if'), (1, 'num'),
+            (51, '%'), (2, '5'), (51, '=='), (2, '0'), (51, ':'), (4, '\n'),
+            (5, '\t  '), (1, 'sum'), (51, '='), (1, 'sum'), (51, '+'),
+            (1, 'num'), (4, '\n'), (6, ''), (6, ''), (6, ''), (1, 'print'),
+            (1, 'sum'), (0, '')]
+
+        self.assertListEqual(expected_tokens, tokens)
+
     def test_that_cv_tokenizer_works(self):
         """Make sure that custom tokenizer used for CountVectorizer is
         working as expected."""
@@ -87,6 +113,33 @@ class CodeClassifierTests(test_utils.GenericTestBase):
     def test_that_jaccard_index_is_calculated_correctly(self):
         """Make sure that correct jaccard index is calculated between
         two sets."""
+        # Check for single element sets.
+        set_a = [1]
+        set_b = [2]
+        expected_index = 0.0
+        jaccard_index = CodeClassifier.calc_jaccard_index(set_a, set_b)
+        self.assertEqual(expected_index, jaccard_index)
+
+        set_a = [1]
+        set_b = [1]
+        expected_index = 1.0
+        jaccard_index = CodeClassifier.calc_jaccard_index(set_a, set_b)
+        self.assertEqual(expected_index, jaccard_index)
+
+        # Check for normal sets.
+        set_a = [1]
+        set_b = [1, 2]
+        expected_index = 0.5
+        jaccard_index = CodeClassifier.calc_jaccard_index(set_a, set_b)
+        self.assertEqual(expected_index, jaccard_index)
+
+        set_a = [2, 3, 4]
+        set_b = [1, 2, 4, 6]
+        expected_index = 0.4
+        jaccard_index = CodeClassifier.calc_jaccard_index(set_a, set_b)
+        self.assertEqual(expected_index, jaccard_index)
+
+        # Check for multsets.
         set_a = [1, 2, 2, 3]
         set_b = [2, 3, 4]
         expected_index = 0.4

@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Utility functions for using winnowing as pre-processing strp."""
+"""Utility functions for using winnowing as pre-processing step."""
 
 
 def hash_generator(token_to_id, tokens):
@@ -29,9 +29,10 @@ def hash_generator(token_to_id, tokens):
     """
     hash_val = 0
     n = len(tokens) - 1
+    base = len(token_to_id) ** n
     for x in tokens:
-        hash_val += token_to_id[x] * (len(token_to_id) ** n)
-        n -= 1
+        hash_val += token_to_id[x] * base
+        base /= len(token_to_id)
     return hash_val
 
 
