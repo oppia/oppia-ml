@@ -24,6 +24,7 @@ import token
 import tokenize
 
 from core.classifiers import base
+from core.classifiers import classifier_utils
 from core.classifiers.CodeClassifier import winnowing
 
 import numpy as np
@@ -547,7 +548,7 @@ class CodeClassifier(base.BaseClassifier):
                 'occurrence': self.occurrence,
                 'fingerprint_data': fingerprint_data
             },
-            'SVM': self.clf.get_params(),
+            'SVM': classifier_utils.extract_svm_parameters(self.clf),
             'cv_vocabulary': self.count_vector.__dict__['vocabulary_']
         }
         return classifier_data
