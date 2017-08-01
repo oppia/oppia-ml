@@ -89,10 +89,10 @@ class CodeClassifierTests(test_utils.GenericTestBase):
 
         self.assertListEqual(expected_tokens, tokens)
 
-    def test_that_cv_tokenizer_works(self):
+    def test_that_tokenize_for_cv_works(self):
         """Make sure that custom tokenizer used for CountVectorizer is
         working as expected."""
-        tokens = CodeClassifier.cv_tokenizer(self.program_a)
+        tokens = CodeClassifier.tokenize_for_cv(self.program_a)
         expected_tokens = [
             'V', '=', '0', 'for', 'V', 'in', 'V', '(', '1000', ')', ':', 'if',
             'V', '%', '3', '==', '0', 'and', 'V', '%', '5', '==', '0', ':', 'V',
@@ -122,27 +122,27 @@ class CodeClassifierTests(test_utils.GenericTestBase):
 
         set_a = [1]
         set_b = [1]
-        expected_index = 1.0
+        expected_index = 1.0 / 1.0
         jaccard_index = CodeClassifier.calc_jaccard_index(set_a, set_b)
         self.assertEqual(expected_index, jaccard_index)
 
         # Check for normal sets.
         set_a = [1]
         set_b = [1, 2]
-        expected_index = 0.5
+        expected_index = 1.0 / 2.0
         jaccard_index = CodeClassifier.calc_jaccard_index(set_a, set_b)
         self.assertEqual(expected_index, jaccard_index)
 
         set_a = [2, 3, 4]
         set_b = [1, 2, 4, 6]
-        expected_index = 0.4
+        expected_index = 2.0 / 5.0
         jaccard_index = CodeClassifier.calc_jaccard_index(set_a, set_b)
         self.assertEqual(expected_index, jaccard_index)
 
-        # Check for multsets.
+        # Check for multisets.
         set_a = [1, 2, 2, 3]
         set_b = [2, 3, 4]
-        expected_index = 0.4
+        expected_index = 2.0 / 5.0
         jaccard_index = CodeClassifier.calc_jaccard_index(set_a, set_b)
         self.assertEqual(expected_index, jaccard_index)
 

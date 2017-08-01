@@ -32,11 +32,11 @@ from sklearn import model_selection
 from sklearn import svm
 
 # The string with which all the variable and method names need to be replaced.
-VAR_TOKEN_NAME = 'V'
+TOKEN_NAME_VAR = 'V'
 
 # The string with which all unknown tokens (tokens which are ignored because
 # they appear rarely in a program) will be replaced.
-UNK_TOKEN_NAME = 'UNK'
+TOKEN_NAME_UNK = 'UNK'
 
 # T is the model parameter of winnowing algorithm. It is the minimum length of a
 # substring that winnowing should match when comparing two programs.
@@ -71,7 +71,7 @@ def get_tokens(program):
         yield (token_id, token_name)
 
 
-def token_is_ignorable(token_id, token_name):
+def _is_token_ignorable(token_id, token_name):
     """Check whether given token can be ignored.
 
     Ignore all newline, comment and empty string tokens.
@@ -90,7 +90,7 @@ def token_is_ignorable(token_id, token_name):
             or token_name.strip() == '')
 
 
-def cv_tokenizer(program):
+def tokenize_for_cv(program):
     """Custom tokenizer for tokenizing Python programs.
 
     This needs to be passed as an argument to sci-kit's CountVectorizer.
@@ -103,7 +103,7 @@ def cv_tokenizer(program):
     """
     tokenized_program = []
     for token_id, token_name in get_tokens(program):
-        if token_is_ignorable(token_id, token_name):
+        if _is_token_ignorable(token_id, token_name):
             continue
         elif token_id == token.NAME:
             # If token_id is tokens.NAME then only add if it is a python
@@ -111,7 +111,7 @@ def cv_tokenizer(program):
             if token_name in keyword.kwlist:
                 tokenized_program.append(token_name)
             else:
-                tokenized_program.append(VAR_TOKEN_NAME)
+                tokenized_program.append(TOKEN_NAME_VAR)
         else:
             tokenized_program.append(token_name)
 
@@ -144,7 +144,7 @@ def map_tokens_to_ids(training_data, threshold):
     for pid in training_data:
         program = training_data[pid]['source']
         for token_id, token_name in get_tokens(program):
-            if token_is_ignorable(token_id, token_name):
+            if _is_token_ignorable(token_id, token_name):
                 continue
             # If token_id is tokens.NAME then only add if it is a python
             # keyword.
@@ -161,11 +161,11 @@ def map_tokens_to_ids(training_data, threshold):
 
     # Add 'UNK' in token_to_id. This will be used to replace any token
     # occurring in program which is not in valid_token.
-    token_to_id[UNK_TOKEN_NAME] = len(token_to_id)
+    token_to_id[TOKEN_NAME_UNK] = len(token_to_id)
 
     # Add 'V' in token_to_id. This token will be used to replace all
     # variables and methods in program.
-    token_to_id[VAR_TOKEN_NAME] = len(token_to_id)
+    token_to_id[TOKEN_NAME_VAR] = len(token_to_id)
     return token_to_id
 
 
@@ -202,20 +202,20 @@ def tokenize_data(training_data, threshold=VOCABULARY_THRESHOLD):
         program = training_data[program_id]['source']
         tokenized_program = []
         for token_id, token_name in get_tokens(program):
-            if token_is_ignorable(token_id, token_name):
+            if _is_token_ignorable(token_id, token_name):
                 continue
             elif token_id == token.NAME and token_name not in keyword.kwlist:
                 # If token_id is tokens.NAME and it is not a python keyword
                 # then it is a variable or method.
                 # Treat all methods and variables same.
-                tokenized_program.append(VAR_TOKEN_NAME)
+                tokenized_program.append(TOKEN_NAME_VAR)
             else:
                 # Add token only if it present in token_to_id. Otherwise replace
-                # the token with UNK_TOKEN_NAME.
+                # the token with TOKEN_NAME_UNK.
                 if token_name in token_to_id:
                     tokenized_program.append(token_name)
                 else:
-                    tokenized_program.append(UNK_TOKEN_NAME)
+                    tokenized_program.append(TOKEN_NAME_UNK)
 
         training_data[program_id]['tokens'] = tokenized_program
 
@@ -461,7 +461,9 @@ def run_knn(training_data, top_neighbours):
         if training_data[pid]['prediction'] == training_data[pid]['class']:
             # If the prediction is correct, then increment 'occurrence' by the
             # number of times the correct class has to appear in nearest
-            # neighbours.
+            # neighbours. During prediction this value is used as threshold
+            # and prediction class must appear more than occurrence times
+            # in nearest neighbors to give assurance of correct classification.
             occurrence += common[0][1]
         else:
             # Else mark the ID of program so that it will be
@@ -616,7 +618,7 @@ class CodeClassifier(base.BaseClassifier):
         # Build vocabulary for programs in dataset. This vocabulary will be
         # used to generate Bag-of-Words vector for python programs.
         count_vector = sklearn_text.CountVectorizer(
-            tokenizer=cv_tokenizer, min_df=5)
+            tokenizer=tokenize_for_cv, min_df=5)
         count_vector.fit(programs)
 
         # Get BoW vectors for misclassified python programs.
