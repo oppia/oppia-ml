@@ -547,7 +547,7 @@ class CodeClassifier(base.BaseClassifier):
                 'occurrence': self.occurrence,
                 'fingerprint_data': fingerprint_data
             },
-            'SVM': self.clf.__dict__,
+            'SVM': self.clf.get_params(),
             'cv_vocabulary': self.count_vector.__dict__['vocabulary_']
         }
         return classifier_data
