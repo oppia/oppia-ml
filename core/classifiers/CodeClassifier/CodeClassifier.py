@@ -355,8 +355,15 @@ def calc_jaccard_index(multiset_a, multiset_b):
 def get_program_similarity(fingerprint_a, fingerprint_b):
     """Find similarity between fingerprint of two programs.
 
+    A fingerprint is a subset of k-gram hashes generated from program. Each of
+    the k-gram hashes is formed by hashing a substring of length K and hence
+    fingerprint is indirectly based on substrings of a program. Fingerprint acts
+    as identity of the program and can be used to compare two programs.
+
     Args:
-        fingerprint_a: list((int, int)). Fingerprint of first program.
+        fingerprint_a: list((int, int)). Fingerprint of first program. First
+            integer stores the fingerprint hash value and 2nd integer stores
+            location in the program where fingerprint is present.
         fingerprint_b: list((int, int)). Fingerprint of second program.
 
     Returns:
