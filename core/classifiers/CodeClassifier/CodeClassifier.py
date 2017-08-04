@@ -17,6 +17,7 @@
 """Base class for classification algorithms."""
 
 import collections
+import json
 import keyword
 import math
 import StringIO
@@ -745,3 +746,7 @@ class CodeClassifier(base.BaseClassifier):
                 raise Exception(
                     'No class found for program with \'%s\' pid in'
                     ' fingerprint_data.' % pid)
+
+        # Validate that entire classifier data is json serializable and
+        # does not raise any exception.
+        json.dumps(classifier_data)
