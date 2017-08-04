@@ -40,5 +40,8 @@ class ClassifierUtilsTest(test_utils.GenericTestBase):
         data = classifier_utils.extract_svm_parameters(clf)
         expected_keys = [
             'n_support', 'support_vectors', 'dual_coef', 'intercept', 'classes']
-
         self.assertListEqual(sorted(expected_keys), sorted(data.keys()))
+
+        # Make sure that all of the values are of list type.
+        for key in data:
+            self.assertEqual(type(data[key]), list)

@@ -28,9 +28,9 @@ def extract_svm_parameters(clf):
     """
 
     return {
-        'n_support': clf.__dict__['n_support_'],
-        'support_vectors': clf.__dict__['support_vectors_'],
-        'dual_coef': clf.__dict__['_dual_coef_'],
-        'intercept': clf.__dict__['_intercept_'],
-        'classes': clf.__dict__['classes_'],
+        'n_support': clf.__dict__['n_support_'].tolist(),
+        'support_vectors': clf.__dict__['support_vectors_'].tolist(),
+        'dual_coef': clf.__dict__['_dual_coef_'].tolist(),
+        'intercept': clf.__dict__['_intercept_'].tolist(),
+        'classes': clf.__dict__['classes_'].tolist(),
     }
