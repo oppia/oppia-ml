@@ -663,7 +663,7 @@ class CodeClassifier(base.BaseClassifier):
             'sample_weight': sample_weight
         }
         search = model_selection.GridSearchCV(
-            svm.SVC(), param_grid, fit_params=fit_params)
+            svm.SVC(probability=True), param_grid, fit_params=fit_params)
         search.fit(train_data, train_result)
         clf = search.best_estimator_
 

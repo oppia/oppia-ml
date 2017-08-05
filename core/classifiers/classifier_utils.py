@@ -27,10 +27,20 @@ def extract_svm_parameters(clf):
         parameters will be used in frontend during prediction.
     """
 
+    kernel_params = {
+        'kernel': clf.__dict__['kernel'],
+        'gamma': clf.__dict__['_gamma'],
+        'coef0': clf.__dict__['coef0'],
+        'degree': clf.__dict__['degree'],
+    }
+
     return {
         'n_support': clf.__dict__['n_support_'].tolist(),
         'support_vectors': clf.__dict__['support_vectors_'].tolist(),
         'dual_coef': clf.__dict__['_dual_coef_'].tolist(),
         'intercept': clf.__dict__['_intercept_'].tolist(),
         'classes': clf.__dict__['classes_'].tolist(),
+        'probA': clf.__dict__['probA_'].tolist(),
+        'probB': clf.__dict__['probB_'].tolist(),
+        'kernel_params': kernel_params
     }
