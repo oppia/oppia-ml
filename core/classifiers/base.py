@@ -22,8 +22,7 @@ import abc
 class BaseClassifier(object):
     """A base class for classifiers that uses supervised learning to match
     free-form text answers to answer groups. The classifier trains on answers
-    that exploration editors have assigned to an answer group. Given a new
-    answer, it predicts the answer group.
+    that exploration editors have assigned to an answer group.
 
     Below are some concepts used in this class.
     training_data: list(dict). The training data that is used for training
@@ -38,7 +37,7 @@ class BaseClassifier(object):
         pass
 
     @abc.abstractmethod
-    def to_dict(self, model):
+    def to_dict(self):
         """Returns a dict representing this classifier.
 
         Returns:

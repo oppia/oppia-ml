@@ -62,10 +62,14 @@ STORE_TRAINED_CLASSIFIER_MODEL_HANDLER = 'ml/trainedclassifierhandler'
 
 # Algorithm IDs of different classifier algorithms. These IDs are used to obtain
 # instance of classifier algorithm using algorithm_registry.
-ALGORITHM_IDS = []
+# Note: we need same IDs in Oppia as well.
+ALGORITHM_IDS = ['CodeClassifier']
 
 # Path of the directory which stores classifiers.
 CLASSIFIERS_DIR = os.path.join('core', 'classifiers')
+
+# Path of directory which stores datasets for testing.
+DATASETS_DIR = os.path.join('core', 'tests', 'datasets')
 
 # Wait for fixed amount of time when there are no pending job requests.
 FIXED_TIME_WAITING = 'fixed_time_wait'
