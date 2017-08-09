@@ -50,8 +50,8 @@ class TextClassifierTests(test_utils.GenericTestBase):
         """Test the performance of the text classifier.
 
         This method measures and tests the run-time and the f1 score of the
-        classifier. The run-time should be within x secs and the f1 score
-        should be greater than 85 for the test to pass.
+        classifier. The run-time should be within 1 second and the f1 score
+        should be greater than 0.85 for the test to pass.
         """
         self.clf.train(self.training_data)
         # The weighted f1 score for the test dataset should be at least 0.85.
