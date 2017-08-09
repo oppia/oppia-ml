@@ -23,9 +23,10 @@ def extract_svm_parameters(clf):
     """Extract parameters from a trained SVC classifier.
 
     Args:
-        clf: object of class sklearn.svm.SVC. Trained classifier model instance.
+        clf: object of class sklearn.svm.SVC. Trained classifier model
+             instance.
 
-    Retutns:
+    Returns:
         dict. A dictionary containing parameters of trained classifier. These
         parameters will be used in frontend during prediction.
     """

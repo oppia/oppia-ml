@@ -59,8 +59,8 @@ class TextClassifier(base.BaseClassifier):
 
         Args:
             training_data: list(dict). The training data that is used for
-                training the classifier. The list contains dicts where each dict
-                represents a single training data group, for example:
+                training the classifier. The list contains dicts where each
+                dict represents a single training data group, for example:
                 training_data = [
                     {
                         'answer_group_index': 1,

@@ -22,6 +22,7 @@ from core.tests import test_utils
 import numpy as np
 from sklearn import svm
 
+
 class ClassifierUtilsTest(test_utils.GenericTestBase):
     """Tests for utility functions."""
 
@@ -38,8 +39,8 @@ class ClassifierUtilsTest(test_utils.GenericTestBase):
         # Train the model.
         clf.fit(self.data, self.labels)
         data = classifier_utils.extract_svm_parameters(clf)
-        expected_keys = [
-            'n_support', 'support_vectors', 'dual_coef', 'intercept', 'classes']
+        expected_keys = ['n_support', 'support_vectors', 'dual_coef',
+                         'intercept', 'classes']
         self.assertListEqual(sorted(expected_keys), sorted(data.keys()))
 
         # Make sure that all of the values are of list type.
