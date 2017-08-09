@@ -16,6 +16,9 @@
 
 """Common utility functions required by classifier."""
 
+import scipy
+
+
 def extract_svm_parameters(clf):
     """Extract parameters from a trained SVC classifier.
 
@@ -26,11 +29,20 @@ def extract_svm_parameters(clf):
         dict. A dictionary containing parameters of trained classifier. These
         parameters will be used in frontend during prediction.
     """
+    support_vectors = clf.__dict__['support_vectors_']
+    dual_coef = clf.__dict__['_dual_coef_']
+
+    # If `support_vectors` is a sparse matrix, convert it to an array.
+    # Dual coefficients will have the same type as support_vectors.
+    if type(support_vectors) is scipy.sparse.csr.csr_matrix:
+        # Warning: this might result in really large list.
+        support_vectors = support_vectors.toarray()
+        dual_coef = dual_coef.toarray()
 
     return {
         'n_support': clf.__dict__['n_support_'].tolist(),
-        'support_vectors': clf.__dict__['support_vectors_'].tolist(),
-        'dual_coef': clf.__dict__['_dual_coef_'].tolist(),
+        'support_vectors': support_vectors.tolist(),
+        'dual_coef': dual_coef.tolist(),
         'intercept': clf.__dict__['_intercept_'].tolist(),
         'classes': clf.__dict__['classes_'].tolist(),
     }
