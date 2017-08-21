@@ -35,7 +35,7 @@ def extract_svm_parameters(clf):
 
     # If `support_vectors` is a sparse matrix, convert it to an array.
     # Dual coefficients will have the same type as support_vectors.
-    if type(support_vectors) is scipy.sparse.csr.csr_matrix:
+    if isinstance(support_vectors, scipy.sparse.csr.csr_matrix):
         # Warning: this might result in really large list.
         support_vectors = support_vectors.toarray()
         dual_coef = dual_coef.toarray()
