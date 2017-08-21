@@ -99,8 +99,7 @@ class TextClassifier(base.BaseClassifier):
         logging.info(
             'The best score for GridSearch=%s', clf.best_score_)
         logging.info(
-            'train() spent %f seconds for %d instances', (end - start,
-                                                           len(x)))
+            'train() spent %f seconds for %d instances', end-start, len(x))
         self.best_clf = clf.best_estimator_
         self.best_params = clf.best_params_
         self.best_score = clf.best_score_
