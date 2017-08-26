@@ -39,9 +39,20 @@ class ClassifierUtilsTest(test_utils.GenericTestBase):
         clf.fit(self.data, self.labels)
         data = classifier_utils.extract_svm_parameters(clf)
         expected_keys = [
-            'n_support', 'support_vectors', 'dual_coef', 'intercept', 'classes']
+            'n_support', 'support_vectors', 'dual_coef', 'intercept', 'classes',
+            'kernel_params', 'probA', 'probB']
         self.assertListEqual(sorted(expected_keys), sorted(data.keys()))
 
-        # Make sure that all of the values are of list type.
-        for key in data:
-            self.assertEqual(type(data[key]), list)
+        # Make sure that all of the values are of serializable type.
+        self.assertEqual(type(data['n_support']), list)
+        self.assertEqual(type(data['support_vectors']), list)
+        self.assertEqual(type(data['dual_coef']), list)
+        self.assertEqual(type(data['intercept']), list)
+        self.assertEqual(type(data['classes']), list)
+        self.assertEqual(type(data['probA']), list)
+        self.assertEqual(type(data['probB']), list)
+        self.assertEqual(type(data['kernel_params']), dict)
+        self.assertEqual(type(data['kernel_params']['kernel']), str)
+        self.assertEqual(type(data['kernel_params']['gamma']), float)
+        self.assertEqual(type(data['kernel_params']['degree']), int)
+        self.assertEqual(type(data['kernel_params']['coef0']), float)
