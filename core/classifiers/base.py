@@ -57,11 +57,11 @@ class BaseClassifier(object):
                 training_data = [
                     {
                         'answer_group_index': 1,
-                        'answers': ['a1', 'a2']
+                        'answers': [answer_1, answer_2]
                     },
                     {
                         'answer_group_index': 2,
-                        'answers': ['a2', 'a3']
+                        'answers': [answer_3, answer_4]
                     }
                 ]
         """
