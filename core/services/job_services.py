@@ -77,7 +77,8 @@ def get_next_job():
     Returns: dict. A dictionary containing job data.
     """
     job_data = remote_access_services.fetch_next_job_request()
-    _validate_job_data(job_data)
+    if job_data:
+        _validate_job_data(job_data)
     return job_data
 
 

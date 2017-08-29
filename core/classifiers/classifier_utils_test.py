@@ -52,7 +52,87 @@ class ClassifierUtilsTest(test_utils.GenericTestBase):
         self.assertEqual(type(data['probA']), list)
         self.assertEqual(type(data['probB']), list)
         self.assertEqual(type(data['kernel_params']), dict)
-        self.assertEqual(type(data['kernel_params']['kernel']), str)
+        self.assertEqual(type(data['kernel_params']['kernel']), unicode)
         self.assertEqual(type(data['kernel_params']['gamma']), float)
         self.assertEqual(type(data['kernel_params']['degree']), int)
         self.assertEqual(type(data['kernel_params']['coef0']), float)
+
+    def check_that_unicode_validator_works_as_expected(self):
+        """Make sure that unicode validator function works as expected."""
+        test_dict = {
+            'a': u'b',
+            u'c': {
+                u'abc': 20,
+                u'cdf': [u'j', u'k']
+            },
+            u'x': [{u'm': u'n'}, {u'e': u'f'}]
+        }
+
+        with self.assertRaisesRegexp(
+            Exception, 'Expected \'a\' to be unicode but found str.'):
+            classifier_utils.unicode_validator_for_classifier_data(test_dict)
+
+        test_dict = {
+            u'a': 'b',
+            u'c': {
+                u'abc': 20,
+                u'cdf': [u'j', u'k']
+            },
+            u'x': [{u'm': u'n'}, {u'e': u'f'}]
+        }
+
+        with self.assertRaisesRegexp(
+            Exception, 'Expected \'b\' to be unicode but found str.'):
+            classifier_utils.unicode_validator_for_classifier_data(test_dict)
+
+        test_dict = {
+            u'a': u'b',
+            u'c': {
+                'abc': 20,
+                u'cdf': [u'j', u'k']
+            },
+            u'x': [{u'm': u'n'}, {u'e': u'f'}]
+        }
+
+        with self.assertRaisesRegexp(
+            Exception, 'Expected \'abc\' to be unicode but found str.'):
+            classifier_utils.unicode_validator_for_classifier_data(test_dict)
+
+        test_dict = {
+            u'a': u'b',
+            u'c': {
+                u'abc': 20,
+                u'cdf': ['j', u'k']
+            },
+            u'x': [{u'm': u'n'}, {u'e': u'f'}]
+        }
+
+        with self.assertRaisesRegexp(
+            Exception, 'Expected \'j\' to be unicode but found str.'):
+            classifier_utils.unicode_validator_for_classifier_data(test_dict)
+
+        test_dict = {
+            u'a': u'b',
+            u'c': {
+                u'abc': 20,
+                u'cdf': [u'j', u'k']
+            },
+            u'x': [{'m': u'n'}, {u'e': u'f'}]
+        }
+
+        with self.assertRaisesRegexp(
+            Exception, 'Expected \'m\' to be unicode but found str.'):
+            classifier_utils.unicode_validator_for_classifier_data(test_dict)
+
+        test_dict = {
+            u'a': u'b',
+            u'c': {
+                u'abc': 20,
+                u'cdf': [u'j', u'k']
+            },
+            u'x': [{u'm': u'n'}, {u'e': 'f'}]
+        }
+
+        with self.assertRaisesRegexp(
+            Exception, 'Expected \'f\' to be unicode but found str.'):
+            classifier_utils.unicode_validator_for_classifier_data(test_dict)

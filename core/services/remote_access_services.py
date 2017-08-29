@@ -127,7 +127,7 @@ def store_trained_classifier_model(job_result_dict):
         raise Exception('job_result_dict must contain \'classifier_data\'.')
 
     payload = {
-        'message': json.loads(json.dumps(job_result_dict)),
+        'message': job_result_dict,
         'vm_id': _get_vm_id()
     }
     signature = generate_signature(payload['message'])
