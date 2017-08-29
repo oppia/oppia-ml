@@ -37,6 +37,21 @@ class TestBase(unittest.TestCase):
         """tearDown method which is run after executing every test case."""
         pass
 
+    @staticmethod
+    def put_get_request(url, data, status_code, headers=None):
+        """Puts a mock get request for given url.
+
+        Args:
+            url: str. URL on which request.get() is to be executed.
+            data: dict. A dictionary containing response data.
+            status_code: int. Status code of response.
+        """
+        response = responses.RequestsMock()
+        response.add(
+            response.GET, url, body=data, status=status_code,
+            adding_headers=headers)
+        return response
+
     def set_job_request_post_callback(self, callback):
         """Sets a callback for fetch next job post request.
 
