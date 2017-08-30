@@ -60,11 +60,15 @@ class Registry(object):
         # registry.
         for loader, name, _ in pkgutil.iter_modules(path=extension_paths):
             module = loader.find_module(name).load_module(name)
-            clazz = getattr(module, name)
+
+            try:
+                clazz = getattr(module, name)
+            except AttributeError:
+                continue
 
             ancestor_names = [
                 base_class.__name__ for base_class in clazz.__bases__]
-            if 'BaseClassifierClass' in ancestor_names:
+            if 'BaseClassifier' in ancestor_names:
                 cls._classifier_classes[clazz.__name__] = clazz
 
     @classmethod

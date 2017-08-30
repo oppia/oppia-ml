@@ -26,7 +26,7 @@ DEV_MODE = True
 
 # Default communication URL to be used to communicate with Oppia server.
 # This URL will be used in local development.
-DEFAULT_COMMUNICATION_URL = 'https://localhost'
+DEFAULT_COMMUNICATION_URL = 'http://localhost'
 
 # Default communication PORT to be used to communicate with Oppia server.
 # This URL will be used in local development.
@@ -55,7 +55,7 @@ METADATA_VM_ID_PARAM_NAME = 'vm_id'
 METADATA_SHARED_SECRET_PARAM_NAME = 'shared_secret_key'
 
 # Handler URL of Oppia which is used to retrieve jobs.
-FETCH_NEXT_JOB_REQUEST_HANDLER = 'ml/trainingjobhandler'
+FETCH_NEXT_JOB_REQUEST_HANDLER = 'ml/nextjobhandler'
 
 # Handler URL of Oppia which is used to store job result.
 STORE_TRAINED_CLASSIFIER_MODEL_HANDLER = 'ml/trainedclassifierhandler'
@@ -79,3 +79,6 @@ FIXED_TIME_WAITING_PERIOD = 60
 
 # Default waiting method to be used when there are no pending job requests.
 DEFAULT_WAITING_METHOD = FIXED_TIME_WAITING
+
+# Prefix for data sent from Oppia to the Oppia-ml via JSON.
+XSSI_PREFIX = ')]}\'\n'

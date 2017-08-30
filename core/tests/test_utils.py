@@ -19,6 +19,7 @@
 import contextlib
 import json
 import unittest
+import urlparse
 
 import responses
 
@@ -36,28 +37,6 @@ class TestBase(unittest.TestCase):
         """tearDown method which is run after executing every test case."""
         pass
 
-    def save_new_job_request(
-            self, job_id, algorithm_id, training_data=None):
-        """Puts a new job request with job_id.
-
-        Args:
-            job_id: str. Unicode string representing ID of
-                new job request.
-            algorithm_id: str. Unicode string representing ID of classifier
-                algorithm.
-            training_data: dict. Contains training data used to train
-                classifier.
-        """
-        request_url = '%s:%s/%s' % (
-            vmconf.DEFAULT_COMMUNICATION_URL, vmconf.DEFAULT_COMMUNICATION_PORT,
-            vmconf.FETCH_NEXT_JOB_REQUEST_HANDLER)
-        response_data = {
-            'job_id': job_id,
-            'algorithm_id': algorithm_id,
-            'training_data': training_data
-        }
-        return self.put_get_request(request_url, json.dumps(response_data), 200)
-
     @staticmethod
     def put_get_request(url, data, status_code, headers=None):
         """Puts a mock get request for given url.
@@ -72,6 +51,18 @@ class TestBase(unittest.TestCase):
             response.GET, url, body=data, status=status_code,
             adding_headers=headers)
         return response
+
+    def set_job_request_post_callback(self, callback):
+        """Sets a callback for fetch next job post request.
+
+        Args:
+            callback: callable. This is called implicitly when
+                request.post() is executed.
+        """
+        request_url = '%s:%s/%s' % (
+            vmconf.DEFAULT_COMMUNICATION_URL, vmconf.DEFAULT_COMMUNICATION_PORT,
+            vmconf.FETCH_NEXT_JOB_REQUEST_HANDLER)
+        return self.set_post_callback(request_url, callback)
 
     def set_job_result_post_callback(self, callback):
         """Sets a callback for store job result post request.
@@ -156,8 +147,11 @@ class TestBase(unittest.TestCase):
 
         def wrapper(request):
             """Wrapper class for python decorator."""
-            # func(request) returns str(data) as response to post request.
-            return (200, {}, func(request))
+            # func(request) returns response data as json object.
+            data = urlparse.parse_qs(request.body)
+            payload = json.loads(data['payload'][0])
+            request.payload = payload
+            return (200, {}, json.dumps(func(request)))
         return wrapper
 
 

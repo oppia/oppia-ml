@@ -33,7 +33,7 @@ def main():
     """Main process of VM."""
     try:
         job_data = job_services.get_next_job()
-        if job_data is None:
+        if not job_data:
             logging.info('No pending job requests.')
             if vmconf.DEFAULT_WAITING_METHOD == vmconf.FIXED_TIME_WAITING:
                 time.sleep(vmconf.FIXED_TIME_WAITING_PERIOD)
