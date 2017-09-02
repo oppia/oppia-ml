@@ -88,8 +88,8 @@ class TextClassifier(base.BaseClassifier):
 
         # Set the range of parameters for the exhaustive grid search.
         param_grid = [{
-            'C': [0.5, 1, 10, 50, 100],
-            'kernel': ['linear']
+            u'C': [0.5, 1, 10, 50, 100],
+            u'kernel': [u'linear']
         }]
 
         clf = model_selection.GridSearchCV(
@@ -101,8 +101,8 @@ class TextClassifier(base.BaseClassifier):
             'The best score for GridSearch=%s', clf.best_score_)
         logging.info(
             'train() spent %f seconds for %d instances', end-start, len(x))
-        self.best_clf = clf.best_estimator_
         self.best_params = clf.best_params_
+        self.best_clf = clf.best_estimator_
         self.best_score = clf.best_score_
         self.count_vector = count_vector
         self.exec_time = end-start
@@ -133,6 +133,9 @@ class TextClassifier(base.BaseClassifier):
                                   'best_score']
         allowed_best_params_keys = ['kernel', 'C']
         allowed_svm_kernel_params_keys = ['kernel', 'gamma', 'coef0', 'degree']
+        allowed_svm_keys = ['n_support', 'dual_coef', 'support_vectors',
+                            'intercept', 'classes', 'probA', 'probB',
+                            'kernel_params']
 
         for key in allowed_top_level_keys:
             if key not in classifier_data:
@@ -156,8 +159,14 @@ class TextClassifier(base.BaseClassifier):
                     '\'%s\' key not found in \'best_params\''
                     ' in classifier_data.' % key)
 
+        for key in allowed_svm_keys:
+            if key not in classifier_data['SVM']:
+                raise Exception(
+                    '\'%s\' key not found in \'SVM\''
+                    ' in classifier_data.' % key)
+
         for key in allowed_svm_kernel_params_keys:
-            if key not in classifier_data['svm']['kernel_params']:
+            if key not in classifier_data['SVM']['kernel_params']:
                 raise Exception(
                     '\'%s\' key not found in \'kernel_params\''
                     ' in classifier_data.' % key)

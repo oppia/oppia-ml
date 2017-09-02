@@ -49,10 +49,11 @@ def extract_svm_parameters(clf):
 
     return {
         u'n_support': clf.__dict__['n_support_'].tolist(),
-        u'support_vectors': support_vectors,
-        u'dual_coef': dual_coef,
+        u'support_vectors': support_vectors.tolist(),
+        u'dual_coef': dual_coef.tolist(),
         u'intercept': clf.__dict__['_intercept_'].tolist(),
-        u'classes': clf.__dict__['classes_'].tolist(),
+        u'classes': [i.decode('UTF-8') if isinstance(i, basestring) else i
+                     for i in clf.__dict__['classes_'].tolist()],
         u'probA': clf.__dict__['probA_'].tolist(),
         u'probB': clf.__dict__['probB_'].tolist(),
         u'kernel_params': kernel_params

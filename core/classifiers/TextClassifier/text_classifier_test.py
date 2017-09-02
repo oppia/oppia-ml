@@ -56,5 +56,5 @@ class TextClassifierTests(test_utils.GenericTestBase):
         self.clf.train(self.training_data)
         # The weighted f1 score for the test dataset should be at least 0.85.
         self.assertGreaterEqual(self.clf.best_score, 0.85)
-        # The training phase for the test dataset should take less than 1 sec.
-        self.assertLessEqual(self.clf.exec_time, 1)
+        # The training phase for the test dataset should take less than 2 sec.
+        self.assertLessEqual(self.clf.exec_time, 2)
