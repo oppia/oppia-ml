@@ -122,6 +122,7 @@ class TextClassifier(base.BaseClassifier):
         }
         return classifier_data
 
+    # pylint: disable=too-many-branches
     def validate(self, classifier_data):
         """Validates classifier data.
 
@@ -132,7 +133,8 @@ class TextClassifier(base.BaseClassifier):
         allowed_top_level_keys = [u'SVM', u'cv_vocabulary', u'best_params',
                                   u'best_score']
         allowed_best_params_keys = [u'kernel', u'C']
-        allowed_svm_kernel_params_keys = [u'kernel', u'gamma', u'coef0', u'degree']
+        allowed_svm_kernel_params_keys = [u'kernel', u'gamma', u'coef0',
+                                          u'degree']
         allowed_svm_keys = [u'n_support', u'dual_coef', u'support_vectors',
                             u'intercept', u'classes', u'probA', u'probB',
                             u'kernel_params']
