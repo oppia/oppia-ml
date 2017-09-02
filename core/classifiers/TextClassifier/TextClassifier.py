@@ -129,20 +129,20 @@ class TextClassifier(base.BaseClassifier):
             classifier_data: dict of the classifier attributes specific to
                 the classifier algorithm used.
         """
-        allowed_top_level_keys = ['SVM', 'cv_vocabulary', 'best_params',
-                                  'best_score']
-        allowed_best_params_keys = ['kernel', 'C']
-        allowed_svm_kernel_params_keys = ['kernel', 'gamma', 'coef0', 'degree']
-        allowed_svm_keys = ['n_support', 'dual_coef', 'support_vectors',
-                            'intercept', 'classes', 'probA', 'probB',
-                            'kernel_params']
+        allowed_top_level_keys = [u'SVM', u'cv_vocabulary', u'best_params',
+                                  u'best_score']
+        allowed_best_params_keys = [u'kernel', u'C']
+        allowed_svm_kernel_params_keys = [u'kernel', u'gamma', u'coef0', u'degree']
+        allowed_svm_keys = [u'n_support', u'dual_coef', u'support_vectors',
+                            u'intercept', u'classes', u'probA', u'probB',
+                            u'kernel_params']
 
         for key in allowed_top_level_keys:
             if key not in classifier_data:
                 raise Exception(
                     '\'%s\' key not found in classifier_data.' % key)
 
-            if key != 'best_score':
+            if key != u'best_score':
                 if not isinstance(classifier_data[key], dict):
                     raise Exception(
                         'Expected  \'%s\' to be dict but found \'%s\'.'
@@ -154,33 +154,33 @@ class TextClassifier(base.BaseClassifier):
                         % (key, type(classifier_data[key])))
 
         for key in allowed_best_params_keys:
-            if key not in classifier_data['best_params']:
+            if key not in classifier_data[u'best_params']:
                 raise Exception(
                     '\'%s\' key not found in \'best_params\''
                     ' in classifier_data.' % key)
 
         for key in allowed_svm_keys:
-            if key not in classifier_data['SVM']:
+            if key not in classifier_data[u'SVM']:
                 raise Exception(
                     '\'%s\' key not found in \'SVM\''
                     ' in classifier_data.' % key)
 
         for key in allowed_svm_kernel_params_keys:
-            if key not in classifier_data['SVM']['kernel_params']:
+            if key not in classifier_data[u'SVM'][u'kernel_params']:
                 raise Exception(
                     '\'%s\' key not found in \'kernel_params\''
                     ' in classifier_data.' % key)
 
-        if not isinstance(classifier_data['best_params']['C'], float):
+        if not isinstance(classifier_data[u'best_params'][u'C'], float):
             raise Exception(
                 'Expected \'C\' to be a float but found \'%s\'' %
-                type(classifier_data['best_params']['C']))
+                type(classifier_data[u'best_params'][u'C']))
 
-        if not isinstance(classifier_data['best_params']['kernel'],
+        if not isinstance(classifier_data[u'best_params'][u'kernel'],
                           basestring):
             raise Exception(
                 'Expected \'kernel\' to be a string but found \'%s\'' %
-                type(classifier_data['best_params']['kernel']))
+                type(classifier_data[u'best_params'][u'kernel']))
 
         # Validate that all the strings in classifier data are of unicode type.
         classifier_utils.unicode_validator_for_classifier_data(classifier_data)
