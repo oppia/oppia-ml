@@ -49,7 +49,7 @@ def extract_svm_parameters(clf):
 
     return {
         u'n_support': clf.__dict__['n_support_'].tolist(),
-        u'support_vectors':.support_vectors,
+        u'support_vectors': support_vectors,
         u'dual_coef': dual_coef,
         u'intercept': clf.__dict__['_intercept_'].tolist(),
         u'classes': clf.__dict__['classes_'].tolist(),

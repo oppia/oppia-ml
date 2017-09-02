@@ -114,10 +114,10 @@ class TextClassifier(base.BaseClassifier):
             as 'classifier_data'. This data is used for prediction.
         """
         classifier_data = {
-            'SVM': classifier_utils.extract_svm_parameters(self.best_clf),
-            'cv_vocabulary': self.count_vector.__dict__['vocabulary_'],
-            'best_params': self.best_params,
-            'best_score': self.best_score
+            u'SVM': classifier_utils.extract_svm_parameters(self.best_clf),
+            u'cv_vocabulary': self.count_vector.__dict__['vocabulary_'],
+            u'best_params': self.best_params,
+            u'best_score': self.best_score
         }
         return classifier_data
 
@@ -130,6 +130,9 @@ class TextClassifier(base.BaseClassifier):
         """
         allowed_top_level_keys = ['SVM', 'cv_vocabulary', 'best_params',
                                   'best_score']
+        allowed_best_params_keys = ['kernel', 'C']
+        allowed_svm_kernel_params_keys = ['kernel', 'gamma', 'coef0', 'degree']
+
         for key in allowed_top_level_keys:
             if key not in classifier_data:
                 raise Exception(
@@ -146,11 +149,16 @@ class TextClassifier(base.BaseClassifier):
                         'Expected  \'%s\' to be float but found \'%s\'.'
                         % (key, type(classifier_data[key])))
 
-        allowed_best_params_keys = ['kernel', 'C']
         for key in allowed_best_params_keys:
             if key not in classifier_data['best_params']:
                 raise Exception(
                     '\'%s\' key not found in \'best_params\''
+                    ' in classifier_data.' % key)
+
+        for key in allowed_svm_kernel_params_keys:
+            if key not in classifier_data['svm']['kernel_params']:
+                raise Exception(
+                    '\'%s\' key not found in \'kernel_params\''
                     ' in classifier_data.' % key)
 
         if not isinstance(classifier_data['best_params']['C'], float):
@@ -163,6 +171,9 @@ class TextClassifier(base.BaseClassifier):
             raise Exception(
                 'Expected \'kernel\' to be a string but found \'%s\'' %
                 type(classifier_data['best_params']['kernel']))
+
+        # Validate that all the strings in classifier data are of unicode type.
+        classifier_utils.unicode_validator_for_classifier_data(classifier_data)
 
         # Validate that entire classifier data is json serializable and
         # does not raise any exception.

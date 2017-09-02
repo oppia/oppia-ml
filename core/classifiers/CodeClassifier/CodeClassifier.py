@@ -706,7 +706,6 @@ class CodeClassifier(base.BaseClassifier):
                     'Expected  \'%s\' to be dict but found \'%s\'.'
                     % (key, type(classifier_data[key])))
 
-
         allowed_knn_keys = ['T', 'K', 'top', 'occurrence',
                             'token_to_id', 'fingerprint_data']
         for key in allowed_knn_keys:
@@ -755,7 +754,8 @@ class CodeClassifier(base.BaseClassifier):
                 raise Exception(
                     'No class found for program with \'%s\' pid in'
                     ' fingerprint_data.' % pid)
-        # Validate that all the strings in classifier data is of unicode type.
+
+        # Validate that all the strings in classifier data are of unicode type.
         classifier_utils.unicode_validator_for_classifier_data(classifier_data)
 
         # Validate that entire classifier data is json serializable and
