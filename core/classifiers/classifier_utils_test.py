@@ -40,8 +40,8 @@ class ClassifierUtilsTest(test_utils.GenericTestBase):
         clf.fit(self.data, self.labels)
         data = classifier_utils.extract_svm_parameters(clf)
         expected_keys = ['n_support', 'support_vectors', 'dual_coef',
-            'n_support', 'intercept', 'classes',
-            'kernel_params', 'probA', 'probB']
+                         'n_support', 'intercept', 'classes',
+                         'kernel_params', 'probA', 'probB']
         self.assertListEqual(sorted(expected_keys), sorted(data.keys()))
 
         # Make sure that all of the values are of serializable type.
