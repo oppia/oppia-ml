@@ -39,24 +39,24 @@ class ClassifierUtilsTest(test_utils.GenericTestBase):
         # Train the model.
         clf.fit(self.data, self.labels)
         data = classifier_utils.extract_svm_parameters(clf)
-        expected_keys = ['n_support', 'support_vectors', 'dual_coef',
-                         'n_support', 'intercept', 'classes',
-                         'kernel_params', 'probA', 'probB']
+        expected_keys = [u'n_support', u'support_vectors', u'dual_coef',
+                         u'intercept', u'classes', u'kernel_params', u'probA',
+                         u'probB']
         self.assertListEqual(sorted(expected_keys), sorted(data.keys()))
 
         # Make sure that all of the values are of serializable type.
-        self.assertEqual(type(data['n_support']), list)
-        self.assertEqual(type(data['support_vectors']), list)
-        self.assertEqual(type(data['dual_coef']), list)
-        self.assertEqual(type(data['intercept']), list)
-        self.assertEqual(type(data['classes']), list)
-        self.assertEqual(type(data['probA']), list)
-        self.assertEqual(type(data['probB']), list)
-        self.assertEqual(type(data['kernel_params']), dict)
-        self.assertEqual(type(data['kernel_params']['kernel']), unicode)
-        self.assertEqual(type(data['kernel_params']['gamma']), float)
-        self.assertEqual(type(data['kernel_params']['degree']), int)
-        self.assertEqual(type(data['kernel_params']['coef0']), float)
+        self.assertEqual(type(data[u'n_support']), list)
+        self.assertEqual(type(data[u'support_vectors']), list)
+        self.assertEqual(type(data[u'dual_coef']), list)
+        self.assertEqual(type(data[u'intercept']), list)
+        self.assertEqual(type(data[u'classes']), list)
+        self.assertEqual(type(data[u'probA']), list)
+        self.assertEqual(type(data[u'probB']), list)
+        self.assertEqual(type(data[u'kernel_params']), dict)
+        self.assertEqual(type(data[u'kernel_params'][u'kernel']), unicode)
+        self.assertEqual(type(data[u'kernel_params'][u'gamma']), float)
+        self.assertEqual(type(data[u'kernel_params'][u'degree']), int)
+        self.assertEqual(type(data[u'kernel_params'][u'coef0']), float)
 
     def check_that_unicode_validator_works_as_expected(self):
         """Make sure that unicode validator function works as expected."""
