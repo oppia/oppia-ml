@@ -33,14 +33,14 @@ def _validate_job_data(job_data):
     if 'algorithm_id' not in job_data:
         raise Exception('job data should contain algorithm id')
 
-    if not isinstance(job_data['job_id'], str):
+    if not isinstance(job_data['job_id'], unicode):
         raise Exception(
-            'Expected job id to be a string, received %s' %
+            'Expected job id to be unicode, received %s' %
             job_data['job_id'])
 
-    if not isinstance(job_data['algorithm_id'], str):
+    if not isinstance(job_data['algorithm_id'], unicode):
         raise Exception(
-            'Expected algorithm id to be a string, received %s' %
+            'Expected algorithm id to be unicode, received %s' %
             job_data['algorithm_id'])
 
     if not isinstance(job_data['training_data'], list):
@@ -77,7 +77,8 @@ def get_next_job():
     Returns: dict. A dictionary containing job data.
     """
     job_data = remote_access_services.fetch_next_job_request()
-    _validate_job_data(job_data)
+    if job_data:
+        _validate_job_data(job_data)
     return job_data
 
 

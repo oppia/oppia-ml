@@ -22,6 +22,7 @@ import json
 import requests
 
 from core.platform import platform_services
+import utils
 import vmconf
 
 metadata_services = platform_services.Registry.import_metadata_services()
@@ -87,12 +88,16 @@ def fetch_next_job_request():
         _get_url(), _get_port(), vmconf.FETCH_NEXT_JOB_REQUEST_HANDLER)
 
     payload = {
-        'vm_id': _get_vm_id()
+        'vm_id': _get_vm_id(),
+        'message': _get_vm_id(),
     }
-    signature = generate_signature(payload)
+    signature = generate_signature(payload['message'])
     payload['signature'] = signature
-    response = requests.get(request_url, params=payload)
-    return response.json()
+    data = {
+        'payload': json.dumps(payload)
+    }
+    response = requests.post(request_url, data=data)
+    return utils.parse_data_received_from_server(response.text)
 
 
 def store_trained_classifier_model(job_result_dict):
@@ -127,7 +132,10 @@ def store_trained_classifier_model(job_result_dict):
     }
     signature = generate_signature(payload['message'])
     payload['signature'] = signature
+    data = {
+        'payload': json.dumps(payload)
+    }
     request_url = "%s:%s/%s" % (
         _get_url(), _get_port(), vmconf.STORE_TRAINED_CLASSIFIER_MODEL_HANDLER)
-    response = requests.post(request_url, json=payload)
+    response = requests.post(request_url, data=data)
     return response.status_code

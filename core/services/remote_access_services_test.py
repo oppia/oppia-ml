@@ -16,8 +16,6 @@
 
 """Tests for remote access services."""
 
-import json
-
 from core.services import remote_access_services
 from core.tests import test_utils
 import vmconf
@@ -40,7 +38,21 @@ class RemoteAccessServicesTests(test_utils.GenericTestBase):
 
     def test_next_job_gets_fetched(self):
         """Test that next job is fetched correctly."""
-        with self.save_new_job_request('1', 'ab', {}):
+        # Callback for post request.
+        @self.callback
+        def post_callback(request):
+            """Callback for post request."""
+            self.assertIn('vm_id', request.payload.keys())
+            self.assertIn('message', request.payload.keys())
+            self.assertIn('signature', request.payload.keys())
+            job_data = {
+                'job_id': '1',
+                'algorithm_id': 'ab',
+                'training_data': {}
+            }
+            return job_data
+
+        with self.set_job_request_post_callback(post_callback):
             resp = remote_access_services.fetch_next_job_request()
 
         self.assertIn('job_id', resp.keys())
@@ -65,13 +77,12 @@ class RemoteAccessServicesTests(test_utils.GenericTestBase):
         @self.callback
         def post_callback(request):
             """Callback for post request."""
-            payload = json.loads(request.body)
-            self.assertEqual(payload['message']['job_id'], '123')
+            self.assertEqual(request.payload['message']['job_id'], '123')
             classifier_data = {
                 'param': 'val'
             }
             self.assertDictEqual(
-                classifier_data, payload['message']['classifier_data'])
+                classifier_data, request.payload['message']['classifier_data'])
 
         with self.set_job_result_post_callback(post_callback):
             status = remote_access_services.store_trained_classifier_model(

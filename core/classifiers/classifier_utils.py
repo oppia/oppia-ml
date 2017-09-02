@@ -40,10 +40,34 @@ def extract_svm_parameters(clf):
         support_vectors = support_vectors.toarray()
         dual_coef = dual_coef.toarray()
 
-    return {
-        'n_support': clf.__dict__['n_support_'].tolist(),
-        'support_vectors': support_vectors.tolist(),
-        'dual_coef': dual_coef.tolist(),
-        'intercept': clf.__dict__['_intercept_'].tolist(),
-        'classes': clf.__dict__['classes_'].tolist(),
+    kernel_params = {
+        u'kernel': unicode(clf.__dict__['kernel']),
+        u'gamma': clf.__dict__['_gamma'],
+        u'coef0': clf.__dict__['coef0'],
+        u'degree': clf.__dict__['degree'],
     }
+
+    return {
+        u'n_support': clf.__dict__['n_support_'].tolist(),
+        u'support_vectors':.support_vectors,
+        u'dual_coef': dual_coef,
+        u'intercept': clf.__dict__['_intercept_'].tolist(),
+        u'classes': clf.__dict__['classes_'].tolist(),
+        u'probA': clf.__dict__['probA_'].tolist(),
+        u'probB': clf.__dict__['probB_'].tolist(),
+        u'kernel_params': kernel_params
+    }
+
+
+def unicode_validator_for_classifier_data(var):
+    """Validates that incoming object contains unicode literal strings."""
+    if isinstance(var, dict):
+        for k in var.keys():
+            if isinstance(k, str):
+                raise Exception('Expected %s to be unicode but found str.' % k)
+            unicode_validator_for_classifier_data(var[k])
+    if isinstance(var, (list, set, tuple)):
+        for item in var:
+            unicode_validator_for_classifier_data(item)
+    if isinstance(var, str):
+        raise Exception('Expected \'%s\' to be unicode but found str.' % var)
