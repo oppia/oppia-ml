@@ -92,8 +92,9 @@ class TextClassifier(base.BaseClassifier):
             'kernel': ['linear']
         }]
 
-        clf = model_selection.GridSearchCV(svm.SVC(probability=True), param_grid,
-                                           scoring='f1_weighted', n_jobs=-1)
+        clf = model_selection.GridSearchCV(
+            svm.SVC(probability=True), param_grid, scoring='f1_weighted',
+            n_jobs=-1)
         clf.fit(transformed_vector, y)
         end = time.time()
         logging.info(
