@@ -695,7 +695,7 @@ class CodeClassifier(base.BaseClassifier):
             classifier_data: dict of the classifier attributes specific to
                 the classifier algorithm used.
         """
-        allowed_top_level_keys = ['KNN', 'SVM', 'cv_vocabulary']
+        allowed_top_level_keys = [u'KNN', u'SVM', u'cv_vocabulary']
         for key in allowed_top_level_keys:
             if key not in classifier_data:
                 raise Exception(
@@ -706,56 +706,56 @@ class CodeClassifier(base.BaseClassifier):
                     'Expected  \'%s\' to be dict but found \'%s\'.'
                     % (key, type(classifier_data[key])))
 
-
-        allowed_knn_keys = ['T', 'K', 'top', 'occurrence',
-                            'token_to_id', 'fingerprint_data']
+        allowed_knn_keys = [u'T', u'K', u'top', u'occurrence',
+                            u'token_to_id', u'fingerprint_data']
         for key in allowed_knn_keys:
-            if key not in classifier_data['KNN']:
+            if key not in classifier_data[u'KNN']:
                 raise Exception(
                     '\'%s\' key not found in \'KNN\' in classifier_data.' % key)
 
-        if not isinstance(classifier_data['KNN']['T'], int):
+        if not isinstance(classifier_data[u'KNN'][u'T'], int):
             raise Exception(
                 'Expected \'T\' to be an int but found \'%s\'' %
-                type(classifier_data['KNN']['T']))
+                type(classifier_data[u'KNN'][u'T']))
 
-        if not isinstance(classifier_data['KNN']['K'], int):
+        if not isinstance(classifier_data[u'KNN'][u'K'], int):
             raise Exception(
                 'Expected \'K\' to be an int but found \'%s\'' %
-                type(classifier_data['KNN']['K']))
+                type(classifier_data[u'KNN'][u'K']))
 
-        if not isinstance(classifier_data['KNN']['top'], int):
+        if not isinstance(classifier_data[u'KNN'][u'top'], int):
             raise Exception(
                 'Expected \'top\' to be an int but found \'%s\'' %
-                type(classifier_data['KNN']['top']))
+                type(classifier_data[u'KNN'][u'top']))
 
-        if not isinstance(classifier_data['KNN']['occurrence'], float):
+        if not isinstance(classifier_data[u'KNN'][u'occurrence'], float):
             raise Exception(
                 'Expected \'occurrence\' to be a float but found \'%s\'' %
-                type(classifier_data['KNN']['occurrence']))
+                type(classifier_data[u'KNN'][u'occurrence']))
 
-        if not isinstance(classifier_data['KNN']['fingerprint_data'], dict):
+        if not isinstance(classifier_data[u'KNN'][u'fingerprint_data'], dict):
             raise Exception(
                 'Expected \'fingerprint_data\' to be a dict but found \'%s\'' %
-                type(classifier_data['KNN']['fingerprint_data']))
+                type(classifier_data[u'KNN'][u'fingerprint_data']))
 
-        if not isinstance(classifier_data['KNN']['token_to_id'], dict):
+        if not isinstance(classifier_data[u'KNN'][u'token_to_id'], dict):
             raise Exception(
                 'Expected \'token_to_id\' to be a dict but found \'%s\'' %
-                type(classifier_data['KNN']['token_to_id']))
+                type(classifier_data[u'KNN'][u'token_to_id']))
 
-        for pid in classifier_data['KNN']['fingerprint_data']:
+        for pid in classifier_data[u'KNN'][u'fingerprint_data']:
             if ('fingerprint' not in
-                    classifier_data['KNN']['fingerprint_data'][pid]):
+                    classifier_data[u'KNN'][u'fingerprint_data'][pid]):
                 raise Exception(
                     'No fingerprint found for program with \'%s\' pid in'
                     ' fingerprint_data.' % pid)
 
-            if 'class' not in classifier_data['KNN']['fingerprint_data'][pid]:
+            if 'class' not in classifier_data[u'KNN'][u'fingerprint_data'][pid]:
                 raise Exception(
                     'No class found for program with \'%s\' pid in'
                     ' fingerprint_data.' % pid)
-        # Validate that all the strings in classifier data is of unicode type.
+
+        # Validate that all the strings in classifier data are of unicode type.
         classifier_utils.unicode_validator_for_classifier_data(classifier_data)
 
         # Validate that entire classifier data is json serializable and
