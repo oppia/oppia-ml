@@ -78,7 +78,7 @@ class TextClassifier(base.BaseClassifier):
         for answer_group in training_data:
             for answer in answer_group['answers']:
                 x.append(answer)
-                y.append(str(answer_group['answer_group_index']))
+                y.append(answer_group['answer_group_index'])
 
         count_vector = CountVectorizer()
         # Learn a vocabulary dictionary of all tokens in the raw documents.
