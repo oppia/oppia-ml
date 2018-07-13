@@ -47,8 +47,8 @@ def _get_vm_id():
         return vmconf.DEFAULT_VM_ID
 
     # Get VMID dynamically from metadata.
-    return metadata_services.get_metadata_param(
-        vmconf.METADATA_VM_ID_PARAM_NAME)
+    return str(metadata_services.get_metadata_param(
+        vmconf.METADATA_VM_ID_PARAM_NAME))
 
 
 def _get_shared_secret():
@@ -56,8 +56,8 @@ def _get_shared_secret():
         return vmconf.DEFAULT_VM_SHARED_SECRET
 
     # Get shared secret dynamically from metadata.
-    return metadata_services.get_metadata_param(
-        vmconf.METADATA_SHARED_SECRET_PARAM_NAME)
+    return str(metadata_services.get_metadata_param(
+        vmconf.METADATA_SHARED_SECRET_PARAM_NAME))
 
 
 def generate_signature(data):

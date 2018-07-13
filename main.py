@@ -35,8 +35,6 @@ def main():
         job_data = job_services.get_next_job()
         if not job_data:
             logging.info('No pending job requests.')
-            if vmconf.DEFAULT_WAITING_METHOD == vmconf.FIXED_TIME_WAITING:
-                time.sleep(vmconf.FIXED_TIME_WAITING_PERIOD)
             return
         classifier_data = job_services.train_classifier(
             job_data['algorithm_id'], job_data['training_data'])
@@ -56,6 +54,10 @@ def main():
     except Exception as e: # pylint: disable=broad-except
         # Log any exceptions that arises during processing of job.
         logging.error(e.message)
+
+    finally:
+        if vmconf.DEFAULT_WAITING_METHOD == vmconf.FIXED_TIME_WAITING:
+            time.sleep(vmconf.FIXED_TIME_WAITING_PERIOD)
 
 if __name__ == '__main__':
     while True:
