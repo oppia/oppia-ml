@@ -46,7 +46,8 @@ def _get_vm_id():
     if vmconf.DEV_MODE:
         return vmconf.DEFAULT_VM_ID
 
-    # Get VMID dynamically from metadata.
+    # Get VMID dynamically from metadata. HMAC module does not
+    # support unicode string. Hence we need to cast them to str.
     return str(metadata_services.get_metadata_param(
         vmconf.METADATA_VM_ID_PARAM_NAME))
 
@@ -55,7 +56,8 @@ def _get_shared_secret():
     if vmconf.DEV_MODE:
         return vmconf.DEFAULT_VM_SHARED_SECRET
 
-    # Get shared secret dynamically from metadata.
+    # Get shared secret dynamically from metadata. HMAC module does not
+    # support unicode string. Hence we need to cast them to str.
     return str(metadata_services.get_metadata_param(
         vmconf.METADATA_SHARED_SECRET_PARAM_NAME))
 
