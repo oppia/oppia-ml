@@ -18,7 +18,6 @@
 
 import scipy
 
-
 def extract_svm_parameters(clf):
     """Extract parameters from a trained SVC classifier.
 
@@ -60,15 +59,40 @@ def extract_svm_parameters(clf):
     }
 
 
-def unicode_validator_for_classifier_data(var):
+def unicode_validator_for_classifier_data(classifier_data):
     """Validates that incoming object contains unicode literal strings."""
-    if isinstance(var, dict):
-        for k in var.keys():
+    if isinstance(classifier_data, dict):
+        for k in classifier_data.keys():
             if isinstance(k, str):
                 raise Exception('Expected %s to be unicode but found str.' % k)
-            unicode_validator_for_classifier_data(var[k])
-    if isinstance(var, (list, set, tuple)):
-        for item in var:
+            unicode_validator_for_classifier_data(classifier_data[k])
+    if isinstance(classifier_data, (list, set, tuple)):
+        for item in classifier_data:
             unicode_validator_for_classifier_data(item)
-    if isinstance(var, str):
-        raise Exception('Expected \'%s\' to be unicode but found str.' % var)
+    if isinstance(classifier_data, str):
+        raise Exception(
+            'Expected \'%s\' to be unicode but found str.' % classifier_data)
+
+
+def convert_float_numbers_to_string_in_classifier_data(classifier_data):
+    """Converts all floating point numbers in classifier data to string."""
+    if isinstance(classifier_data, dict):
+        for k in classifier_data.keys():
+            if isinstance(classifier_data[k], float):
+                classifier_data[k] = str(classifier_data[k])
+            else:
+                classifier_data[k] = (
+                    convert_float_numbers_to_string_in_classifier_data(
+                        classifier_data[k]))
+        return classifier_data
+    elif isinstance(classifier_data, (list, set, tuple)):
+        new_list = []
+        for item in classifier_data:
+            if isinstance(item, float):
+                new_list.append(str(item))
+            else:
+                new_list.append(
+                    convert_float_numbers_to_string_in_classifier_data(
+                        item))
+        return type(classifier_data)(new_list)
+    return classifier_data

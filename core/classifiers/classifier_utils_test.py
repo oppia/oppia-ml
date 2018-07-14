@@ -137,3 +137,52 @@ class ClassifierUtilsTest(test_utils.GenericTestBase):
         with self.assertRaisesRegexp(
             Exception, 'Expected \'f\' to be unicode but found str.'):
             classifier_utils.unicode_validator_for_classifier_data(test_dict)
+
+    def test_convert_float_numbers_to_string_in_classifier_data(self):
+        """Make sure that all values are converted correctly."""
+        test_dict = {
+            'a': {
+                'ab': 'abcd',
+                'ac': 0.5
+            },
+            'b': {
+                'ba': [1, 2, 3],
+                'bb': [[1.0, 0.0, 1.0], [0.0, 1.0, 1.0]],
+                'bc': [-3.44757604341e-05, -3.44757604341e-05],
+                'bd': [-2.48521656693, -2.48521656693, -2.48521656693],
+                'be': {
+                    'bea': 'abcdef',
+                    'beb': 0.0,
+                    'bec': 0.142857142857,
+                    'bed': 3},
+                'bf': [0.133432545, 1, 2, 3.1233]
+            },
+            'c': 1.123432,
+            'd': 21123
+        }
+
+        expected_dict = {
+            'a': {
+                'ab': 'abcd',
+                'ac': '0.5'
+            },
+            'b': {
+                'ba': [1, 2, 3],
+                'bb': [['1.0', '0.0', '1.0'], ['0.0', '1.0', '1.0']],
+                'bc': ['-3.44757604341e-05', '-3.44757604341e-05'],
+                'bd': ['-2.48521656693', '-2.48521656693', '-2.48521656693'],
+                'be': {
+                    'bea': 'abcdef',
+                    'beb': '0.0',
+                    'bec': '0.142857142857',
+                    'bed': 3},
+                'bf': ['0.133432545', 1, 2, '3.1233']
+            },
+            'c': '1.123432',
+            'd': 21123
+        }
+
+        output_dict = (
+            classifier_utils.convert_float_numbers_to_string_in_classifier_data(
+                test_dict))
+        self.assertDictEqual(expected_dict, output_dict)
