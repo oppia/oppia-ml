@@ -138,6 +138,40 @@ class ClassifierUtilsTest(test_utils.GenericTestBase):
             Exception, 'Expected \'f\' to be unicode but found str.'):
             classifier_utils.unicode_validator_for_classifier_data(test_dict)
 
+    def test_find_all_string_values_in_classifier_data(self):
+        """Make sure that all string value keys are identified correctly."""
+        test_dict = {
+            'a': {
+                'ab': 'abcd',
+                'ac': 0.5,
+                'ad': {
+                    'ada': 'abcdef',
+                    'adc': ['fghi', {
+                        'adca': 'abcd',
+                        'adcb': 0.1234,
+                        'adcc': ['ade', 'afd']
+                    }]
+                },
+                'ae': [['123', '0.123'], ['abc']],
+                'af': [['abcde'], [0.871]]
+            },
+            'b': {
+                'bd': [-2.48521656693, -2.48521656693, -2.48521656693],
+                'be': {
+                    'bea': 'abcdef',
+                    'bed': 3},
+                'bg': ['abc', 'def', 'ghi'],
+                'bh': ['abc', 123],
+            },
+            'c': 1.123432,
+        }
+
+        expected_list = ['a.ab', 'a.ad.ada', 'a.ae', 'b.be.bea', 'b.bg']
+        output_list = (
+            classifier_utils.find_all_string_values_in_classifier_data(
+                test_dict))
+        self.assertListEqual(sorted(expected_list), sorted(output_list))
+
     def test_convert_float_numbers_to_string_in_classifier_data(self):
         """Make sure that all values are converted correctly."""
         test_dict = {

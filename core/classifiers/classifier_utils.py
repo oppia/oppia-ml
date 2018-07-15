@@ -74,6 +74,41 @@ def unicode_validator_for_classifier_data(classifier_data):
             'Expected \'%s\' to be unicode but found str.' % classifier_data)
 
 
+def find_all_string_values_in_classifier_data(classifier_data, parent_key=''):
+    """Finds all keys in classifier data which contain only string values."""
+    join_key = lambda x, y: y if x else '%s.%s' % (x, y)
+    key_list = []
+    if isinstance(classifier_data, dict):
+        for k in classifier_data.keys():
+            if isinstance(classifier_data[k], (str, unicode)):
+                key_list.append(join_key(parent_key, k))
+            else:
+                ret_list = find_all_string_values_in_classifier_data(
+                    classifier_data[k], k)
+                if ret_list:
+                    key_list += [join_key(parent_key, key) for key in ret_list]
+        return key_list
+    elif isinstance(classifier_data, (set, list, tuple)):
+        all_values_are_string = True
+        for item in classifier_data:
+            if isinstance(item, (set, list, tuple)):
+                ret_list = find_all_string_values_in_classifier_data(
+                    item, parent_key)
+                if ret_list:
+                    all_values_are_string = False
+            elif not isinstance(item, (str, unicode)):
+                all_values_are_string = False
+            else:
+                key_list += find_all_string_values_in_classifier_data(
+                    item, parent_key)
+
+        if all_values_are_string:
+            return (
+                [join_key(parent_key, key) for key in key_list] + [parent_key])
+        return []
+    return key_list
+
+
 def convert_float_numbers_to_string_in_classifier_data(classifier_data):
     """Converts all floating point numbers in classifier data to string."""
     if isinstance(classifier_data, dict):

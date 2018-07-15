@@ -117,9 +117,13 @@ def store_job_result(job_id, classifier_data):
     # numbers are represented differently on GAE(Oppia) and GCE(Oppia-ml).
     # Therefore, converting all floating point numbers to string keeps
     # signature consistent on both Oppia and Oppia-ml.
+    strings_only_key_list = (
+        classifier_utils.find_all_string_values_in_classifier_data(
+            classifier_data))
     classifier_data = (
         classifier_utils.convert_float_numbers_to_string_in_classifier_data(
             classifier_data))
+    classifier_data['strings_only_key_list'] = strings_only_key_list
     job_result_dict = {
         'job_id': job_id,
         'classifier_data': classifier_data
