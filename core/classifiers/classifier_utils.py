@@ -76,7 +76,7 @@ def unicode_validator_for_classifier_data(classifier_data):
 
 def find_all_string_values_in_classifier_data(classifier_data, parent_key=''):
     """Finds all keys in classifier data which contain only string values."""
-    join_key = lambda x, y: y if x else '%s.%s' % (x, y)
+    join_key = lambda x, y: y if not x else '%s.%s' % (x, y)
     key_list = []
     if isinstance(classifier_data, dict):
         for k in classifier_data.keys():
@@ -94,7 +94,7 @@ def find_all_string_values_in_classifier_data(classifier_data, parent_key=''):
             if isinstance(item, (set, list, tuple)):
                 ret_list = find_all_string_values_in_classifier_data(
                     item, parent_key)
-                if ret_list:
+                if not ret_list:
                     all_values_are_string = False
             elif not isinstance(item, (str, unicode)):
                 all_values_are_string = False
