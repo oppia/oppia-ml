@@ -74,60 +74,64 @@ def unicode_validator_for_classifier_data(classifier_data):
             'Expected \'%s\' to be unicode but found str.' % classifier_data)
 
 
-def find_all_string_values_in_classifier_data(classifier_data, parent_key=''):
-    """Finds all keys in classifier data which contain only string values."""
-    join_key = lambda x, y: y if not x else '%s.%s' % (x, y)
-    key_list = []
-    if isinstance(classifier_data, dict):
-        for k in classifier_data.keys():
-            if isinstance(classifier_data[k], (str, unicode)):
-                key_list.append(join_key(parent_key, k))
-            else:
-                ret_list = find_all_string_values_in_classifier_data(
-                    classifier_data[k], k)
-                if ret_list:
-                    key_list += [join_key(parent_key, key) for key in ret_list]
-        return key_list
-    elif isinstance(classifier_data, (set, list, tuple)):
-        all_values_are_string = True
-        for item in classifier_data:
-            if isinstance(item, (set, list, tuple)):
-                ret_list = find_all_string_values_in_classifier_data(
-                    item, parent_key)
-                if not ret_list:
-                    all_values_are_string = False
-            elif not isinstance(item, (str, unicode)):
-                all_values_are_string = False
-            else:
-                key_list += find_all_string_values_in_classifier_data(
-                    item, parent_key)
-
-        if all_values_are_string:
-            return (
-                [join_key(parent_key, key) for key in key_list] + [parent_key])
-        return []
-    return key_list
+FLOAT_INDICATOR_KEY = 'float_values'
 
 
 def convert_float_numbers_to_string_in_classifier_data(classifier_data):
-    """Converts all floating point numbers in classifier data to string."""
     if isinstance(classifier_data, dict):
+        if FLOAT_INDICATOR_KEY in classifier_data:
+            raise Exception(
+                'Classifier data already contains a %s key' %
+                FLOAT_INDICATOR_KEY)
+        float_fields = []
         for k in classifier_data.keys():
-            if isinstance(classifier_data[k], float):
-                classifier_data[k] = str(classifier_data[k])
-            else:
+            if isinstance(classifier_data[k], (basestring, int)):
+                classifier_data[k] = classifier_data[k]
+            elif isinstance(classifier_data[k], dict):
                 classifier_data[k] = (
                     convert_float_numbers_to_string_in_classifier_data(
                         classifier_data[k]))
-        return classifier_data
-    elif isinstance(classifier_data, (list, set, tuple)):
-        new_list = []
-        for item in classifier_data:
-            if isinstance(item, float):
-                new_list.append(str(item))
+            elif isinstance(classifier_data[k], list):
+                new_list, is_any_value_float = (
+                    convert_float_numbers_to_string_in_classifier_data(
+                        classifier_data[k]))
+                if is_any_value_float:
+                    float_fields.append(k)
+                classifier_data[k] = new_list
+            elif isinstance(classifier_data[k], float):
+                classifier_data[k] = str(classifier_data[k])
+                float_fields.append(k)
             else:
-                new_list.append(
+                raise Exception(
+                    'Expected all classifier data dict values to be dicts, '
+                    'lists, floats, integers or strings but received %s.' %(
+                        type(classifier_data[k])))
+        classifier_data[FLOAT_INDICATOR_KEY] = float_fields
+        return classifier_data
+    elif isinstance(classifier_data, list):
+        new_list = []
+        is_any_value_float = False
+        for item in classifier_data:
+            if isinstance(item, list):
+                ret_list, ret_bool = (
                     convert_float_numbers_to_string_in_classifier_data(
                         item))
-        return type(classifier_data)(new_list)
-    return classifier_data
+                is_any_value_float = is_any_value_float or ret_bool
+                new_list.append(ret_list)
+            elif isinstance(item, float):
+                new_list.append(str(item))
+                is_any_value_float = True
+            elif isinstance(item, dict):
+                new_list.append(
+                    convert_float_numbers_to_string_in_classifier_data(item))
+            elif isinstance(item, (basestring, int)):
+                new_list.append(item)
+            else:
+                raise Exception(
+                    'Expected list values to be either strings, floats, '
+                    'lists, integers or dicts but received %s.' % (type(item)))
+        return new_list, is_any_value_float
+    else:
+        raise Exception(
+            'Expected all top-level classifier data objects to be lists or '
+            'dicts but received %s.' % (type(classifier_data)))
