@@ -77,14 +77,27 @@ def unicode_validator_for_classifier_data(classifier_data):
 FLOAT_INDICATOR_KEY = 'float_values'
 
 
+# pylint: disable=too-many-branches
 def convert_float_numbers_to_string_in_classifier_data(classifier_data):
+    """Converts all floating point numbers in classifier data to string.
+
+    Args:
+        classifier_data: dict|list. The original classifier data which needs
+            conversion of floats to strings.
+
+    Returns:
+        Dict|List. Modified classifier data in which float values are converted
+            into strings and each dict/subdict is augmented with a special key
+            'float_values' which contains list of keys whose values have
+            undergone the transformation.
+    """
     if isinstance(classifier_data, dict):
         if FLOAT_INDICATOR_KEY in classifier_data:
             raise Exception(
                 'Classifier data already contains a %s key' %
                 FLOAT_INDICATOR_KEY)
         float_fields = []
-        for k in classifier_data.keys():
+        for k in classifier_data:
             if isinstance(classifier_data[k], (basestring, int)):
                 classifier_data[k] = classifier_data[k]
             elif isinstance(classifier_data[k], dict):
