@@ -137,6 +137,7 @@ def convert_float_numbers_to_string_in_classifier_data(classifier_data):
             elif isinstance(item, dict):
                 new_list.append(
                     convert_float_numbers_to_string_in_classifier_data(item))
+                is_any_value_float = True
             elif isinstance(item, (basestring, int)):
                 new_list.append(item)
             else:

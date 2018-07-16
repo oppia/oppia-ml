@@ -158,7 +158,8 @@ class ClassifierUtilsTest(test_utils.GenericTestBase):
                 'bd': [-2.48521656693, -2.48521656693, -2.48521656693],
                 'be': {
                     'bea': 'abcdef',
-                    'bed': 3},
+                    'bed': 3
+                },
                 'bg': ['abc', 'def', 'ghi'],
                 'bh': ['abc', 123],
             },
