@@ -60,13 +60,21 @@ def extract_svm_parameters(clf):
 
 
 def unicode_validator_for_classifier_data(classifier_data):
-    """Validates that incoming object contains unicode literal strings."""
+    """Validates that incoming object contains unicode literal strings.
+
+    Args:
+        classifier_data: *. The trained classifier model data.
+
+    Raises:
+        Exception. If any of the strings in classifier data is not a unicode
+            string.
+    """
     if isinstance(classifier_data, dict):
         for k in classifier_data.keys():
             if isinstance(k, str):
                 raise Exception('Expected %s to be unicode but found str.' % k)
             unicode_validator_for_classifier_data(classifier_data[k])
-    if isinstance(classifier_data, (list, set, tuple)):
+    if isinstance(classifier_data, list):
         for item in classifier_data:
             unicode_validator_for_classifier_data(item)
     if isinstance(classifier_data, str):
