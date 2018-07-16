@@ -177,7 +177,7 @@ class ClassifierUtilsTest(test_utils.GenericTestBase):
                         'adcc': ['ade', 'afd'],
                         'float_values': ['adcb']
                     }],
-                    'float_values': []
+                    'float_values': ['adc']
                 },
                 'ae': [['123', '0.123'], ['abc']],
                 'af': [['abcde'], ['0.871']],
