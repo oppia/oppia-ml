@@ -86,5 +86,5 @@ XSSI_PREFIX = ')]}\'\n'
 # Each dict/subdict in classifier data should contain following key which
 # stores a list of keys whose values should undergo transformation on Oppia.
 # The value of following constant must be same with corresponding constant
-# on Oppia stored at core/domain/classifier_services.py file.
+# on Oppia stored at feconf.py file.
 FLOAT_INDICATOR_KEY = 'float_values'

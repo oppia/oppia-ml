@@ -114,7 +114,7 @@ def make_sure_that_list_has_uniform_structure(data):
                     new_items.append(subitem)
             else:
                 raise Exception(
-                    'Exepcted all the values in list to be either stirngs, '
+                    'Expected all the values in list to be either strings, '
                     'floats, integers, lists or dicts but '
                     'received %s.' % type(item))
         current_items = new_items
