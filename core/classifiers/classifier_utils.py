@@ -18,6 +18,8 @@
 
 import scipy
 
+import vmconf
+
 def extract_svm_parameters(clf):
     """Extract parameters from a trained SVC classifier.
 
@@ -82,10 +84,63 @@ def unicode_validator_for_classifier_data(classifier_data):
             'Expected \'%s\' to be unicode but found str.' % classifier_data)
 
 
-FLOAT_INDICATOR_KEY = 'float_values'
+def make_sure_that_list_has_uniform_structure(data):
+    """Makes sure that list and its sublist/dicts/items have same uniform
+    structure across entire list.
+
+    Args:
+        data: list. A list of items which needs verification of its structure.
+
+    Returns:
+        type. The type of the leaf item of the list.
+
+    Raises:
+        Exception. If list is found to have non-uniform substructure then an
+            exception to report it is raised.
+    """
+    # A leaf item is an item which is not a list. It must be one of the
+    # following type of item.
+    leaf_node_item_types = [int, float, dict, basestring]
+    current_items = []
+    item_type = None
+    current_items.append(data)
+    while current_items:
+        new_items = []
+        for item in current_items:
+            if isinstance(item, (basestring, int, float, dict)):
+                new_items.append(item)
+            elif isinstance(item, (list)):
+                for subitem in item:
+                    new_items.append(subitem)
+            else:
+                raise Exception(
+                    'Exepcted all the values in list to be either stirngs, '
+                    'floats, integers, lists or dicts but '
+                    'received %s.' % type(item))
+        current_items = new_items
+        if not current_items:
+            break
+        item = current_items[0]
+        item_type = type(item)
+        if not all(isinstance(subitem, item_type) for subitem in current_items):
+            raise Exception(
+                'Expected all the values in list to have same type.')
+        if any(isinstance(item, t) for t in leaf_node_item_types):
+            break
+
+    if item_type == dict:
+        keys_value_type_dict = {
+            k: type(v) for k, v in current_items[0].iteritems()
+        }
+        for item in current_items:
+            item_value_type_dict = {k: type(v) for k, v in item.iteritems()}
+            if keys_value_type_dict != item_value_type_dict:
+                raise Exception(
+                    'Expected all the subdicts to have same set of keys '
+                    'and corresponding value types.')
+    return item_type
 
 
-# pylint: disable=too-many-branches
 def convert_float_numbers_to_string_in_classifier_data(classifier_data):
     """Converts all floating point numbers in classifier data to string.
 
@@ -99,11 +154,12 @@ def convert_float_numbers_to_string_in_classifier_data(classifier_data):
             'float_values' which contains list of keys whose values have
             undergone the transformation.
     """
+    # pylint: disable=too-many-branches
     if isinstance(classifier_data, dict):
-        if FLOAT_INDICATOR_KEY in classifier_data:
+        if vmconf.FLOAT_INDICATOR_KEY in classifier_data:
             raise Exception(
                 'Classifier data already contains a %s key' %
-                FLOAT_INDICATOR_KEY)
+                vmconf.FLOAT_INDICATOR_KEY)
         float_fields = []
         for k in classifier_data:
             if isinstance(classifier_data[k], (basestring, int)):
@@ -113,10 +169,12 @@ def convert_float_numbers_to_string_in_classifier_data(classifier_data):
                     convert_float_numbers_to_string_in_classifier_data(
                         classifier_data[k]))
             elif isinstance(classifier_data[k], list):
-                new_list, is_any_value_float = (
+                leaf_node_item_type = make_sure_that_list_has_uniform_structure(
+                    classifier_data[k])
+                new_list = (
                     convert_float_numbers_to_string_in_classifier_data(
                         classifier_data[k]))
-                if is_any_value_float:
+                if leaf_node_item_type in (float, dict):
                     float_fields.append(k)
                 classifier_data[k] = new_list
             elif isinstance(classifier_data[k], float):
@@ -125,34 +183,29 @@ def convert_float_numbers_to_string_in_classifier_data(classifier_data):
             else:
                 raise Exception(
                     'Expected all classifier data dict values to be dicts, '
-                    'lists, floats, integers or strings but received %s.' %(
+                    'lists, floats, integers or strings but received %s.' % (
                         type(classifier_data[k])))
-        classifier_data[FLOAT_INDICATOR_KEY] = float_fields
+        classifier_data[vmconf.FLOAT_INDICATOR_KEY] = float_fields
         return classifier_data
     elif isinstance(classifier_data, list):
         new_list = []
-        is_any_value_float = False
         for item in classifier_data:
             if isinstance(item, list):
-                ret_list, ret_bool = (
-                    convert_float_numbers_to_string_in_classifier_data(
-                        item))
-                is_any_value_float = is_any_value_float or ret_bool
+                ret_list = convert_float_numbers_to_string_in_classifier_data(
+                    item)
                 new_list.append(ret_list)
             elif isinstance(item, float):
                 new_list.append(str(item))
-                is_any_value_float = True
             elif isinstance(item, dict):
                 new_list.append(
                     convert_float_numbers_to_string_in_classifier_data(item))
-                is_any_value_float = True
             elif isinstance(item, (basestring, int)):
                 new_list.append(item)
             else:
                 raise Exception(
                     'Expected list values to be either strings, floats, '
                     'lists, integers or dicts but received %s.' % (type(item)))
-        return new_list, is_any_value_float
+        return new_list
     else:
         raise Exception(
             'Expected all top-level classifier data objects to be lists or '

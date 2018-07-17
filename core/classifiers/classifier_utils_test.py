@@ -138,6 +138,77 @@ class ClassifierUtilsTest(test_utils.GenericTestBase):
             Exception, 'Expected \'f\' to be unicode but found str.'):
             classifier_utils.unicode_validator_for_classifier_data(test_dict)
 
+    def test_that_nonuniform_lists_are_identified(self):
+        """Make sure that only uniform structured lists are allowed."""
+        test_list = [1, 2, 3]
+        classifier_utils.make_sure_that_list_has_uniform_structure(test_list)
+
+        test_list = [[1], [2], [3]]
+        classifier_utils.make_sure_that_list_has_uniform_structure(test_list)
+
+        test_list = [[{'a': 1}], [{'a': 2}], [{'a': 1}]]
+        classifier_utils.make_sure_that_list_has_uniform_structure(test_list)
+
+        test_list = [1, 2, '3']
+        with self.assertRaisesRegexp(
+            Exception, 'Expected all the values in list to have same type.'):
+            classifier_utils.make_sure_that_list_has_uniform_structure(
+                test_list)
+
+        test_list = [1, 2, [3]]
+        with self.assertRaisesRegexp(
+            Exception, 'Expected all the values in list to have same type.'):
+            classifier_utils.make_sure_that_list_has_uniform_structure(
+                test_list)
+
+        test_list = [[1], ['2'], [3]]
+        with self.assertRaisesRegexp(
+            Exception, 'Expected all the values in list to have same type.'):
+            classifier_utils.make_sure_that_list_has_uniform_structure(
+                test_list)
+
+        test_list = [1, 2, 0.32]
+        with self.assertRaisesRegexp(
+            Exception, 'Expected all the values in list to have same type.'):
+            classifier_utils.make_sure_that_list_has_uniform_structure(
+                test_list)
+
+        test_list = [1, 2, [{'a': 1}]]
+        with self.assertRaisesRegexp(
+            Exception, 'Expected all the values in list to have same type.'):
+            classifier_utils.make_sure_that_list_has_uniform_structure(
+                test_list)
+
+        test_list = [[{'a': 0.12}], [{'a': 2}], [{'a': 1}]]
+        with self.assertRaisesRegexp(
+            Exception,
+            'Expected all the subdicts to have same set of keys '
+            'and corresponding value types.'):
+            classifier_utils.make_sure_that_list_has_uniform_structure(
+                test_list)
+
+        test_list = [[{'b': 4}], [{'a': 2}], [{'a': 1}]]
+        with self.assertRaisesRegexp(
+            Exception,
+            'Expected all the subdicts to have same set of keys '
+            'and corresponding value types.'):
+            classifier_utils.make_sure_that_list_has_uniform_structure(
+                test_list)
+
+        test_list = [[{'b': 4}], [{'a': 2}], [[{'a': 1}]]]
+        with self.assertRaisesRegexp(
+            Exception, 'Expected all the values in list to have same type.'):
+            classifier_utils.make_sure_that_list_has_uniform_structure(
+                test_list)
+
+        test_list = [[{'a': 4, 'b': 2}], [{'a': 2}], [{'a': 1}]]
+        with self.assertRaisesRegexp(
+            Exception,
+            'Expected all the subdicts to have same set of keys '
+            'and corresponding value types.'):
+            classifier_utils.make_sure_that_list_has_uniform_structure(
+                test_list)
+
     def test_convert_float_numbers_to_string_in_classifier_data(self):
         """Make sure that all values are converted correctly."""
         test_dict = {
@@ -145,14 +216,18 @@ class ClassifierUtilsTest(test_utils.GenericTestBase):
                 'ab': 'abcd',
                 'ad': {
                     'ada': 'abcdef',
-                    'adc': ['fghi', {
+                    'adc': [{
                         'adca': 'abcd',
                         'adcb': 0.1234,
                         'adcc': ['ade', 'afd']
+                    }, {
+                        'adca': 'abce',
+                        'adcb': 0.34,
+                        'adcc': []
                     }]
                 },
                 'ae': [['123', '0.123'], ['abc']],
-                'af': [['abcde'], [0.871]]
+                'af': [['abcde'], ['0.871']]
             },
             'b': {
                 'bd': [-2.48521656693, -2.48521656693, -2.48521656693],
@@ -161,7 +236,7 @@ class ClassifierUtilsTest(test_utils.GenericTestBase):
                     'bed': 3
                 },
                 'bg': ['abc', 'def', 'ghi'],
-                'bh': ['abc', 123],
+                'bh': ['abc', '123'],
             },
             'c': 1.123432,
         }
@@ -171,17 +246,22 @@ class ClassifierUtilsTest(test_utils.GenericTestBase):
                 'ab': 'abcd',
                 'ad': {
                     'ada': 'abcdef',
-                    'adc': ['fghi', {
+                    'adc': [{
                         'adca': 'abcd',
                         'adcb': '0.1234',
                         'adcc': ['ade', 'afd'],
+                        'float_values': ['adcb']
+                    }, {
+                        'adca': 'abce',
+                        'adcb': '0.34',
+                        'adcc': [],
                         'float_values': ['adcb']
                     }],
                     'float_values': ['adc']
                 },
                 'ae': [['123', '0.123'], ['abc']],
                 'af': [['abcde'], ['0.871']],
-                'float_values': ['af']
+                'float_values': []
             },
             'b': {
                 'bd': ['-2.48521656693', '-2.48521656693', '-2.48521656693'],
@@ -191,7 +271,7 @@ class ClassifierUtilsTest(test_utils.GenericTestBase):
                     'float_values': []
                 },
                 'bg': ['abc', 'def', 'ghi'],
-                'bh': ['abc', 123],
+                'bh': ['abc', '123'],
                 'float_values': ['bd']
             },
             'c': '1.123432',
