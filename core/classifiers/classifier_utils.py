@@ -149,7 +149,7 @@ def convert_float_numbers_to_string_in_classifier_data(classifier_data):
             conversion of floats to strings.
 
     Returns:
-        Dict|List. Modified classifier data in which float values are converted
+        dict|list. Modified classifier data in which float values are converted
             into strings and each dict/subdict is augmented with a special key
             'float_values' which contains list of keys whose values have
             undergone the transformation.
