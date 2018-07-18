@@ -99,40 +99,30 @@ def convert_float_numbers_to_string_in_classifier_data(classifier_data):
     """
     if isinstance(classifier_data, dict):
         for k in classifier_data:
-            if isinstance(classifier_data[k], basestring) and re.match(
-                    r'^([-+]?\d+\.\d+)$', classifier_data[k]):
-                # A float value must not be stored as a string in
-                # classifier data.
-                raise Exception(
-                    'Error: Found a float value %s stored as string. Float '
-                    'values should not be stored as strings.' % (
-                        classifier_data[k]))
-            if isinstance(classifier_data[k], (dict, list)):
-                classifier_data[k] = (
-                    convert_float_numbers_to_string_in_classifier_data(
-                        classifier_data[k]))
-            if isinstance(classifier_data[k], float):
-                classifier_data[k] = str(classifier_data[k])
+            classifier_data[k] = (
+                convert_float_numbers_to_string_in_classifier_data(
+                    classifier_data[k]))
         return classifier_data
     elif isinstance(classifier_data, list):
         new_list = []
         for item in classifier_data:
-            if isinstance(item, (list, dict)):
-                new_list.append(
-                    convert_float_numbers_to_string_in_classifier_data(
-                        item))
-            if isinstance(item, float):
-                new_list.append(str(item))
-            if isinstance(item, basestring):
-                # A float value must not be stored as a string in
-                # classifier data.
-                if re.match(r'^([-+]?\d+\.\d+)$', item):
-                    raise Exception(
-                        'Error: Found a float value %s stored as string. Float '
-                        'values should not be stored as strings.' % (item))
-                new_list.append(item)
+            new_list.append(
+                convert_float_numbers_to_string_in_classifier_data(item))
         return new_list
+    elif isinstance(classifier_data, float):
+        return str(classifier_data)
+    elif isinstance(classifier_data, basestring):
+        if re.match(r'^([-+]?\d+\.\d+)$', classifier_data):
+            # A float value must not be stored as a string in
+            # classifier data.
+            raise Exception(
+                'Error: Found a float value %s stored as string. Float '
+                'values should not be stored as strings.' % (
+                    classifier_data))
+        return classifier_data
+    elif isinstance(classifier_data, int):
+        return classifier_data
     else:
         raise Exception(
-            'Expected all top-level classifier data objects to be lists or '
-            'dicts but received %s.' % (type(classifier_data)))
+            'Expected all classifier data objects to be lists, dicts, floats, '
+            'strings, integers but received %s.' % (type(classifier_data)))
