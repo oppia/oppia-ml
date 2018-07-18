@@ -82,7 +82,8 @@ class RemoteAccessServicesTests(test_utils.GenericTestBase):
                 'param': 'val'
             }
             self.assertDictEqual(
-                classifier_data, request.payload['message']['classifier_data'])
+                classifier_data,
+                request.payload['message']['classifier_data'])
 
         with self.set_job_result_post_callback(post_callback):
             status = remote_access_services.store_trained_classifier_model(
@@ -110,6 +111,7 @@ class RemoteAccessServicesTests(test_utils.GenericTestBase):
         }
 
         with self.assertRaisesRegexp(
-            Exception, 'job_result_dict must contain \'classifier_data\'.'):
+            Exception,
+            'job_result_dict must contain \'classifier_data\'.'):
             remote_access_services.store_trained_classifier_model(
                 job_result_dict)

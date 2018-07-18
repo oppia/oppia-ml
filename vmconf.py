@@ -85,4 +85,5 @@ XSSI_PREFIX = ')]}\'\n'
 
 # The regular expression used to identify whether a string contains float value.
 # The regex must match with regex that is stored in feconf.py file of Oppia.
-FLOAT_VERIFIER_REGEX = '^([-+]?\\d*\\.\\d+)$|^([-+]?\\d+\\.?\\d*e[-+]?\\d*)$'
+FLOAT_VERIFIER_REGEX = (
+    '^([-+]?\\d*\\.\\d+)$|^([-+]?(\\d*\\.?\\d+|\\d+\\.?\\d*)e[-+]?\\d*)$')

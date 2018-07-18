@@ -126,7 +126,8 @@ def store_trained_classifier_model(job_result_dict):
         raise Exception('job_result_dict must contain \'job_id\'.')
 
     if 'classifier_data' not in job_result_dict:
-        raise Exception('job_result_dict must contain \'classifier_data\'.')
+        raise Exception(
+            'job_result_dict must contain \'classifier_data\'.')
 
     payload = {
         'message': job_result_dict,

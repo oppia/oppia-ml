@@ -112,11 +112,12 @@ def convert_float_numbers_to_string_in_classifier_data(classifier_data):
             values are converted into strings.
     """
     if isinstance(classifier_data, dict):
+        classifier_data_with_stringified_floats = {}
         for k in classifier_data:
-            classifier_data[k] = (
+            classifier_data_with_stringified_floats[k] = (
                 convert_float_numbers_to_string_in_classifier_data(
                     classifier_data[k]))
-        return classifier_data
+        return classifier_data_with_stringified_floats
     elif isinstance(classifier_data, list):
         new_list = []
         for item in classifier_data:

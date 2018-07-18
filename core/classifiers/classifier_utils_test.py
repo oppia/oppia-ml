@@ -16,8 +16,11 @@
 
 """Tests for utility functions defined in classifier_utils."""
 
+import re
+
 from core.classifiers import classifier_utils
 from core.tests import test_utils
+import vmconf
 
 import numpy as np
 from sklearn import svm
@@ -137,6 +140,27 @@ class ClassifierUtilsTest(test_utils.GenericTestBase):
         with self.assertRaisesRegexp(
             Exception, 'Expected \'f\' to be unicode but found str.'):
             classifier_utils.unicode_validator_for_classifier_data(test_dict)
+
+    def test_that_float_verifier_regex_works_correctly(self):
+        """Test that float verifier regex correctly identifies float values."""
+        test_list = [
+            '0.123', '+0.123', '-0.123', '.123', '+.123', '-.123',
+            '0000003.1']
+        for test in test_list:
+            self.assertEqual(
+                re.match(vmconf.FLOAT_VERIFIER_REGEX, test).groups()[0], test)
+
+        test_list = [
+            '3e10', '3e-10', '3e+10', '+3e10', '-3e10', '+3e+10', '+3e-10',
+            '-3e-10', '-3e+10', '0.3e10', '-0.3e10', '+0.3e10', '-0.3e-10',
+            '-0.3e+10', '+0.3e+10', '+0.3e-10', '.3e+10', '-.3e10']
+        for test in test_list:
+            self.assertEqual(
+                re.match(vmconf.FLOAT_VERIFIER_REGEX, test).groups()[1], test)
+
+        test_list = ['123', '0000', '123.']
+        for test in test_list:
+            self.assertIsNone(re.match(vmconf.FLOAT_VERIFIER_REGEX, test))
 
     def test_convert_float_numbers_to_string_in_classifier_data(self):
         """Make sure that all values are converted correctly."""
