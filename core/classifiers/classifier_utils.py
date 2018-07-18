@@ -87,15 +87,25 @@ def unicode_validator_for_classifier_data(classifier_data):
 def convert_float_numbers_to_string_in_classifier_data(classifier_data):
     """Converts all floating point numbers in classifier data to string.
 
+    The following function iterates through entire classifier data and converts
+    all float values to corresponding string values. At the same time, it also
+    verifies that none of the existing string values are convertible to float
+    values with the help of regex.
+
     Args:
-        classifier_data: dict|list. The original classifier data which needs
-            conversion of floats to strings.
+        classifier_data: dict|list|string|int|float. The original classifier
+            data which needs conversion of floats to strings.
+
+    Raises:
+        Exception. If any of the string values are convertible to float then
+            an exception is raised to report the error. The classifier data
+            must not include any string values which can be casted to float.
 
     Returns:
-        dict|list. Modified classifier data in which float values are converted
-            into strings and each dict/subdict is augmented with a special key
-            'float_values' which contains list of keys whose values have
-            undergone the transformation.
+        dict|list|string|int|float. Modified classifier data in which float
+            values are converted into strings and each dict/subdict is augmented
+            with a special key 'float_values' which contains list of keys whose
+            values have undergone the transformation.
     """
     if isinstance(classifier_data, dict):
         for k in classifier_data:
