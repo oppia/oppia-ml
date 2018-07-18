@@ -146,7 +146,6 @@ class ClassifierUtilsTest(test_utils.GenericTestBase):
 
         expected_dict = {
             'x': ['123', 'abc', '0.123'],
-            'float_values': ['x']
         }
 
         output_dict = (
@@ -206,21 +205,16 @@ class ClassifierUtilsTest(test_utils.GenericTestBase):
                         'adca': 'abcd',
                         'adcb': '0.1234',
                         'adcc': ['ade', 'afd'],
-                        'float_values': ['adcb']
                     }],
-                    'float_values': ['adc']
                 },
                 'ae': [['123', '0.123'], ['abc']],
-                'float_values': ['ae']
             },
             'b': {
                 'bd': ['-2.48521656693', '-2.48521656693', '-2.48521656693'],
                 'bg': ['abc', 'def', 'ghi'],
                 'bh': ['abc', '123'],
-                'float_values': ['bd']
             },
             'c': '1.123432',
-            'float_values': ['c']
         }
 
         output_dict = (

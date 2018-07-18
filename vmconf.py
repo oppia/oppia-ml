@@ -82,9 +82,3 @@ DEFAULT_WAITING_METHOD = FIXED_TIME_WAITING
 
 # Prefix for data sent from Oppia to the Oppia-ml via JSON.
 XSSI_PREFIX = ')]}\'\n'
-
-# Each dict/subdict in classifier data should contain following key which
-# stores a list of keys whose values should undergo transformation on Oppia.
-# The value of following constant must be same with corresponding constant
-# on Oppia stored at feconf.py file.
-FLOAT_INDICATOR_KEY = 'float_values'

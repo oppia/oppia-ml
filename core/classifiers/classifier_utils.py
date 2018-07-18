@@ -20,8 +20,6 @@ import re
 
 import scipy
 
-import vmconf
-
 def extract_svm_parameters(clf):
     """Extract parameters from a trained SVC classifier.
 
@@ -99,74 +97,33 @@ def convert_float_numbers_to_string_in_classifier_data(classifier_data):
             'float_values' which contains list of keys whose values have
             undergone the transformation.
     """
-    # pylint: disable=too-many-branches
     if isinstance(classifier_data, dict):
-        if vmconf.FLOAT_INDICATOR_KEY in classifier_data:
-            raise Exception(
-                'Classifier data already contains a %s key' %
-                vmconf.FLOAT_INDICATOR_KEY)
-        float_fields = []
         for k in classifier_data:
-            if isinstance(classifier_data[k], basestring):
+            if isinstance(classifier_data[k], basestring) and re.match(
+                    r'^([-+]?\d+\.\d+)$', classifier_data[k]):
                 # A float value must not be stored as a string in
                 # classifier data.
-                if re.match(r'^([-+]?\d+\.\d+)$', classifier_data[k]):
-                    raise Exception(
-                        'Error: Found a float value %s stored as string. Float '
-                        'values should not be stored as strings.' % (
-                            classifier_data[k]))
-            elif isinstance(classifier_data[k], int):
-                classifier_data[k] = classifier_data[k]
-            elif isinstance(classifier_data[k], dict):
+                raise Exception(
+                    'Error: Found a float value %s stored as string. Float '
+                    'values should not be stored as strings.' % (
+                        classifier_data[k]))
+            if isinstance(classifier_data[k], (dict, list)):
                 classifier_data[k] = (
                     convert_float_numbers_to_string_in_classifier_data(
                         classifier_data[k]))
-            elif isinstance(classifier_data[k], list):
-                # Recursive call to list returns two values. One is the new
-                # updated list and other is a boolean stating presence of
-                # a float value in list.
-                new_list, is_there_any_float = (
-                    convert_float_numbers_to_string_in_classifier_data(
-                        classifier_data[k]))
-                if is_there_any_float:
-                    float_fields.append(k)
-                classifier_data[k] = new_list
-            elif isinstance(classifier_data[k], float):
+            if isinstance(classifier_data[k], float):
                 classifier_data[k] = str(classifier_data[k])
-                float_fields.append(k)
-            else:
-                raise Exception(
-                    'Expected all classifier data dict values to be dicts, '
-                    'lists, floats, integers or strings but received %s.' % (
-                        type(classifier_data[k])))
-        classifier_data[vmconf.FLOAT_INDICATOR_KEY] = float_fields
         return classifier_data
     elif isinstance(classifier_data, list):
         new_list = []
-        is_there_any_float = False
         for item in classifier_data:
-            if isinstance(item, list):
-                # Recursive call to list returns two values. One is the new
-                # updated list and other is a boolean stating presence of
-                # a float value in list.
-                ret_list, ret_bool = (
+            if isinstance(item, (list, dict)):
+                new_list.append(
                     convert_float_numbers_to_string_in_classifier_data(
                         item))
-                # Either float value is already discovered or it is present in
-                # the nested list.
-                is_there_any_float = is_there_any_float or ret_bool
-                new_list.append(ret_list)
-            elif isinstance(item, float):
+            if isinstance(item, float):
                 new_list.append(str(item))
-                is_there_any_float = True
-            elif isinstance(item, dict):
-                new_list.append(
-                    convert_float_numbers_to_string_in_classifier_data(item))
-                # A nested dict may contain a float value. If it doesn't
-                # then its FLOAT_INDICATOR_KEY will have an empty list
-                # and it will not be modified by decoder.
-                is_there_any_float = True
-            elif isinstance(item, basestring):
+            if isinstance(item, basestring):
                 # A float value must not be stored as a string in
                 # classifier data.
                 if re.match(r'^([-+]?\d+\.\d+)$', item):
@@ -174,13 +131,7 @@ def convert_float_numbers_to_string_in_classifier_data(classifier_data):
                         'Error: Found a float value %s stored as string. Float '
                         'values should not be stored as strings.' % (item))
                 new_list.append(item)
-            elif isinstance(item, int):
-                new_list.append(item)
-            else:
-                raise Exception(
-                    'Expected list values to be either strings, floats, '
-                    'lists, integers or dicts but received %s.' % (type(item)))
-        return new_list, is_there_any_float
+        return new_list
     else:
         raise Exception(
             'Expected all top-level classifier data objects to be lists or '
