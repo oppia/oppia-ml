@@ -105,7 +105,7 @@ def convert_float_numbers_to_string_in_classifier_data(classifier_data):
             an exception is raised to report the error. The classifier data
             must not include any string values which can be casted to float.
         Exception. If classifier data contains an object whose type is other
-            than integer, string, dict, floats or list.
+            than integer, string, dict, float or list.
 
     Returns:
         dict|list|string|int|float. Modified classifier data in which float
