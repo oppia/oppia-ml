@@ -105,9 +105,7 @@ def convert_float_numbers_to_string_in_classifier_data(classifier_data):
 
     Returns:
         dict|list|string|int|float. Modified classifier data in which float
-            values are converted into strings and each dict/subdict is augmented
-            with a special key 'float_values' which contains list of keys whose
-            values have undergone the transformation.
+            values are converted into strings.
     """
     if isinstance(classifier_data, dict):
         for k in classifier_data:
