@@ -119,11 +119,11 @@ def convert_float_numbers_to_string_in_classifier_data(classifier_data):
                     classifier_data[k]))
         return classifier_data_with_stringified_floats
     elif isinstance(classifier_data, list):
-        new_list = []
+        classifier_data_with_stringified_floats = []
         for item in classifier_data:
-            new_list.append(
+            classifier_data_with_stringified_floats.append(
                 convert_float_numbers_to_string_in_classifier_data(item))
-        return new_list
+        return classifier_data_with_stringified_floats
     elif isinstance(classifier_data, float):
         return str(classifier_data)
     elif isinstance(classifier_data, basestring):
