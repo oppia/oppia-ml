@@ -82,3 +82,12 @@ DEFAULT_WAITING_METHOD = FIXED_TIME_WAITING
 
 # Prefix for data sent from Oppia to the Oppia-ml via JSON.
 XSSI_PREFIX = ')]}\'\n'
+
+# The regular expression used to identify whether a string contains float value.
+# The regex must match with regex that is stored in feconf.py file of Oppia.
+# If this regex needs to be modified then first of all shutdown Oppia-ml VM.
+# Then update the regex constant in here and Oppia both.
+# Run any migration job that is required to migrate existing trained models
+# before starting Oppia-ml again.
+FLOAT_VERIFIER_REGEX = (
+    '^([-+]?\\d*\\.\\d+)$|^([-+]?(\\d*\\.?\\d+|\\d+\\.?\\d*)e[-+]?\\d*)$')

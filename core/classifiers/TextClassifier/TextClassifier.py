@@ -136,8 +136,8 @@ class TextClassifier(base.BaseClassifier):
         allowed_svm_kernel_params_keys = [u'kernel', u'gamma', u'coef0',
                                           u'degree']
         allowed_svm_keys = [u'n_support', u'dual_coef', u'support_vectors',
-                            u'intercept', u'classes', u'probA', u'probB',
-                            u'kernel_params']
+                            u'intercept', u'classes', u'kernel_params',
+                            u'probA', u'probB']
 
         for key in allowed_top_level_keys:
             if key not in classifier_data:

@@ -16,8 +16,11 @@
 
 """Common utility functions required by classifier."""
 
+import re
+
 import scipy
 
+import vmconf
 
 def extract_svm_parameters(clf):
     """Extract parameters from a trained SVC classifier.
@@ -60,15 +63,81 @@ def extract_svm_parameters(clf):
     }
 
 
-def unicode_validator_for_classifier_data(var):
-    """Validates that incoming object contains unicode literal strings."""
-    if isinstance(var, dict):
-        for k in var.keys():
+def unicode_validator_for_classifier_data(classifier_data):
+    """Validates that incoming object contains unicode literal strings.
+
+    Args:
+        classifier_data: *. The trained classifier model data.
+
+    Raises:
+        Exception. If any of the strings in classifier data is not a unicode
+            string.
+    """
+    if isinstance(classifier_data, dict):
+        for k in classifier_data:
             if isinstance(k, str):
                 raise Exception('Expected %s to be unicode but found str.' % k)
-            unicode_validator_for_classifier_data(var[k])
-    if isinstance(var, (list, set, tuple)):
-        for item in var:
+            unicode_validator_for_classifier_data(classifier_data[k])
+    elif isinstance(classifier_data, list):
+        for item in classifier_data:
             unicode_validator_for_classifier_data(item)
-    if isinstance(var, str):
-        raise Exception('Expected \'%s\' to be unicode but found str.' % var)
+    elif isinstance(classifier_data, str):
+        raise Exception(
+            'Expected \'%s\' to be unicode but found str.' % classifier_data)
+    else:
+        return
+
+
+def convert_float_numbers_to_string_in_classifier_data(classifier_data):
+    """Converts all floating point numbers in classifier data to string.
+
+    The following function iterates through entire classifier data and converts
+    all float values to corresponding string values. At the same time, it also
+    verifies that none of the existing string values are convertible to float
+    values with the help of regex.
+
+    Args:
+        classifier_data: dict|list|string|int|float. The original classifier
+            data which needs conversion of floats to strings.
+
+    Raises:
+        Exception. If any of the string values are convertible to float then
+            an exception is raised to report the error. The classifier data
+            must not include any string values which can be casted to float.
+        Exception. If classifier data contains an object whose type is other
+            than integer, string, dict, float or list.
+
+    Returns:
+        dict|list|string|int|float. Modified classifier data in which float
+            values are converted into strings.
+    """
+    if isinstance(classifier_data, dict):
+        classifier_data_with_stringified_floats = {}
+        for k in classifier_data:
+            classifier_data_with_stringified_floats[k] = (
+                convert_float_numbers_to_string_in_classifier_data(
+                    classifier_data[k]))
+        return classifier_data_with_stringified_floats
+    elif isinstance(classifier_data, list):
+        classifier_data_with_stringified_floats = []
+        for item in classifier_data:
+            classifier_data_with_stringified_floats.append(
+                convert_float_numbers_to_string_in_classifier_data(item))
+        return classifier_data_with_stringified_floats
+    elif isinstance(classifier_data, float):
+        return str(classifier_data)
+    elif isinstance(classifier_data, basestring):
+        if re.match(vmconf.FLOAT_VERIFIER_REGEX, classifier_data):
+            # A float value must not be stored as a string in
+            # classifier data.
+            raise Exception(
+                'Error: Found a float value %s stored as string. Float '
+                'values should not be stored as strings.' % (
+                    classifier_data))
+        return classifier_data
+    elif isinstance(classifier_data, int):
+        return classifier_data
+    else:
+        raise Exception(
+            'Expected all classifier data objects to be lists, dicts, floats, '
+            'strings, integers but received %s.' % (type(classifier_data)))

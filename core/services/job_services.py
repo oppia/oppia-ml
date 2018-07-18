@@ -17,6 +17,7 @@
 """This module contains functions used for polling, training and saving jobs."""
 
 from core.classifiers import algorithm_registry
+from core.classifiers import classifier_utils
 from core.services import remote_access_services
 
 # pylint: disable=too-many-branches
@@ -111,9 +112,18 @@ def store_job_result(job_id, classifier_data):
     Returns:
         int. Status code of response.
     """
+    # The classifier data to be sent in the payload should have all
+    # floating point values stored as strings. This is because floating point
+    # numbers are represented differently on GAE(Oppia) and GCE(Oppia-ml).
+    # Therefore, converting all floating point numbers to string keeps
+    # signature consistent on both Oppia and Oppia-ml.
+    # For more info visit: https://stackoverflow.com/q/40173295
+    classifier_data_with_stringified_floats = (
+        classifier_utils.convert_float_numbers_to_string_in_classifier_data(
+            classifier_data))
     job_result_dict = {
         'job_id': job_id,
-        'classifier_data': classifier_data
+        'classifier_data': classifier_data_with_stringified_floats
     }
 
     status = remote_access_services.store_trained_classifier_model(
