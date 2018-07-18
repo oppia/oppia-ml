@@ -16,6 +16,8 @@
 
 """Common utility functions required by classifier."""
 
+import re
+
 import scipy
 
 import vmconf
@@ -84,63 +86,6 @@ def unicode_validator_for_classifier_data(classifier_data):
             'Expected \'%s\' to be unicode but found str.' % classifier_data)
 
 
-def make_sure_that_list_has_uniform_structure(data):
-    """Makes sure that list and its sublist/dicts/items have same uniform
-    structure across entire list.
-
-    Args:
-        data: list. A list of items which needs verification of its structure.
-
-    Returns:
-        type. The type of the leaf item of the list.
-
-    Raises:
-        Exception. If list is found to have non-uniform substructure then an
-            exception to report it is raised.
-    """
-    # A leaf item is an item which is not a list. It must be one of the
-    # following type of item.
-    leaf_node_item_types = [int, float, dict, basestring]
-    current_items = []
-    item_type = None
-    current_items.append(data)
-    while current_items:
-        new_items = []
-        for item in current_items:
-            if isinstance(item, (basestring, int, float, dict)):
-                new_items.append(item)
-            elif isinstance(item, (list)):
-                for subitem in item:
-                    new_items.append(subitem)
-            else:
-                raise Exception(
-                    'Expected all the values in list to be either strings, '
-                    'floats, integers, lists or dicts but '
-                    'received %s.' % type(item))
-        current_items = new_items
-        if not current_items:
-            break
-        item = current_items[0]
-        item_type = type(item)
-        if not all(isinstance(subitem, item_type) for subitem in current_items):
-            raise Exception(
-                'Expected all the values in list to have same type.')
-        if any(isinstance(item, t) for t in leaf_node_item_types):
-            break
-
-    if item_type == dict:
-        keys_value_type_dict = {
-            k: type(v) for k, v in current_items[0].iteritems()
-        }
-        for item in current_items:
-            item_value_type_dict = {k: type(v) for k, v in item.iteritems()}
-            if keys_value_type_dict != item_value_type_dict:
-                raise Exception(
-                    'Expected all the subdicts to have same set of keys '
-                    'and corresponding value types.')
-    return item_type
-
-
 def convert_float_numbers_to_string_in_classifier_data(classifier_data):
     """Converts all floating point numbers in classifier data to string.
 
@@ -162,19 +107,28 @@ def convert_float_numbers_to_string_in_classifier_data(classifier_data):
                 vmconf.FLOAT_INDICATOR_KEY)
         float_fields = []
         for k in classifier_data:
-            if isinstance(classifier_data[k], (basestring, int)):
+            if isinstance(classifier_data[k], basestring):
+                # A float value must not be stored as a string in
+                # classifier data.
+                if re.match(r'^([-+]?\d+\.\d+)$', classifier_data[k]):
+                    raise Exception(
+                        'Error: Found a float value %s stored as string. Float '
+                        'values should not be stored as strings.' % (
+                            classifier_data[k]))
+            elif isinstance(classifier_data[k], int):
                 classifier_data[k] = classifier_data[k]
             elif isinstance(classifier_data[k], dict):
                 classifier_data[k] = (
                     convert_float_numbers_to_string_in_classifier_data(
                         classifier_data[k]))
             elif isinstance(classifier_data[k], list):
-                leaf_node_item_type = make_sure_that_list_has_uniform_structure(
-                    classifier_data[k])
-                new_list = (
+                # Recursive call to list returns two values. One is the new
+                # updated list and other is a boolean stating presence of
+                # a float value in list.
+                new_list, is_there_any_float = (
                     convert_float_numbers_to_string_in_classifier_data(
                         classifier_data[k]))
-                if leaf_node_item_type in (float, dict):
+                if is_there_any_float:
                     float_fields.append(k)
                 classifier_data[k] = new_list
             elif isinstance(classifier_data[k], float):
@@ -189,23 +143,44 @@ def convert_float_numbers_to_string_in_classifier_data(classifier_data):
         return classifier_data
     elif isinstance(classifier_data, list):
         new_list = []
+        is_there_any_float = False
         for item in classifier_data:
             if isinstance(item, list):
-                ret_list = convert_float_numbers_to_string_in_classifier_data(
-                    item)
+                # Recursive call to list returns two values. One is the new
+                # updated list and other is a boolean stating presence of
+                # a float value in list.
+                ret_list, ret_bool = (
+                    convert_float_numbers_to_string_in_classifier_data(
+                        item))
+                # Either float value is already discovered or it is present in
+                # the nested list.
+                is_there_any_float = is_there_any_float or ret_bool
                 new_list.append(ret_list)
             elif isinstance(item, float):
                 new_list.append(str(item))
+                is_there_any_float = True
             elif isinstance(item, dict):
                 new_list.append(
                     convert_float_numbers_to_string_in_classifier_data(item))
-            elif isinstance(item, (basestring, int)):
+                # A nested dict may contain a float value. If it doesn't
+                # then its FLOAT_INDICATOR_KEY will have an empty list
+                # and it will not be modified by decoder.
+                is_there_any_float = True
+            elif isinstance(item, basestring):
+                # A float value must not be stored as a string in
+                # classifier data.
+                if re.match(r'^([-+]?\d+\.\d+)$', item):
+                    raise Exception(
+                        'Error: Found a float value %s stored as string. Float '
+                        'values should not be stored as strings.' % (item))
+                new_list.append(item)
+            elif isinstance(item, int):
                 new_list.append(item)
             else:
                 raise Exception(
                     'Expected list values to be either strings, floats, '
                     'lists, integers or dicts but received %s.' % (type(item)))
-        return new_list
+        return new_list, is_there_any_float
     else:
         raise Exception(
             'Expected all top-level classifier data objects to be lists or '
