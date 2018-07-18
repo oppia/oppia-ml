@@ -20,6 +20,8 @@ import re
 
 import scipy
 
+import vmconf
+
 def extract_svm_parameters(clf):
     """Extract parameters from a trained SVC classifier.
 
@@ -72,16 +74,18 @@ def unicode_validator_for_classifier_data(classifier_data):
             string.
     """
     if isinstance(classifier_data, dict):
-        for k in classifier_data.keys():
+        for k in classifier_data:
             if isinstance(k, str):
                 raise Exception('Expected %s to be unicode but found str.' % k)
             unicode_validator_for_classifier_data(classifier_data[k])
-    if isinstance(classifier_data, list):
+    elif isinstance(classifier_data, list):
         for item in classifier_data:
             unicode_validator_for_classifier_data(item)
-    if isinstance(classifier_data, str):
+    elif isinstance(classifier_data, str):
         raise Exception(
             'Expected \'%s\' to be unicode but found str.' % classifier_data)
+    else:
+        return
 
 
 def convert_float_numbers_to_string_in_classifier_data(classifier_data):
@@ -101,7 +105,7 @@ def convert_float_numbers_to_string_in_classifier_data(classifier_data):
             an exception is raised to report the error. The classifier data
             must not include any string values which can be casted to float.
         Exception. If classifier data contains an object whose type is other
-            than integer, string, dict or list.
+            than integer, string, dict, floats or list.
 
     Returns:
         dict|list|string|int|float. Modified classifier data in which float
@@ -122,7 +126,7 @@ def convert_float_numbers_to_string_in_classifier_data(classifier_data):
     elif isinstance(classifier_data, float):
         return str(classifier_data)
     elif isinstance(classifier_data, basestring):
-        if re.match(r'^([-+]?\d+\.\d+)$', classifier_data):
+        if re.match(vmconf.FLOAT_VERIFIER_REGEX, classifier_data):
             # A float value must not be stored as a string in
             # classifier data.
             raise Exception(
