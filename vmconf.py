@@ -71,6 +71,10 @@ CLASSIFIERS_DIR = os.path.join('core', 'classifiers')
 # Path of directory which stores datasets for testing.
 DATASETS_DIR = os.path.join('core', 'tests', 'datasets')
 
+# Path of directory which stores pretrained classifier models for each
+# classifier.
+PRETRAINED_MODELS_PATH = os.path.join('core', 'tests', 'models')
+
 # Wait for fixed amount of time when there are no pending job requests.
 FIXED_TIME_WAITING = 'fixed_time_wait'
 

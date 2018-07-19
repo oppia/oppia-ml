@@ -123,7 +123,8 @@ def store_job_result(job_id, classifier_data):
             classifier_data))
     job_result_dict = {
         'job_id': job_id,
-        'classifier_data': classifier_data_with_stringified_floats
+        'classifier_data_with_stringified_floats': (
+            classifier_data_with_stringified_floats)
     }
 
     status = remote_access_services.store_trained_classifier_model(

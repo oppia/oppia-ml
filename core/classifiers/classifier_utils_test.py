@@ -16,8 +16,11 @@
 
 """Tests for utility functions defined in classifier_utils."""
 
+import json
+import os
 import re
 
+from core.classifiers import algorithm_registry
 from core.classifiers import classifier_utils
 from core.tests import test_utils
 import vmconf
@@ -245,3 +248,19 @@ class ClassifierUtilsTest(test_utils.GenericTestBase):
             classifier_utils.convert_float_numbers_to_string_in_classifier_data(
                 test_dict))
         self.assertDictEqual(expected_dict, output_dict)
+
+    def test_that_pretrained_models_for_all_classifier_are_correct(self):
+        """Make sure that trained classifier models generated in the output
+        by each classifier do not raise Exception when passed through
+        convert_float_numbers_to_string_in_classifier_data function."""
+
+        classifier_ids = (
+            algorithm_registry.Registry.get_all_classifier_algorithm_ids())
+        for classifier_id in classifier_ids:
+            file_path = os.path.join(
+                vmconf.PRETRAINED_MODELS_PATH, '%s.json' % classifier_id)
+            with open(file_path, 'r') as f:
+                classifier_data = json.loads(f.read())
+                output_dict = classifier_utils.convert_float_numbers_to_string_in_classifier_data( # pylint: disable=line-too-long
+                    classifier_data)
+                self.assertIsInstance(output_dict, dict)
