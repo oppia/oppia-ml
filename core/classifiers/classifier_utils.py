@@ -88,7 +88,7 @@ def unicode_validator_for_classifier_data(classifier_data):
         return
 
 
-def convert_float_numbers_to_string_in_classifier_data(classifier_data):
+def encode_floats_in_classifier_data(classifier_data):
     """Converts all floating point numbers in classifier data to string.
 
     The following function iterates through entire classifier data and converts
@@ -115,14 +115,14 @@ def convert_float_numbers_to_string_in_classifier_data(classifier_data):
         classifier_data_with_stringified_floats = {}
         for k in classifier_data:
             classifier_data_with_stringified_floats[k] = (
-                convert_float_numbers_to_string_in_classifier_data(
+                encode_floats_in_classifier_data(
                     classifier_data[k]))
         return classifier_data_with_stringified_floats
     elif isinstance(classifier_data, list):
         classifier_data_with_stringified_floats = []
         for item in classifier_data:
             classifier_data_with_stringified_floats.append(
-                convert_float_numbers_to_string_in_classifier_data(item))
+                encode_floats_in_classifier_data(item))
         return classifier_data_with_stringified_floats
     elif isinstance(classifier_data, float):
         return str(classifier_data)
