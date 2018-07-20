@@ -165,7 +165,7 @@ class ClassifierUtilsTest(test_utils.GenericTestBase):
         for test in test_list:
             self.assertIsNone(re.match(vmconf.FLOAT_VERIFIER_REGEX, test))
 
-    def test_convert_float_numbers_to_string_in_classifier_data(self):
+    def test_encode_floats_in_classifier_data(self):
         """Make sure that all values are converted correctly."""
         test_dict = {
             'x': ['123', 'abc', 0.123]
@@ -176,7 +176,7 @@ class ClassifierUtilsTest(test_utils.GenericTestBase):
         }
 
         output_dict = (
-            classifier_utils.convert_float_numbers_to_string_in_classifier_data(
+            classifier_utils.encode_floats_in_classifier_data(
                 test_dict))
 
         self.assertDictEqual(expected_dict, output_dict)
@@ -188,7 +188,7 @@ class ClassifierUtilsTest(test_utils.GenericTestBase):
         with self.assertRaisesRegexp(
             Exception,
             'Float values should not be stored as strings.'):
-            classifier_utils.convert_float_numbers_to_string_in_classifier_data(
+            classifier_utils.encode_floats_in_classifier_data(
                 test_dict)
 
 
@@ -199,7 +199,7 @@ class ClassifierUtilsTest(test_utils.GenericTestBase):
         with self.assertRaisesRegexp(
             Exception,
             'Float values should not be stored as strings.'):
-            classifier_utils.convert_float_numbers_to_string_in_classifier_data(
+            classifier_utils.encode_floats_in_classifier_data(
                 test_dict)
 
         test_dict = {
@@ -245,14 +245,14 @@ class ClassifierUtilsTest(test_utils.GenericTestBase):
         }
 
         output_dict = (
-            classifier_utils.convert_float_numbers_to_string_in_classifier_data(
+            classifier_utils.encode_floats_in_classifier_data(
                 test_dict))
         self.assertDictEqual(expected_dict, output_dict)
 
     def test_that_pretrained_models_for_all_classifier_are_correct(self):
         """Make sure that trained classifier models generated in the output
         by each classifier do not raise Exception when passed through
-        convert_float_numbers_to_string_in_classifier_data function."""
+        encode_floats_in_classifier_data function."""
 
         classifier_ids = (
             algorithm_registry.Registry.get_all_classifier_algorithm_ids())
@@ -261,6 +261,6 @@ class ClassifierUtilsTest(test_utils.GenericTestBase):
                 vmconf.PRETRAINED_MODELS_PATH, '%s.json' % classifier_id)
             with open(file_path, 'r') as f:
                 classifier_data = json.loads(f.read())
-                output_dict = classifier_utils.convert_float_numbers_to_string_in_classifier_data( # pylint: disable=line-too-long
+                output_dict = classifier_utils.encode_floats_in_classifier_data(
                     classifier_data)
                 self.assertIsInstance(output_dict, dict)
