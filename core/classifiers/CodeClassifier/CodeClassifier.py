@@ -543,7 +543,8 @@ class CodeClassifier(base.BaseClassifier):
         """
         fingerprint_data = {
             unicode(index): {
-                u'fingerprint': self.training_data[index]['fingerprint'],
+                u'fingerprint': [
+                    list(f) for f in self.training_data[index]['fingerprint']],
                 u'class': self.training_data[index]['class']
             } for index in self.training_data
         }

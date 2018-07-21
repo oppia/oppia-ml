@@ -118,13 +118,13 @@ def store_job_result(job_id, classifier_data):
     # Therefore, converting all floating point numbers to string keeps
     # signature consistent on both Oppia and Oppia-ml.
     # For more info visit: https://stackoverflow.com/q/40173295
-    classifier_data_with_stringified_floats = (
+    classifier_data_with_floats_stringified = (
         classifier_utils.encode_floats_in_classifier_data(
             classifier_data))
     job_result_dict = {
         'job_id': job_id,
-        'classifier_data_with_stringified_floats': (
-            classifier_data_with_stringified_floats)
+        'classifier_data_with_floats_stringified': (
+            classifier_data_with_floats_stringified)
     }
 
     status = remote_access_services.store_trained_classifier_model(

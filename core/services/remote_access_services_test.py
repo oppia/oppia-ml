@@ -68,7 +68,7 @@ class RemoteAccessServicesTests(test_utils.GenericTestBase):
 
         job_result_dict = {
             'job_id': '123',
-            'classifier_data_with_stringified_floats': {
+            'classifier_data_with_floats_stringified': {
                 'param': 'val'
             }
         }
@@ -84,7 +84,7 @@ class RemoteAccessServicesTests(test_utils.GenericTestBase):
             self.assertDictEqual(
                 classifier_data,
                 request.payload['message'][(
-                    'classifier_data_with_stringified_floats')])
+                    'classifier_data_with_floats_stringified')])
 
         with self.set_job_result_post_callback(post_callback):
             status = remote_access_services.store_trained_classifier_model(
@@ -114,6 +114,6 @@ class RemoteAccessServicesTests(test_utils.GenericTestBase):
         with self.assertRaisesRegexp(
             Exception,
             'job_result_dict must contain '
-            '\'classifier_data_with_stringified_floats\'.'):
+            '\'classifier_data_with_floats_stringified\'.'):
             remote_access_services.store_trained_classifier_model(
                 job_result_dict)
