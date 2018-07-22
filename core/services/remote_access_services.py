@@ -116,7 +116,7 @@ def store_trained_classifier_model(job_result_dict):
         Exception: job_result_dict is not of dict type.
         Exception: job_result_dict does not contain 'job_id' key.
         Exception: job_result_dict does not contain
-            'classifier_data_with_stringified_floats' key.
+            'classifier_data_with_floats_stringified' key.
     """
 
     # Make sure that job_result_dict is in proper foramt.
@@ -126,10 +126,10 @@ def store_trained_classifier_model(job_result_dict):
     if 'job_id' not in job_result_dict:
         raise Exception('job_result_dict must contain \'job_id\'.')
 
-    if 'classifier_data_with_stringified_floats' not in job_result_dict:
+    if 'classifier_data_with_floats_stringified' not in job_result_dict:
         raise Exception(
             'job_result_dict must contain '
-            '\'classifier_data_with_stringified_floats\'.')
+            '\'classifier_data_with_floats_stringified\'.')
 
     payload = {
         'message': job_result_dict,

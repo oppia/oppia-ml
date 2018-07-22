@@ -503,8 +503,12 @@ class CodeClassifier(base.BaseClassifier):
         #        'tokens': list(str). Token list of program.
         #        'k_gram_hashes': list(int). K-gram hash values of
         #            program.
-        #        'fingerprint': list(int). Extracted fingerprint of
-        #            program.
+        #        'fingerprint': list(tuple(int, int)). Extracted fingerprint of
+        #            program. Each fingerprint consist of fingerprint components
+        #            which are stored as tuples. The first component
+        #            represents the actual extracted component and second
+        #            represents the position in source document from where the
+        #            first component is extracted.
         #        'nearest_neighbours': list(int). The indices of the
         #            programs that are most similar to this one
         #        } for each program in training_data.
@@ -542,10 +546,11 @@ class CodeClassifier(base.BaseClassifier):
             'classifier_data'. This data is used for prediction.
         """
         fingerprint_data = {
-            unicode(index): {
-                u'fingerprint': self.training_data[index]['fingerprint'],
-                u'class': self.training_data[index]['class']
-            } for index in self.training_data
+            unicode(idx): {
+                u'fingerprint': [
+                    list(f) for f in self.training_data[idx]['fingerprint']],
+                u'class': self.training_data[idx]['class']
+            } for idx in self.training_data
         }
 
         classifier_data = {
