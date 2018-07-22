@@ -503,8 +503,12 @@ class CodeClassifier(base.BaseClassifier):
         #        'tokens': list(str). Token list of program.
         #        'k_gram_hashes': list(int). K-gram hash values of
         #            program.
-        #        'fingerprint': list(int). Extracted fingerprint of
-        #            program.
+        #        'fingerprint': list(tuple(int, int)). Extracted fingerprint of
+        #            program. Each fingerprint consist of fingerprint components
+        #            which are stored as tuples. The first component
+        #            represents the actual extracted component and second
+        #            represents the position in source document from where the
+        #            first component is extracted.
         #        'nearest_neighbours': list(int). The indices of the
         #            programs that are most similar to this one
         #        } for each program in training_data.
@@ -541,16 +545,6 @@ class CodeClassifier(base.BaseClassifier):
             dict. A dictionary representation of classifier referred as
             'classifier_data'. This data is used for prediction.
         """
-        # The fingerprint consist of fingerprint components where each
-        # component is a tuple of length 2. The first element of the tuple is
-        # the extracted component (numeric value) and the second is the
-        # position in source document from where the first component is
-        # extracted. Both combined togather and combined with the rest of
-        # the components extracted (extraction according to winnowing algorithm)
-        # similarly from source document make up the fingerprint of document.
-        # The components are stored as tuples because extraction algorithm
-        # requries a hashable entity to make sure that each component is
-        # extracted at most once from source document.
         fingerprint_data = {
             unicode(idx): {
                 u'fingerprint': [
