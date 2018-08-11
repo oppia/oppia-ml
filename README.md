@@ -19,7 +19,10 @@ Oppia-ml is written in Python and uses various machine learning libraries for cr
  
 ### Deploying Oppia-ml on VM instance
 
-1. Clone this repo in oppia-ml folder of your VM instance.
+1. Clone this repo in oppia-ml folder of your VM instance:
+  ```
+    git clone https://github.com/oppia/oppia-ml.git
+  ```
 
 2. Install Supervisor on VM instance. Generally it can be installed by running simple pip command. You need superuser privileges to install it on VM. if this command does not work then follow instructions on official installation [page](http://supervisord.org/installing.html). 
   ```
