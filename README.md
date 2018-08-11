@@ -35,7 +35,7 @@ Oppia-ml is written in Python and uses various machine learning libraries for cr
   ```
 
 4. Add shared secret key in VM and in Oppia for secure communication.
-  - Shared key on VM is added using GCE metadata (Compute Engine > Metadata). Add two key - value pairs in metadata, one for `shared_secret_key` and other is `vm_id`. VM will automatically get the ID and secret from metadata.
+  - Shared key on VM is added using GCE metadata. Select the VM instance in the GCP panel, then add two key - value pairs in metadata, one for `shared_secret_key` and other is `vm_id`. VM will automatically get the ID and secret from metadata.
   - Shared key on Oppia can be added by going to `/admin` page of your Oppia host. On this page go to the 'Config' tab where there will be one section for VMID and shared secret keys in which one can add as many `vm_id` and `shared_secret_key` as needed.
 
 ## Support
