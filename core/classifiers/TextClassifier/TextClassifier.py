@@ -80,7 +80,7 @@ class TextClassifier(base.BaseClassifier):
                 x.append(answer)
                 y.append(answer_group['answer_group_index'])
 
-        count_vector = CountVectorizer()
+        count_vector = CountVectorizer(lowercase=True)
         # Learn a vocabulary dictionary of all tokens in the raw documents.
         count_vector.fit(x)
         # Transform document to document-term matrix
