@@ -16,7 +16,7 @@
 
 "Functions and class definitions related to protobuf files used in Oppia-ml"
 
-from core.platform.protobuf.protofiles import training_job_data_pb2
+from core.platform.protobuf.protofiles import training_job_data_pb2 # pylint: disable=no-name-in-module
 
 class TrainingJobResultMessage(object):
     """TrainingJobDataMessage used to transfer trained classifier and relevant

@@ -17,7 +17,7 @@
 """Tests for gce metadata services"""
 
 from core.platform.protobuf import gce_protobuf_services
-from core.platform.protobuf.protofiles import text_classifier_pb2
+from core.platform.protobuf.protofiles import text_classifier_pb2 # pylint: disable=no-name-in-module
 from core.tests import test_utils
 import vmconf
 
