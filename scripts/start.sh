@@ -38,5 +38,10 @@ fi
 # Install third party dependencies.
 bash scripts/install_third_party.sh
 
+# Compile proto files
+echo Compiling protobuf files
+$PROTOTOOL generate core/platform/protobuf/protofiles
+echo protobuf files compilation done
+
 echo Starting main worker process
 $PYTHON_CMD main.py

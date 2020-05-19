@@ -64,6 +64,16 @@ while read -r line; do
   fi
 done < "$MANIFEST_FILE"
 
+echo Checking if prototool is installed in $PROTOTOOL_PATH
+
+if [ ! -d "$PROTOTOOL_PATH" ]; then
+  echo Installing prototool
+  mkdir "$PROTOTOOL_PATH"
+  curl -sSL "https://github.com/uber/prototool/releases/download/v1.9.0/prototool-$(uname -s)-$(uname -m)" \
+    -o "$PROTOTOOL_PATH/prototool"
+  chmod +x "$PROTOTOOL_PATH/prototool"
+fi
+
 # install pre-push script
 echo Installing pre-push hook for git
 $PYTHON_CMD $OPPIA_ML_DIR/scripts/pre_push_hook.py --install

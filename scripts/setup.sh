@@ -85,4 +85,8 @@ export PYTHON_CMD
 # Set PYTHONPATH.
 export PYTHONPATH=$OPPIA_ML_DIR:$PYTHONPATH
 
+# Set prototool path.
+export PROTOTOOL_PATH=$THIRD_PARTY_DIR/prototool-1.9.0
+export PROTOTOOL=$PROTOTOOL_PATH/prototool
+
 export SETUP_DONE=true

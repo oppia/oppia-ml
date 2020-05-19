@@ -1,0 +1,8 @@
+protoc:
+  version: 3.8.0
+lint:
+  group: google
+generate:
+  plugins:
+    - name: python
+      output: ./
