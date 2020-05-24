@@ -538,6 +538,20 @@ class CodeClassifier(base.BaseClassifier):
         # text into a feature a vector.
         self.count_vector = None
 
+    @property
+    def name_in_job_result_proto(self):
+        # This is just a temporary fix to get lint tests passing.
+        # CodeClassifier will be re-invented before enabling it, at some point
+        # in future.
+        return 'code_classifier'
+
+    @property
+    def type_in_job_result_proto(self):
+        # This is just a temporary fix to get lint tests passing.
+        # CodeClassifier will be re-invented before enabling it, at some point
+        # in future.
+        return self.__class__.__name__
+
     def to_dict(self):
         """Returns a dict representing this classifier.
 
