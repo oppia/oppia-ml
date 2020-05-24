@@ -3,4 +3,4 @@
 *.swp
 *.swo
 third_party/*
-core/platform/protobuf/protofiles/*.py
+core/domain/protofiles/*.py

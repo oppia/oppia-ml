@@ -18,7 +18,7 @@
 
 from core.classifiers import algorithm_registry
 from core.classifiers import classifier_utils
-from core.services import remote_access_services
+from core.domain import remote_access_services
 
 # pylint: disable=too-many-branches
 def _validate_job_data(job_data):

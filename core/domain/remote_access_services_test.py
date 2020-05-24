@@ -16,7 +16,7 @@
 
 """Tests for remote access services."""
 
-from core.services import remote_access_services
+from core.domain import remote_access_services
 from core.tests import test_utils
 import vmconf
 

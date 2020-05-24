@@ -16,7 +16,7 @@
 
 syntax = "proto3";
 
-import "core/platform/protobuf/protofiles/text_classifier.proto";
+import "core/domain/protofiles/text_classifier.proto";
 
 message TrainingJobData {
   message JobResult {

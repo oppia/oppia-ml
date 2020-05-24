@@ -35,6 +35,10 @@ class TextClassifier(base.BaseClassifier):
     Support Vector Classifier (SVC) to obtain the best model using the linear
     kernel.
     """
+
+    NAME_IN_JOB_RESULT_PROTO = 'text_classifier'
+    TYPE_IN_JOB_RESULT_PROTO = 'TextClassifier'
+
     def __init__(self):
         super(TextClassifier, self).__init__()
         # sklearn.svm.SVC classifier object.
@@ -53,6 +57,14 @@ class TextClassifier(base.BaseClassifier):
 
         # Time taken to train the classifier
         self.exec_time = None
+
+    @property
+    def name_in_job_result_proto(self):
+        return 'text_classifier'
+
+    @property
+    def type_in_job_result_proto(self):
+        return self.__class__.__name__
 
     def train(self, training_data):
         """Trains classifier using given training_data.

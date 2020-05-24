@@ -97,7 +97,7 @@ BAD_PATTERNS = {
 
 EXCLUDED_PATHS = (
     'third_party/*', '.git/*', '*.pyc', 'CHANGELOG',
-    'scripts/pre_commit_linter.py')
+    'scripts/pre_commit_linter.py', 'core/domain/protofiles/*.py')
 
 if not os.getcwd().endswith('oppia-ml'):
     print ''
@@ -198,9 +198,6 @@ def _lint_py_files(config_pylint, files_to_lint, result):
         config_pylint: str. Path to the .pylintrc file.
         files_to_lint: list(str). A list of filepaths to lint.
         result: multiprocessing.Queue. A queue to put results of test.
-
-    Returns:
-        None
     """
     start_time = time.time()
     are_there_errors = False
@@ -249,9 +246,6 @@ def _lint_proto_files(files_to_lint, result):
     Args:
         files_to_lint: list(str). A list of filepaths to lint.
         result: multiprocessing.Queue. A queue to put results of test.
-
-    Returns:
-        None
     """
     start_time = time.time()
     are_there_errors = False
