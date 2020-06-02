@@ -64,7 +64,7 @@ class TextClassifier(base.BaseClassifier):
 
     @property
     def type_in_job_result_proto(self):
-        return self.__class__.__name__
+        return '%sFrozenModel' % (self.__class__.__name__)
 
     def train(self, training_data):
         """Trains classifier using given training_data.

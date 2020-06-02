@@ -97,7 +97,7 @@ BAD_PATTERNS = {
 
 EXCLUDED_PATHS = (
     'third_party/*', '.git/*', '*.pyc', 'CHANGELOG',
-    'scripts/pre_commit_linter.py', 'core/domain/protofiles/*.py')
+    'scripts/pre_commit_linter.py', 'core/domain/proto/*.py')
 
 if not os.getcwd().endswith('oppia-ml'):
     print ''

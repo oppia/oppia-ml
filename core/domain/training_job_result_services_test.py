@@ -17,8 +17,8 @@
 """Tests for training job results services."""
 
 from core.classifiers import algorithm_registry
-from core.domain.protofiles import text_classifier_pb2
-from core.domain.protofiles import training_job_data_pb2
+from core.domain.proto import text_classifier_pb2
+from core.domain.proto import training_job_response_payload_pb2
 from core.domain import training_job_result_domain
 from core.domain import training_job_result_services
 from core.tests import test_utils
@@ -31,7 +31,8 @@ class TrainingJobResultServicesTests(test_utils.GenericTestBase):
         of attribute in job result proto which stores classifier data for that
         algorithm.
         """
-        job_result_proto = training_job_data_pb2.TrainingJobData.JobResult()
+        job_result_proto = (
+            training_job_response_payload_pb2.TrainingJobResponsePayload.JobResult()) # pylint: disable=line-too-long
         for classifier in algorithm_registry.Registry.get_all_classifiers():
             self.assertIsNotNone(classifier.name_in_job_result_proto)
             attribute_type_name = type(getattr(
@@ -39,11 +40,12 @@ class TrainingJobResultServicesTests(test_utils.GenericTestBase):
             self.assertEqual(
                 attribute_type_name, classifier.type_in_job_result_proto)
 
-    def test_that_training_job_result_proto_is_correct(self):
+    def test_that_training_job_result_proto_is_generated_with_correct_details(
+            self):
         """Ensure that the JobResult proto is correctly generated from
         TrainingJobResult domain object.
         """
-        classifier_data = text_classifier_pb2.TextClassifier()
+        classifier_data = text_classifier_pb2.TextClassifierFrozenModel()
         classifier_data.model_json = 'dummy model'
         job_id = 'job_id'
         algorithm_id = 'TextClassifier'
@@ -60,5 +62,5 @@ class TrainingJobResultServicesTests(test_utils.GenericTestBase):
         # runtime.
         self.assertEqual(job_result_proto.job_id, job_id) # pylint: disable=no-member
         self.assertEqual(
-            job_result_proto.WhichOneof('classifier_data'),
+            job_result_proto.WhichOneof('classifier_frozen_model'),
             classifier.name_in_job_result_proto)

@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"Functions and class definitions related to protobuf files used in Oppia-ml"
+"""Functions and classdefs related to protobuf files used in Oppia-ml"""
 
 from core.classifiers import algorithm_registry
 
@@ -42,6 +42,9 @@ class TrainingJobResult(object):
             Exception: str. If the classifier data is stored in a field
                 that does not correspond to algorithm_id.
         """
+
+        # Ensure that the classifier_data is corresponds to the classifier
+        # having given algorithm_id.
         classifier = algorithm_registry.Registry.get_classifier_by_algorithm_id(
             self.algorithm_id)
         if (

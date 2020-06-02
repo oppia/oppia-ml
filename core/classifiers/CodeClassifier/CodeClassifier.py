@@ -540,17 +540,19 @@ class CodeClassifier(base.BaseClassifier):
 
     @property
     def name_in_job_result_proto(self):
-        # This is just a temporary fix to get lint tests passing.
-        # CodeClassifier will be re-invented before enabling it, at some point
-        # in future.
+        # This property needs to be defined as it is defined as
+        # abstract property in BaseClassifier. However, since code classifier
+        # is currently disabled, the proto message definitions for code
+        # classifier will not be added until it is re-implemented and enabled.
         return 'code_classifier'
 
     @property
     def type_in_job_result_proto(self):
-        # This is just a temporary fix to get lint tests passing.
-        # CodeClassifier will be re-invented before enabling it, at some point
-        # in future.
-        return self.__class__.__name__
+        # This property needs to be defined as it is defined as
+        # abstract property in BaseClassifier. However, since code classifier
+        # is currently disabled, the proto message definitions for code
+        # classifier will not be added until it is re-implemented and enabled.
+        return '%sFrozenModel' % self.__class__.__name__
 
     def to_dict(self):
         """Returns a dict representing this classifier.

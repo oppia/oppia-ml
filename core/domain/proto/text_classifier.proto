@@ -16,18 +16,8 @@
 
 syntax = "proto3";
 
-import "core/domain/protofiles/text_classifier.proto";
-
-message TrainingJobData {
-  message JobResult {
-    string job_id = 1;
-    // Each of the classifier algorithms' proto message must be present in
-    // the oneof classifier_data field.
-    oneof classifier_data {
-      TextClassifier text_classifier = 2;
-    }
-  }
-  JobResult job_result = 1;
-  string vm_id = 2;
-  string signature = 3;
+message TextClassifierFrozenModel {
+  // The parameters of a trained text classifier model which are necessary
+  // for inference.
+  string model_json = 1;
 }

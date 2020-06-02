@@ -101,7 +101,7 @@ fi
 
 # Compile proto files
 echo Compiling protobuf files
-$PROTOTOOL generate core/domain/protofiles
+$PROTOTOOL generate core/domain/proto
 echo protobuf files compilation done
 
 export SETUP_DONE=true

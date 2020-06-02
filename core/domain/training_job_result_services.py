@@ -17,7 +17,7 @@
 """Functions for training job result domain object and protobuf message."""
 
 from core.classifiers import algorithm_registry
-from core.domain.protofiles import training_job_data_pb2
+from core.domain.proto import training_job_response_payload_pb2
 
 def get_proto_message_from_training_job_result(job_result):
     """Generate TrainingJobResult protobuf object from the TrainingJobResult
@@ -32,7 +32,8 @@ def get_proto_message_from_training_job_result(job_result):
             TrainingJobResult protobuf message definition.
     """
     job_result.validate()
-    proto_message = training_job_data_pb2.TrainingJobData.JobResult()
+    proto_message = (
+        training_job_response_payload_pb2.TrainingJobResponsePayload.JobResult()) # pylint: disable=line-too-long
     proto_message.job_id = job_result.job_id
     job_result_attribute = (
         algorithm_registry.Registry.get_classifier_by_algorithm_id(
