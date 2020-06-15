@@ -36,9 +36,6 @@ class TextClassifier(base.BaseClassifier):
     kernel.
     """
 
-    NAME_IN_JOB_RESULT_PROTO = 'text_classifier'
-    TYPE_IN_JOB_RESULT_PROTO = 'TextClassifier'
-
     def __init__(self):
         super(TextClassifier, self).__init__()
         # sklearn.svm.SVC classifier object.

@@ -18,7 +18,12 @@ syntax = "proto3";
 
 import "core/domain/proto/text_classifier.proto";
 
+// Training job response payload contains job result of the training job
+// along with other metadata items such as vm_id (to identify which VM executed
+// this job) and signature of the payload for security purpose.
 message TrainingJobResponsePayload {
+  // Job result of the training job. Job result contains the ID of the Job and
+  // trained model (frozen model) of the job.
   message JobResult {
     // Id of the training job whose data is being stored.
     string job_id = 1;

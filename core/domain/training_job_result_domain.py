@@ -17,9 +17,14 @@
 """Functions and classdefs related to protobuf files used in Oppia-ml"""
 
 from core.classifiers import algorithm_registry
+from core.domain.proto import training_job_response_payload_pb2
 
 class TrainingJobResult(object):
-    """TrainingJobResult domain object."""
+    """TrainingJobResult domain object.
+
+    This domain object stores the of training job result along with job_id and
+    algorithm_id. The training job result is the trained classifier data.
+    """
 
     def __init__(self, job_id, algorithm_id, classifier_data):
         """Initializes TrainingJobResult object.
@@ -54,3 +59,23 @@ class TrainingJobResult(object):
                 "Expected classifier data of type %s but found %s type" % (
                     classifier.type_in_job_result_proto,
                     type(self.classifier_data).__name__))
+
+    def to_proto(self):
+        """Generate TrainingJobResult protobuf object from the TrainingJobResult
+        domain object.
+
+        Returns:
+            TrainingJobResult protobuf object. Protobuf object corresponding to
+                TrainingJobResult protobuf message definition.
+        """
+        self.validate()
+        proto_message = (
+            training_job_response_payload_pb2.
+            TrainingJobResponsePayload.JobResult())
+        proto_message.job_id = self.job_id
+        job_result_attribute = (
+            algorithm_registry.Registry.get_classifier_by_algorithm_id(
+                self.algorithm_id).name_in_job_result_proto)
+        getattr(proto_message, job_result_attribute).CopyFrom(
+            self.classifier_data)
+        return proto_message
