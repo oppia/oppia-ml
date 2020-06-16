@@ -44,7 +44,7 @@ class TrainingJobResult(object):
         """Validate that TrainigJobResult object stores correct data.
 
         Raises:
-            Exception: str. If the classifier data is stored in a field
+            Exception: str. The classifier data is stored in a field
                 that does not correspond to algorithm_id.
         """
 
