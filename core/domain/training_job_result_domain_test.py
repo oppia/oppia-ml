@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Tests for gce metadata services"""
+"""Tests for trainging job result domain"""
 
 from core.classifiers import algorithm_registry
 from core.domain import training_job_result_domain
