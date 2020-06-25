@@ -2,7 +2,7 @@
 
 Oppia-ml is a supplementary component which is used with Oppia for training machine learning models on a separate VM instance. Oppia puts job requests for training a classifier in database. Oppia-ml picks this job requests one by one, trains classifier for these requests and stores the result of training back into database. Oppia uses this stored results to predict outcome for answers.
  
-Oppia-ml is written in Python and uses various machine learning libraries for creating classifiers.
+Oppia-ml is written in Python and uses various machine learning and deep learning libraries for creating classifiers.
 
 ## Installation
 
