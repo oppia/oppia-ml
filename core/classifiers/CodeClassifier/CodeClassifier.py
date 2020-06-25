@@ -538,6 +538,22 @@ class CodeClassifier(base.BaseClassifier):
         # text into a feature a vector.
         self.count_vector = None
 
+    @property
+    def name_in_job_result_proto(self):
+        # This property needs to be defined as it is defined as
+        # abstract property in BaseClassifier. However, since code classifier
+        # is currently disabled, the proto message definitions for code
+        # classifier will not be added until it is re-implemented and enabled.
+        return 'code_classifier'
+
+    @property
+    def type_in_job_result_proto(self):
+        # This property needs to be defined as it is defined as
+        # abstract property in BaseClassifier. However, since code classifier
+        # is currently disabled, the proto message definitions for code
+        # classifier will not be added until it is re-implemented and enabled.
+        return '%sFrozenModel' % self.__class__.__name__
+
     def to_dict(self):
         """Returns a dict representing this classifier.
 

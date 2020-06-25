@@ -3,3 +3,5 @@
 *.swp
 *.swo
 third_party/*
+core/domain/proto/*.py
+!core/domain/proto/__init__.py

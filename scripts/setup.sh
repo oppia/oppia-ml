@@ -85,4 +85,23 @@ export PYTHON_CMD
 # Set PYTHONPATH.
 export PYTHONPATH=$OPPIA_ML_DIR:$PYTHONPATH
 
+# Set prototool path.
+export PROTOTOOL_PATH=$THIRD_PARTY_DIR/prototool-1.9.0
+export PROTOTOOL=$PROTOTOOL_PATH/prototool
+
+echo Checking if prototool is installed in $PROTOTOOL_PATH
+
+if [ ! -d "$PROTOTOOL_PATH" ]; then
+  echo Installing prototool
+  mkdir "$PROTOTOOL_PATH"
+  curl -sSL "https://github.com/uber/prototool/releases/download/v1.9.0/prototool-$(uname -s)-$(uname -m)" \
+    -o "$PROTOTOOL_PATH/prototool"
+  chmod +x "$PROTOTOOL_PATH/prototool"
+fi
+
+# Compile proto files
+echo Compiling protobuf files
+$PROTOTOOL generate core/domain/proto
+echo protobuf files compilation done
+
 export SETUP_DONE=true

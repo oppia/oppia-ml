@@ -36,6 +36,22 @@ class BaseClassifier(object):
     def __init__(self):
         pass
 
+    @property
+    @abc.abstractproperty
+    def name_in_job_result_proto(self):
+        """A property that identifies the attribute in job result proto message
+        which will store this classifier's classifier data.
+        """
+        raise NotImplementedError
+
+    @property
+    @abc.abstractproperty
+    def type_in_job_result_proto(self):
+        """The type of the property in job result proto message which stores
+        this classifier's classifier data.
+        """
+        raise NotImplementedError
+
     @abc.abstractmethod
     def to_dict(self):
         """Returns a dict representing this classifier.

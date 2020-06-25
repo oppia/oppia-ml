@@ -26,7 +26,7 @@ import vm_config
 vm_config.configure()
 
 # pylint: disable=wrong-import-position
-from core.services import job_services
+from core.domain import job_services
 import vmconf
 
 def main():

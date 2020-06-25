@@ -97,7 +97,7 @@ BAD_PATTERNS = {
 
 EXCLUDED_PATHS = (
     'third_party/*', '.git/*', '*.pyc', 'CHANGELOG',
-    'scripts/pre_commit_linter.py')
+    'scripts/pre_commit_linter.py', 'core/domain/proto/*.py')
 
 if not os.getcwd().endswith('oppia-ml'):
     print ''
@@ -105,11 +105,18 @@ if not os.getcwd().endswith('oppia-ml'):
 
 _PYLINT_PATH = os.path.join(os.getcwd(), 'third_party', 'pylint-1.7.1')
 _MANIFEST_FILE_PATH = os.path.join(os.getcwd(), 'manifest.txt')
+_PROTOTOOL_PATH = os.path.join(
+    os.getcwd(), 'third_party', 'prototool-1.9.0', 'prototool')
 
 if not os.path.exists(_PYLINT_PATH):
     print ''
     print 'ERROR    Please run start.sh first to install pylint '
     print '         and its dependencies.'
+    sys.exit(1)
+
+if not os.path.exists(_PROTOTOOL_PATH):
+    print ''
+    print 'ERROR    Please run start.sh first to install prototool'
     sys.exit(1)
 
 # Fix third-party library paths.
@@ -191,9 +198,6 @@ def _lint_py_files(config_pylint, files_to_lint, result):
         config_pylint: str. Path to the .pylintrc file.
         files_to_lint: list(str). A list of filepaths to lint.
         result: multiprocessing.Queue. A queue to put results of test.
-
-    Returns:
-        None
     """
     start_time = time.time()
     are_there_errors = False
@@ -235,6 +239,44 @@ def _lint_py_files(config_pylint, files_to_lint, result):
             _MESSAGE_TYPE_SUCCESS, num_py_files, time.time() - start_time))
 
     print 'Python linting finished.'
+
+def _lint_proto_files(files_to_lint, result):
+    """Prints a list of lint errors in the given list of Proto files.
+
+    Args:
+        files_to_lint: list(str). A list of filepaths to lint.
+        result: multiprocessing.Queue. A queue to put results of test.
+    """
+    start_time = time.time()
+    are_there_errors = False
+
+    num_proto_files = len(files_to_lint)
+    if not files_to_lint:
+        result.put('')
+        print 'There are no Proto files to lint.'
+        return
+
+    print 'Linting %s Proto files' % num_proto_files
+
+    _BATCH_SIZE = 50
+    current_batch_start_index = 0
+
+    for proto_file in files_to_lint:
+        print('Linting %s' % proto_file)
+        try:
+            subprocess.check_output(
+                [_PROTOTOOL_PATH, 'lint', proto_file])
+        except subprocess.CalledProcessError as e:
+            print(e.output)
+            are_there_errors = True
+
+    if are_there_errors:
+        result.put('%s    Proto linting failed' % _MESSAGE_TYPE_FAILED)
+    else:
+        result.put('%s   %s Proto files linted (%.1f secs)' % (
+            _MESSAGE_TYPE_SUCCESS, num_proto_files, time.time() - start_time))
+
+    print 'Proto linting finished.'
 
 def _get_all_files():
     """This function is used to check if this script is ran from
@@ -285,21 +327,44 @@ def _pre_commit_linter(all_files):
 
     py_files_to_lint = [
         filename for filename in all_files if filename.endswith('.py')]
+    proto_files_to_lint = [
+        filename for filename in all_files if filename.endswith('.proto')]
 
-    linting_processes = []
+    python_linting_processes = []
 
     py_result = multiprocessing.Queue()
-    linting_processes.append(multiprocessing.Process(
+    python_linting_processes.append(multiprocessing.Process(
         target=_lint_py_files,
         args=(config_pylint, py_files_to_lint, py_result)))
 
     print 'Starting Python Linting'
     print '----------------------------------------'
 
-    for process in linting_processes:
+    for process in python_linting_processes:
         process.start()
 
-    for process in linting_processes:
+    for process in python_linting_processes:
+        # Require timeout parameter to prevent against endless waiting for the
+        # linting function to return.
+        process.join(timeout=600)
+
+    print ''
+    print '----------------------------------------'
+
+    proto_linting_processes = []
+
+    proto_result = multiprocessing.Queue()
+    proto_linting_processes.append(multiprocessing.Process(
+        target=_lint_proto_files,
+        args=(proto_files_to_lint, proto_result)))
+
+    print 'Starting Proto Linting'
+    print '----------------------------------------'
+
+    for process in proto_linting_processes:
+        process.start()
+
+    for process in proto_linting_processes:
         # Require timeout parameter to prevent against endless waiting for the
         # linting function to return.
         process.join(timeout=600)
@@ -311,6 +376,7 @@ def _pre_commit_linter(all_files):
     # Require block = False to prevent unnecessary waiting for the process
     # output.
     summary_messages.append(py_result.get(block=False))
+    summary_messages.append(proto_result.get(block=False))
     print '\n'.join(summary_messages)
     print ''
     return summary_messages
