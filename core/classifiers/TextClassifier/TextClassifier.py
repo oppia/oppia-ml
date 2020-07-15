@@ -26,6 +26,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 
 from core.classifiers import base
 from core.classifiers import classifier_utils
+from core.domain.proto import text_classifier_pb2
 
 
 class TextClassifier(base.BaseClassifier):
@@ -54,6 +55,10 @@ class TextClassifier(base.BaseClassifier):
 
         # Time taken to train the classifier
         self.exec_time = None
+
+    @property
+    def version(self):
+        return 1
 
     @property
     def name_in_job_result_proto(self):
@@ -116,12 +121,13 @@ class TextClassifier(base.BaseClassifier):
         self.count_vector = count_vector
         self.exec_time = end-start
 
-    def to_dict(self):
-        """Returns a dict representing this classifier.
+    def to_proto(self):
+        """Returns a protobuf of the frozen model.
 
         Returns:
-            dict. A dictionary representation of classifier referred to
-            as 'classifier_data'. This data is used for prediction.
+            TextClassifierFrozenModel. A protobuf object of the frozen model
+            which stores parameters of the trained model. This data is used for
+            prediction.
         """
         classifier_data = {
             u'SVM': classifier_utils.extract_svm_parameters(self.best_clf),
@@ -129,16 +135,22 @@ class TextClassifier(base.BaseClassifier):
             u'best_params': self.best_params,
             u'best_score': self.best_score
         }
-        return classifier_data
+        stringified_classifier_data = json.dumps(classifier_data)
+        text_classifier_proto = text_classifier_pb2.TextClassifierFrozenModel()
+        text_classifier_proto.model_json = stringified_classifier_data
+        return text_classifier_proto
 
     # pylint: disable=too-many-branches
-    def validate(self, classifier_data):
-        """Validates classifier data.
+    def validate(self, frozen_model_proto):
+        """Validates frozen model of trained classifier.
 
         Args:
-            classifier_data: dict of the classifier attributes specific to
-                the classifier algorithm used.
+            frozen_model_proto: TextClassifierFrozenModel object consisting of
+                trained classifier model parameters.
         """
+        stringified_classifier_data = frozen_model_proto.model_json
+        classifier_data = json.loads(stringified_classifier_data)
+
         allowed_top_level_keys = [u'SVM', u'cv_vocabulary', u'best_params',
                                   u'best_score']
         allowed_best_params_keys = [u'kernel', u'C']
@@ -195,7 +207,3 @@ class TextClassifier(base.BaseClassifier):
 
         # Validate that all the strings in classifier data are of unicode type.
         classifier_utils.unicode_validator_for_classifier_data(classifier_data)
-
-        # Validate that entire classifier data is json serializable and
-        # does not raise any exception.
-        json.dumps(classifier_data)

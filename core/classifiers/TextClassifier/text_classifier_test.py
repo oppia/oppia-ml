@@ -43,7 +43,7 @@ class TextClassifierTests(test_utils.GenericTestBase):
     def test_that_text_classifier_works(self):
         """Test that entire classifier is working end-to-end."""
         self.clf.train(self.training_data)
-        classifier_data = self.clf.to_dict()
+        classifier_data = self.clf.to_proto()
         self.clf.validate(classifier_data)
 
     def test_text_classifier_performance(self):
@@ -56,5 +56,5 @@ class TextClassifierTests(test_utils.GenericTestBase):
         self.clf.train(self.training_data)
         # The weighted f1 score for the test dataset should be at least 0.85.
         self.assertGreaterEqual(self.clf.best_score, 0.85)
-        # The training phase for the test dataset should take less than 2 sec.
-        self.assertLessEqual(self.clf.exec_time, 2)
+        # The training phase for the test dataset should take less than 4 sec.
+        self.assertLessEqual(self.clf.exec_time, 4)

@@ -38,6 +38,14 @@ class BaseClassifier(object):
 
     @property
     @abc.abstractproperty
+    def version(self):
+        """Version of the classifier algorithm. Version of algorithm is matched
+        with the version received as part of job data before training the
+        classifier."""
+        raise NotImplementedError
+
+    @property
+    @abc.abstractproperty
     def name_in_job_result_proto(self):
         """A property that identifies the attribute in job result proto message
         which will store this classifier's classifier data.
@@ -53,12 +61,13 @@ class BaseClassifier(object):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def to_dict(self):
-        """Returns a dict representing this classifier.
+    def to_proto(self):
+        """Returns a protobuf of the frozen model consisting of trained
+        parameters.
 
         Returns:
-            dict. A dictionary representation of classifier referred as
-            'classifier_data'. This data is used for prediction.
+            Object. A protobuf object of frozen model containing trained
+            model parameters. This data is used for prediction.
         """
         raise NotImplementedError
 
@@ -84,11 +93,12 @@ class BaseClassifier(object):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def validate(self, classifier_data):
-        """Validates classifier data.
+    def validate(self, frozen_model_proto):
+        """Validates frozen model protobuf object containing parameters of
+        trained classifier model.
 
         Args:
-            classifier_data: dict of the classifier attributes specific to
-                the classifier algorithm used.
+            frozen_model_proto: Object of the frozen model protobuf containing
+                parameters of trained classifier model.
         """
         raise NotImplementedError

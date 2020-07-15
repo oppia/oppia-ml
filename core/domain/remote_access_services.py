@@ -16,11 +16,13 @@
 
 """This module provides interface to communicate with Oppia remotely."""
 
+import base64
 import hashlib
 import hmac
 import json
 import requests
 
+from core.domain.proto import training_job_response_payload_pb2
 from core.platform import platform_services
 import utils
 import vmconf
@@ -62,16 +64,17 @@ def _get_shared_secret():
         vmconf.METADATA_SHARED_SECRET_PARAM_NAME))
 
 
-def generate_signature(data):
-    """Generates digital signature for given data.
+def generate_signature(message, vm_id):
+    """Generates digital signature for given message combined with vm_id.
 
     Args:
-        data: dict. A dictionary data to be transferred over network.
-
+        messate: str. Message string.
+        vm_id: string. ID of the VM that trained the job.
+    
     Returns:
         str. The digital signature generated from request data.
     """
-    msg = json.dumps(data, sort_keys=True)
+    msg = '%s|%s' % (base64.b64encode(message), vm_id)
     key = _get_shared_secret()
 
     # Generate signature and return it.
@@ -93,21 +96,22 @@ def fetch_next_job_request():
         'vm_id': _get_vm_id(),
         'message': _get_vm_id(),
     }
-    signature = generate_signature(payload['message'])
+    signature = generate_signature(payload['message'], payload['vm_id'])
     payload['signature'] = signature
     data = {
         'payload': json.dumps(payload)
     }
-    response = requests.post(request_url, data=data)
+    response = requests.post(
+        request_url, data=data, headers={'Content-Type': 'application/json'})
     return utils.parse_data_received_from_server(response.text)
 
 
-def store_trained_classifier_model(job_result_dict):
+def store_trained_classifier_model(job_result):
     """Stores the result of processed job request.
 
     Args:
-        job_result_dict: dict. A dictionary containing result of training
-            of classifier.
+        job_result: TrainingJobResult. Domain object containing result of training
+            of classifier along with job_id and algorithm_id.
 
     Returns:
         response: response object containing the server's response.
@@ -119,28 +123,18 @@ def store_trained_classifier_model(job_result_dict):
             'classifier_data_with_floats_stringified' key.
     """
 
-    # Make sure that job_result_dict is in proper foramt.
-    if not isinstance(job_result_dict, dict):
-        raise Exception('job_result_dict must be in dict format.')
+    job_result.validate()
+    payload = training_job_response_payload_pb2.TrainingJobResponsePayload()
+    payload.job_result.CopyFrom(job_result.to_proto())
+    payload.vm_id = _get_vm_id()
+    signature = generate_signature(
+        payload.job_result.SerializeToString(), payload.vm_id)
+    payload.signature = signature
 
-    if 'job_id' not in job_result_dict:
-        raise Exception('job_result_dict must contain \'job_id\'.')
-
-    if 'classifier_data_with_floats_stringified' not in job_result_dict:
-        raise Exception(
-            'job_result_dict must contain '
-            '\'classifier_data_with_floats_stringified\'.')
-
-    payload = {
-        'message': job_result_dict,
-        'vm_id': _get_vm_id()
-    }
-    signature = generate_signature(payload['message'])
-    payload['signature'] = signature
-    data = {
-        'payload': json.dumps(payload)
-    }
+    data = payload.SerializeToString()
     request_url = "%s:%s/%s" % (
         _get_url(), _get_port(), vmconf.STORE_TRAINED_CLASSIFIER_MODEL_HANDLER)
-    response = requests.post(request_url, data=data)
+    response = requests.post(
+        request_url, data=data,
+        headers={'Content-Type': 'application/octet-stream'})
     return response.status_code

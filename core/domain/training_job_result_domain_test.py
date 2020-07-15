@@ -41,6 +41,24 @@ class TrainingJobResultTests(test_utils.GenericTestBase):
         """Ensure that validation checks raise exception when
         an invalid classifier model is supplied.
         """
+        job_id = 123
+        algorithm_id = 'TextClassifier'
+        classifier_data = 'simple classifier'
+        job_result = training_job_result_domain.TrainingJobResult(
+            job_id, algorithm_id, classifier_data)
+        with self.assertRaisesRegexp(
+            Exception, 'Expected job id of basestring type'):
+            job_result.validate()
+
+        job_id = '123'
+        algorithm_id = 123
+        classifier_data = 'simple classifier'
+        job_result = training_job_result_domain.TrainingJobResult(
+            job_id, algorithm_id, classifier_data)
+        with self.assertRaisesRegexp(
+            Exception, 'Expected algorithm id of basestring type'):
+            job_result.validate()
+
         job_id = 'job_id'
         algorithm_id = 'TextClassifier'
         classifier_data = 'simple classifier'

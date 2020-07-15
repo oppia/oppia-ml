@@ -539,6 +539,10 @@ class CodeClassifier(base.BaseClassifier):
         self.count_vector = None
 
     @property
+    def version(self):
+        return 1
+
+    @property
     def name_in_job_result_proto(self):
         # This property needs to be defined as it is defined as
         # abstract property in BaseClassifier. However, since code classifier
@@ -582,6 +586,9 @@ class CodeClassifier(base.BaseClassifier):
             u'cv_vocabulary': self.count_vector.__dict__['vocabulary_']
         }
         return classifier_data
+
+    def to_proto(self):
+        raise NotImplementedError
 
     # pylint: disable=too-many-locals
     def train(self, training_data):

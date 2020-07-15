@@ -27,7 +27,7 @@ message TrainingJobResponsePayload {
   message JobResult {
     // Id of the training job whose data is being stored.
     string job_id = 1;
-    
+
     // Each of the classifier algorithms' proto message must be present in
     // the oneof classifier_data field.
     oneof classifier_frozen_model {
@@ -38,7 +38,7 @@ message TrainingJobResponsePayload {
 
   // Id of the VM instance that trained the job.
   string vm_id = 2;
-  
+
   // Signature of the job data for authenticated communication.
   string signature = 3;
 }

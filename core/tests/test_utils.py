@@ -148,10 +148,12 @@ class TestBase(unittest.TestCase):
         def wrapper(request):
             """Wrapper class for python decorator."""
             # func(request) returns response data as json object.
-            data = urlparse.parse_qs(request.body)
-            payload = json.loads(data['payload'][0])
-            request.payload = payload
-            return (200, {}, json.dumps(func(request)))
+            if request.headers['content-type'] == 'application/json':
+                data = urlparse.parse_qs(request.body)
+                payload = json.loads(data['payload'][0])
+                request.payload = payload
+                return (200, {}, json.dumps(func(request)))
+            return (200, {}, func(request))
         return wrapper
 
 

@@ -47,6 +47,15 @@ class TrainingJobResult(object):
             Exception: str. The classifier data is stored in a field
                 that does not correspond to algorithm_id.
         """
+        if not isinstance(self.job_id, basestring):
+            raise Exception(
+                "Expected job id of basestring type but received %s" % (
+                    type(self.job_id).__name__))
+
+        if not isinstance(self.algorithm_id, basestring):
+            raise Exception(
+                "Expected algorithm id of basestring type but received %s" % (
+                    type(self.algorithm_id).__name__))
 
         # Ensure that the classifier_data is corresponds to the classifier
         # having given algorithm_id.
