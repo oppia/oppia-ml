@@ -1,8 +1,10 @@
 protoc:
-  version: 3.8.0
+  version: 3.11.0
+  includes:
+    - third_party/oppia-ml-proto-0.0.0
 lint:
   group: google
 generate:
   plugins:
     - name: python
-      output: ./
+      output: core/domain/proto
