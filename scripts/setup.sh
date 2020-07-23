@@ -99,9 +99,4 @@ if [ ! -d "$PROTOTOOL_PATH" ]; then
   chmod +x "$PROTOTOOL_PATH/prototool"
 fi
 
-# Compile proto files
-echo Compiling protobuf files
-$PROTOTOOL generate third_party/oppia-ml-proto-0.0.0
-echo protobuf files compilation done
-
 export SETUP_DONE=true

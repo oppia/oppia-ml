@@ -61,7 +61,7 @@ while read -r line; do
   if [ ! -d "$LIB_PATH" ]; then
     echo Installing $NAME
     if [ $NAME == 'oppia-ml-proto' ]; then
-      curl --output $THIRD_PARTY_DIR/tmp.zip "https://codeload.github.com/oppia/oppia-ml-proto/zip/0.0.0"
+      curl --output $THIRD_PARTY_DIR/tmp.zip "https://codeload.github.com/oppia/oppia-ml-proto/zip/$VERSION"
       unzip $THIRD_PARTY_DIR/tmp.zip -d $THIRD_PARTY_DIR
       rm $THIRD_PARTY_DIR/tmp.zip
       echo "DONE"
