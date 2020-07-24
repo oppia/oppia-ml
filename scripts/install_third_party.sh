@@ -74,3 +74,8 @@ done < "$MANIFEST_FILE"
 # install pre-push script
 echo Installing pre-push hook for git
 $PYTHON_CMD $OPPIA_ML_DIR/scripts/pre_push_hook.py --install
+
+# Compile proto files
+echo Compiling protobuf files
+$PROTOTOOL generate third_party/oppia-ml-proto-0.0.0
+echo protobuf files compilation done
