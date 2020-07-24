@@ -1,0 +1,27 @@
+name: Backend Tests
+on:
+  push:
+    branches:
+      - develop
+      - release-*
+  pull_request:
+    branches:
+      - develop
+      - release-*
+
+jobs:
+  backend:
+    runs-on:  ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-18.04]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '2.x'
+          architecture: 'x64'
+      - name: Setup
+        run: bash scripts/setup.sh || exit 1
+      - name: Run Backend Tests
+        run: bash scripts/run_backend_tests.sh
