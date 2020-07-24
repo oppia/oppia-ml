@@ -106,7 +106,7 @@ if not os.getcwd().endswith('oppia-ml'):
 _PYLINT_PATH = os.path.join(os.getcwd(), 'third_party', 'pylint-1.7.1')
 _MANIFEST_FILE_PATH = os.path.join(os.getcwd(), 'manifest.txt')
 _PROTOTOOL_PATH = os.path.join(
-    os.getcwd(), 'third_party', 'prototool-1.9.0', 'prototool')
+    os.getcwd(), 'third_party', 'prototool-1.10.0', 'prototool')
 
 if not os.path.exists(_PYLINT_PATH):
     print ''

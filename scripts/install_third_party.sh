@@ -60,10 +60,22 @@ while read -r line; do
   echo Checking if $NAME is installed in $LIB_PATH
   if [ ! -d "$LIB_PATH" ]; then
     echo Installing $NAME
-    $PIP_CMD install $NAME==$VERSION --target="$LIB_PATH"
+    if [ $NAME == 'oppia-ml-proto' ]; then
+      curl --output $THIRD_PARTY_DIR/tmp.zip "https://codeload.github.com/oppia/oppia-ml-proto/zip/$VERSION"
+      unzip $THIRD_PARTY_DIR/tmp.zip -d $THIRD_PARTY_DIR
+      rm $THIRD_PARTY_DIR/tmp.zip
+      echo "DONE"
+    else
+      $PIP_CMD install $NAME==$VERSION --target="$LIB_PATH"
+    fi
   fi
 done < "$MANIFEST_FILE"
 
 # install pre-push script
 echo Installing pre-push hook for git
 $PYTHON_CMD $OPPIA_ML_DIR/scripts/pre_push_hook.py --install
+
+# Compile proto files
+echo Compiling protobuf files
+$PROTOTOOL generate third_party/oppia-ml-proto-0.0.0
+echo protobuf files compilation done
