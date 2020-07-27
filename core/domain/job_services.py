@@ -49,9 +49,9 @@ def _validate_job_data(job_data):
             'Expected algorithm id to be unicode, received %s' %
             job_data['algorithm_id'])
 
-    if not isinstance(job_data['algorithm_version'], unicode):
+    if not isinstance(job_data['algorithm_version'], int):
         raise Exception(
-            'Expected algorithm version to be unicode, received %s' %
+            'Expected algorithm version to be integer, received %s' %
             job_data['algorithm_version'])
 
     if not isinstance(job_data['training_data'], list):

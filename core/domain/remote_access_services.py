@@ -70,7 +70,7 @@ def generate_signature(message, vm_id):
     Args:
         messate: str. Message string.
         vm_id: string. ID of the VM that trained the job.
-    
+
     Returns:
         str. The digital signature generated from request data.
     """
@@ -101,8 +101,7 @@ def fetch_next_job_request():
     data = {
         'payload': json.dumps(payload)
     }
-    response = requests.post(
-        request_url, data=data, headers={'Content-Type': 'application/json'})
+    response = requests.post(request_url, data=data)
     return utils.parse_data_received_from_server(response.text)
 
 
