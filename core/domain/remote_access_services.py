@@ -109,8 +109,8 @@ def store_trained_classifier_model(job_result):
     """Stores the result of processed job request.
 
     Args:
-        job_result: TrainingJobResult. Domain object containing result of training
-            of classifier along with job_id and algorithm_id.
+        job_result: TrainingJobResult. Domain object containing result of
+            training of classifier along with job_id and algorithm_id.
 
     Returns:
         response: response object containing the server's response.

@@ -716,7 +716,7 @@ class CodeClassifier(base.BaseClassifier):
 
     # pylint: enable=too-many-locals
     # pylint: disable=too-many-branches, no-self-use
-    def validate(self, classifier_data):
+    def validate(self, classifier_data): #pylint: disable=arguments-differ
         """Validates classifier data.
 
         Args:
