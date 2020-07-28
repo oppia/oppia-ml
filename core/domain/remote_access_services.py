@@ -68,7 +68,7 @@ def generate_signature(message, vm_id):
     """Generates digital signature for given message combined with vm_id.
 
     Args:
-        messate: str. Message string.
+        message: str. Message string.
         vm_id: string. ID of the VM that trained the job.
 
     Returns:

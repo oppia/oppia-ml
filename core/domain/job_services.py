@@ -64,6 +64,13 @@ def _validate_job_data(job_data):
     if job_data['algorithm_id'] not in algorithm_ids:
         raise Exception('Invalid algorithm id %s' % job_data['algorithm_id'])
 
+    classifier = algorithm_registry.Registry.get_classifier_by_algorithm_id(
+        job_data['algorithm_id'])
+    if classifier.version != job_data['algorithm_version']:
+        raise Exception(
+            'Classifier version %d mismatches algorithm version %d received '
+            'in job data' % (classifier.version, job_data['algorithm_version']))
+
     for grouped_answers in job_data['training_data']:
         if 'answer_group_index' not in grouped_answers:
             raise Exception(
@@ -129,13 +136,6 @@ def store_job_result(job_id, algorithm_id, frozen_model_proto):
     Returns:
         int. Status code of response.
     """
-    # The classifier data to be sent in the payload should have all
-    # floating point values stored as strings. This is because floating point
-    # numbers are represented differently on GAE(Oppia) and GCE(Oppia-ml).
-    # Therefore, converting all floating point numbers to string keeps
-    # signature consistent on both Oppia and Oppia-ml.
-    # For more info visit: https://stackoverflow.com/q/40173295
-
     job_result = training_job_result_domain.TrainingJobResult(
         job_id, algorithm_id, frozen_model_proto)
     status = remote_access_services.store_trained_classifier_model(

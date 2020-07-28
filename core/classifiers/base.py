@@ -39,9 +39,10 @@ class BaseClassifier(object):
     @property
     @abc.abstractproperty
     def version(self):
-        """Version of the classifier algorithm. Version of algorithm is matched
-        with the version received as part of job data before training the
-        classifier."""
+        """Version of the classifier algorithm. The version of algorithm is
+        matched with the version received as part of job data before training
+        the classifier.
+        """
         raise NotImplementedError
 
     @property
@@ -94,8 +95,8 @@ class BaseClassifier(object):
 
     @abc.abstractmethod
     def validate(self, frozen_model_proto):
-        """Validates frozen model protobuf object containing parameters of
-        trained classifier model.
+        """Validates the specified frozen model protobuf object containing
+        parameters of trained classifier model.
 
         Args:
             frozen_model_proto: Object of the frozen model protobuf containing

@@ -145,8 +145,8 @@ class TextClassifier(base.BaseClassifier):
         """Validates frozen model of trained classifier.
 
         Args:
-            frozen_model_proto: TextClassifierFrozenModel object consisting of
-                trained classifier model parameters.
+            frozen_model_proto: TextClassifierFrozenModel. An object consisting
+                of trained classifier model parameters.
         """
         stringified_classifier_data = frozen_model_proto.model_json
         classifier_data = json.loads(stringified_classifier_data)
