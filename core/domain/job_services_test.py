@@ -69,7 +69,20 @@ class JobServicesTests(test_utils.GenericTestBase):
         self.assertEqual(job_data['algorithm_version'], 1)
         self.assertEqual(job_data['training_data'], [])
 
-    def test_job_validation_raises_exception_on_incorrect_job_data_type(self):
+    def test_validate_works_correctly(self):
+        """Test that validate for fetched job works as expected."""
+        job_data = {
+            'job_id': '1',
+            'algorithm_id': 'TextClassifier',
+            'training_data': [],
+            'algorithm_version': 1
+        }
+        post_callback = self._get_post_callback_for_next_job(job_data)
+
+        with self.set_job_request_post_callback(post_callback):
+            job_services.get_next_job()
+
+    def test_validate_with_incorrect_job_data_type_raises_exception(self):
         """Test that job validation raises exception if job_id is missing
         in the received job data.
         """
@@ -81,7 +94,7 @@ class JobServicesTests(test_utils.GenericTestBase):
                 Exception, 'Invalid format of job data'):
                 job_services.get_next_job()
 
-    def test_job_validation_raises_exception_on_missing_job_id(self):
+    def test_validate_with_missing_job_id_raises_exception(self):
         """Test that job validation raises exception if job_id is missing
         in the received job data.
         """
@@ -96,7 +109,7 @@ class JobServicesTests(test_utils.GenericTestBase):
                 Exception, 'job data should contain job id'):
                 job_services.get_next_job()
 
-    def test_job_validation_raises_exception_on_missing_algorithm_id(self):
+    def test_validate_with_missing_algorithm_id_raises_exception(self):
         """Test that job validation raises exception if algorithm_id is missing
         in the received job data.
         """
@@ -111,7 +124,7 @@ class JobServicesTests(test_utils.GenericTestBase):
                 Exception, 'job data should contain algorithm id'):
                 job_services.get_next_job()
 
-    def test_job_validation_raises_exception_on_missing_training_data(self):
+    def test_validate_with_missing_training_data_raises_exception(self):
         """Test that job validation raises exception if training_data is missing
         in the received job data.
         """
@@ -126,7 +139,7 @@ class JobServicesTests(test_utils.GenericTestBase):
                 Exception, 'job data should contain training data'):
                 job_services.get_next_job()
 
-    def test_job_validation_raises_exception_on_missing_algorithm_version(self):
+    def test_validate_with_missing_algorithm_version_raises_exception(self):
         """Test that job validation raises exception if algorithm_version is
         missing in the received job data.
         """
@@ -142,7 +155,7 @@ class JobServicesTests(test_utils.GenericTestBase):
                 Exception, 'job data should contain algorithm version'):
                 job_services.get_next_job()
 
-    def test_job_validation_raises_exception_on_invalid_job_id(self):
+    def test_validate_with_invalid_job_id_raises_exception(self):
         """Test that job validation raises exception if job_id is invalid
         in the received job data.
         """
@@ -160,7 +173,7 @@ class JobServicesTests(test_utils.GenericTestBase):
                 Exception, 'Expected job id to be unicode'):
                 job_services.get_next_job()
 
-    def test_job_validation_raises_exception_on_invalid_algorithm_id(self):
+    def test_validate_with_invalid_algorithm_id_raises_exception(self):
         """Test that job validation raises exception if algorithm_id is invalid
         in the received job data.
         """
@@ -177,9 +190,9 @@ class JobServicesTests(test_utils.GenericTestBase):
                 Exception, 'Expected algorithm id to be unicode'):
                 job_services.get_next_job()
 
-    def test_job_validation_raises_exception_on_invalid_training_data(self):
-        """Test that job validation raises exception if training_data is invalid
-        in the received job data.
+    def test_validate_with_invalid_training_data_raises_exception(self):
+        """Test that job validation raises exception if training_data is not
+        a dict in the received job data.
         """
         job_data = {
             'job_id': '1',
@@ -194,7 +207,17 @@ class JobServicesTests(test_utils.GenericTestBase):
                 Exception, 'Expected training data to be a list'):
                 job_services.get_next_job()
 
-        job_data['training_data'] = [{'answers': ['a', 'b', 'c']}]
+    def test_validate_training_data_without_answer_group_index_raises_exception(
+            self):
+        """Test that job validation raises exception if training_data doesn't
+        contain 'answer_group_index' key.
+        """
+        job_data = {
+            'job_id': '1',
+            'algorithm_id': 'TextClassifier',
+            'training_data': [{'answers': ['a', 'b', 'c']}],
+            'algorithm_version': 1
+        }
         post_callback = self._get_post_callback_for_next_job(job_data)
 
         with self.set_job_request_post_callback(post_callback):
@@ -203,7 +226,16 @@ class JobServicesTests(test_utils.GenericTestBase):
                 'Expected answer_group_index to be a key in training_data'):
                 job_services.get_next_job()
 
-        job_data['training_data'] = [{'answer_group_index': 1}]
+    def test_validate_training_data_without_answers_raises_exception(self):
+        """Test that job validation raises exception if training_data doesn't
+        contain answers key.
+        """
+        job_data = {
+            'job_id': '1',
+            'algorithm_id': 'TextClassifier',
+            'training_data': [{'answer_group_index': 1}],
+            'algorithm_version': 1
+        }
         post_callback = self._get_post_callback_for_next_job(job_data)
 
         with self.set_job_request_post_callback(post_callback):
@@ -212,10 +244,19 @@ class JobServicesTests(test_utils.GenericTestBase):
                 'Expected answers to be a key in training_data'):
                 job_services.get_next_job()
 
-        job_data['training_data'] = [{
-            'answer_group_index': '1',
-            'answers': ['a', 'b', 'c']
-        }]
+    def test_validate_training_data_invalid_answer_group_idx_raises_exception(
+            self):
+        """Test that job validation raises exception if training_data contains
+        incorrect answer_group_index.
+        """
+        job_data = {
+            'job_id': '1',
+            'algorithm_id': 'TextClassifier',
+            'training_data': [{
+                'answer_group_index': '1',
+                'answers': ['a', 'b', 'c']}],
+            'algorithm_version': 1
+        }
         post_callback = self._get_post_callback_for_next_job(job_data)
 
         with self.set_job_request_post_callback(post_callback):
@@ -224,10 +265,18 @@ class JobServicesTests(test_utils.GenericTestBase):
                 'Expected answer_group_index to be an int'):
                 job_services.get_next_job()
 
-        job_data['training_data'] = [{
-            'answer_group_index': 1,
-            'answers': 'answer1'
-        }]
+    def test_validate_training_data_with_invalid_answers_exception(self):
+        """Test that job validation raises exception if training_data contains
+        incorrect answers.
+        """
+        job_data = {
+            'job_id': '1',
+            'algorithm_id': 'TextClassifier',
+            'training_data': [{
+                'answer_group_index': 1,
+                'answers': 'answer1'}],
+            'algorithm_version': 1
+        }
         post_callback = self._get_post_callback_for_next_job(job_data)
         with self.set_job_request_post_callback(post_callback):
             with self.assertRaisesRegexp(
@@ -235,7 +284,7 @@ class JobServicesTests(test_utils.GenericTestBase):
                 'Expected answers to be a list'):
                 job_services.get_next_job()
 
-    def test_job_validation_raises_exception_on_invalid_algorithm_version(self):
+    def test_validate_with_invalid_algorithm_version_raises_exception(self):
         """Test that job validation raises exception if algorithm_version is
         invalid in the received job data.
         """
@@ -252,7 +301,7 @@ class JobServicesTests(test_utils.GenericTestBase):
                 Exception, 'Expected algorithm version to be integer'):
                 job_services.get_next_job()
 
-    def test_job_validation_raises_exception_on_unknown_algorithm_id(self):
+    def test_validate_with_incorrect_algorithm_id_raises_exception(self):
         """Test that job validation raises exception if algorithm_id is
         unknown in the received job data.
         """
@@ -269,7 +318,7 @@ class JobServicesTests(test_utils.GenericTestBase):
                 Exception, 'Invalid algorithm id ab'):
                 job_services.get_next_job()
 
-    def test_job_validation_raises_exception_on_unknown_algorithm_version(self):
+    def test_validate_with_incorrect_algorithm_version_raises_exception(self):
         """Test that job validation raises exception if algorithm_version is
         unknown in the received job data.
         """

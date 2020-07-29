@@ -37,7 +37,7 @@ class TrainingJobResultTests(test_utils.GenericTestBase):
             job_id, algorithm_id, classifier_data)
         job_result.validate()
 
-    def test_job_data_with_invalid_job_id_raises_exception_on_validtion(self):
+    def test_job_data_with_invalid_job_id_raises_exception_on_validation(self):
         """Ensure that validation checks raise exception when an invalid
         job_id is supplied.
         """
@@ -50,7 +50,7 @@ class TrainingJobResultTests(test_utils.GenericTestBase):
             Exception, 'Expected job id of basestring type'):
             job_result.validate()
 
-    def test_job_data_with_invalid_algorithm_id_raises_exception_on_validtion(
+    def test_job_data_with_invalid_algorithm_id_raises_exception_on_validation(
             self):
         """Ensure that validation checks raise exception when an invalid
         algorithm_id is supplied.
@@ -64,7 +64,7 @@ class TrainingJobResultTests(test_utils.GenericTestBase):
             Exception, 'Expected algorithm id of basestring type'):
             job_result.validate()
 
-    def test_job_data_with_invalid_classifier_data_raises_exception_on_validte(
+    def test_job_data_with_invalid_classifier_data_raises_exception_on_validate(
             self):
         """Ensure that validation checks raise exception when an invalid
         classifier_data is supplied.
