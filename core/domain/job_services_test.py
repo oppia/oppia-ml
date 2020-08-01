@@ -69,7 +69,7 @@ class JobServicesTests(test_utils.GenericTestBase):
         self.assertEqual(job_data['algorithm_version'], 1)
         self.assertEqual(job_data['training_data'], [])
 
-    def test_validate_works_correctly(self):
+    def test_validate_with_valid_job_data_raises_no_exceptions(self):
         """Test that validate for fetched job works as expected."""
         job_data = {
             'job_id': '1',

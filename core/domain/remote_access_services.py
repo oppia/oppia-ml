@@ -69,7 +69,7 @@ def generate_signature(message, vm_id):
 
     Args:
         message: str. Message string.
-        vm_id: string. ID of the VM that trained the job.
+        vm_id: str. ID of the VM that trained the job.
 
     Returns:
         str. The digital signature generated from request data.
@@ -113,13 +113,7 @@ def store_trained_classifier_model(job_result):
             training of classifier along with job_id and algorithm_id.
 
     Returns:
-        response: response object containing the server's response.
-
-    Raises:
-        Exception: job_result_dict is not of dict type.
-        Exception: job_result_dict does not contain 'job_id' key.
-        Exception: job_result_dict does not contain
-            'classifier_data_with_floats_stringified' key.
+        int. Status code of the response.
     """
 
     job_result.validate()

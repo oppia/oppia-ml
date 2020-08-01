@@ -40,15 +40,14 @@ def main():
             job_data['algorithm_id'], job_data['algorithm_version'],
             job_data['training_data'])
 
-        if frozen_model_proto:
-            status = job_services.store_job_result(
-                job_data['job_id'], job_data['algorithm_id'],
-                frozen_model_proto)
+        status = job_services.store_job_result(
+            job_data['job_id'], job_data['algorithm_id'],
+            frozen_model_proto)
 
-            if status != 200:
-                logging.warning(
-                    'Failed to store result of the job with \'%s\' job_id',
-                    job_data['job_id'])
+        if status != 200:
+            logging.warning(
+                'Failed to store result of the job with \'%s\' job_id',
+                job_data['job_id'])
         return
 
     except KeyboardInterrupt:

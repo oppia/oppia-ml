@@ -67,8 +67,8 @@ class BaseClassifier(object):
         parameters.
 
         Returns:
-            Object. A protobuf object of frozen model containing trained
-            model parameters. This data is used for prediction.
+            FrozenModel object. A protobuf object of frozen model containing
+            trained model parameters. This data is used for prediction.
         """
         raise NotImplementedError
 
@@ -99,7 +99,7 @@ class BaseClassifier(object):
         parameters of the trained classifier model.
 
         Args:
-            frozen_model_proto: Object of the frozen model protobuf containing
-                parameters of trained classifier model.
+            frozen_model_proto: FrozenModel object of the frozen model protobuf
+                containing parameters of trained classifier model.
         """
         raise NotImplementedError

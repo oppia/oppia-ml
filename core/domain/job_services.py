@@ -110,7 +110,8 @@ def train_classifier(algorithm_id, algorithm_version, training_data):
             stores 'answer_group_index' and 'answers'.
 
     Returns:
-        dict. Result of trained classifier algorithm.
+        FrozenModel. A protobuf object containing trained parameters of the
+        classifier algorithm.
     """
     classifier = algorithm_registry.Registry.get_classifier_by_algorithm_id(
         algorithm_id)

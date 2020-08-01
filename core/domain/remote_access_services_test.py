@@ -29,12 +29,12 @@ class RemoteAccessServicesTests(test_utils.GenericTestBase):
     def test_that_generate_signature_works_correctly(self):
         """Test that generate signature function is working as expected."""
         with self.swap(vmconf, 'DEFAULT_VM_SHARED_SECRET', '1a2b3c4e'):
-            sign = remote_access_services.generate_signature(
+            signature = remote_access_services.generate_signature(
                 'vm_default', vm_id='vm_default')
 
-        expected_sign = (
+        expected_signature = (
             '740ed25befc87674a82844db7769436edb7d21c29d1c9cc87d7a1f3fdefe3610')
-        self.assertEqual(sign, expected_sign)
+        self.assertEqual(signature, expected_signature)
 
     def test_next_job_gets_fetched(self):
         """Test that next job is fetched correctly."""
@@ -94,3 +94,31 @@ class RemoteAccessServicesTests(test_utils.GenericTestBase):
             status = remote_access_services.store_trained_classifier_model(
                 job_result)
         self.assertEqual(status, 200)
+
+    def test_that_job_result_is_validated_before_storing(self):
+        """Ensure that JobResult domain object is validated before proceeding
+        to store it.
+        """
+        frozen_model_proto = text_classifier_pb2.TextClassifierFrozenModel()
+        frozen_model_proto.model_json = 'model_json'
+        algorithm_id = 'TextClassifier'
+        job_id = '123'
+
+        job_result = training_job_result_domain.TrainingJobResult(
+            job_id, algorithm_id, frozen_model_proto)
+
+        check_valid_call = {'validate_has_been_called': False}
+        def validate_check():
+            """Assert that validate function is called."""
+            check_valid_call['validate_has_been_called'] = True
+
+        @self.callback
+        def post_callback(request): # pylint: disable=unused-argument
+            """Callback for post request."""
+            return
+
+        with self.set_job_result_post_callback(post_callback):
+            with self.swap(job_result, 'validate', validate_check):
+                remote_access_services.store_trained_classifier_model(
+                    job_result)
+        self.assertTrue(check_valid_call['validate_has_been_called'])
