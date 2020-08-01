@@ -38,10 +38,15 @@ class BaseClassifier(object):
 
     @property
     @abc.abstractproperty
-    def version(self):
+    def algorithm_version(self):
         """Version of the classifier algorithm. The version of the algorithm is
         matched with the version received as part of job data before training
         the classifier.
+
+        The version of the algorithm changes everytime the classifier
+        algorithm is changed. The algorithm version helps Oppia to map the
+        trained classifier models with their corresponding prediction API
+        in the Oppia frontend.
         """
         raise NotImplementedError
 

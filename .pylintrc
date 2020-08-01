@@ -67,6 +67,9 @@ ignore-imports=yes
 # and fix those issues.
 
 disable=duplicate-code, no-member
+# no-member check is disabled because protobuf generated python classes
+# do not have well defined properties.
+# (see https://github.com/PyCQA/pylint/issues/1864).
 [REPORTS]
 
 # Hide statistics, external dependencies and overall rating.

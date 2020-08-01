@@ -57,7 +57,7 @@ class TextClassifier(base.BaseClassifier):
         self.exec_time = None
 
     @property
-    def version(self):
+    def algorithm_version(self):
         return 1
 
     @property

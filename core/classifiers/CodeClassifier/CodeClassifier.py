@@ -539,7 +539,7 @@ class CodeClassifier(base.BaseClassifier):
         self.count_vector = None
 
     @property
-    def version(self):
+    def algorithm_version(self):
         return 1
 
     @property
@@ -716,6 +716,11 @@ class CodeClassifier(base.BaseClassifier):
 
     # pylint: enable=too-many-locals
     # pylint: disable=too-many-branches, no-self-use
+    # CodeClassifier has been deprecated as it does not support protobuf based
+    # model storage. Hence, the validate method has been kept as it is to
+    # support the existing test cases. It still takes a dict object as argument
+    # for validation and has not been updated to take the protobuf object as
+    # argument.
     def validate(self, classifier_data): #pylint: disable=arguments-differ
         """Validates classifier data.
 
