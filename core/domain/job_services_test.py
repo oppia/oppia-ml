@@ -368,7 +368,7 @@ class JobServicesTests(test_utils.GenericTestBase):
         """Ensure that train classifier trains classifier."""
         training_data = _load_training_data()
         frozen_model = job_services.train_classifier(
-            'TextClassifier', 1, training_data)
+            'TextClassifier', training_data)
         self.assertTrue(isinstance(
             frozen_model, text_classifier_pb2.TextClassifierFrozenModel))
 
@@ -376,6 +376,6 @@ class JobServicesTests(test_utils.GenericTestBase):
         """Ensure that train classifier trains classifier."""
         training_data = _load_training_data()
         frozen_model = job_services.train_classifier(
-            'TextClassifier', 1, training_data)
+            'TextClassifier', training_data)
         self.assertTrue(isinstance(
             frozen_model, text_classifier_pb2.TextClassifierFrozenModel))

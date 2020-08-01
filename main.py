@@ -37,8 +37,7 @@ def main():
             logging.info('No pending job requests.')
             return
         frozen_model_proto = job_services.train_classifier(
-            job_data['algorithm_id'], job_data['algorithm_version'],
-            job_data['training_data'])
+            job_data['algorithm_id'], job_data['training_data'])
 
         status = job_services.store_job_result(
             job_data['job_id'], job_data['algorithm_id'],

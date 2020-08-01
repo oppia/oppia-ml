@@ -16,8 +16,6 @@
 
 """This module contains functions used for polling, training and saving jobs."""
 
-import logging
-
 from core.classifiers import algorithm_registry
 from core.domain import training_job_result_domain
 from core.domain import remote_access_services
@@ -66,10 +64,11 @@ def _validate_job_data(job_data):
 
     classifier = algorithm_registry.Registry.get_classifier_by_algorithm_id(
         job_data['algorithm_id'])
-    if classifier.version != job_data['algorithm_version']:
+    if classifier.algorithm_version != job_data['algorithm_version']:
         raise Exception(
             'Classifier version %d mismatches algorithm version %d received '
-            'in job data' % (classifier.version, job_data['algorithm_version']))
+            'in job data' % (
+                classifier.algorithm_version, job_data['algorithm_version']))
 
     for grouped_answers in job_data['training_data']:
         if 'answer_group_index' not in grouped_answers:
@@ -100,7 +99,7 @@ def get_next_job():
     return job_data
 
 
-def train_classifier(algorithm_id, algorithm_version, training_data):
+def train_classifier(algorithm_id, training_data):
     """Train classifier associated with 'algorithm_id' using 'training_data'.
 
     Args:
@@ -115,11 +114,6 @@ def train_classifier(algorithm_id, algorithm_version, training_data):
     """
     classifier = algorithm_registry.Registry.get_classifier_by_algorithm_id(
         algorithm_id)
-    if classifier.version != algorithm_version:
-        logging.warning(
-            'Classifier version %d mismatches algorithm version %d received '
-            'in job data', classifier.version, algorithm_version)
-        return None
     classifier.train(training_data)
     frozen_model_proto = classifier.to_proto()
     classifier.validate(frozen_model_proto)
