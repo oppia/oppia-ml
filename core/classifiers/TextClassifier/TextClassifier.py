@@ -58,6 +58,13 @@ class TextClassifier(base.BaseClassifier):
 
     @property
     def algorithm_version(self):
+        """The version of the TextClassifier algorithm.
+
+        The algorithm_version should be incremented every time the classifier
+        algorithm used for training is updated. This change is non-backward
+        compatible i.e. models trained on older algorithm have to be retrained
+        on new algorithm.
+        """
         return 1
 
     @property

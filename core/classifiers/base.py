@@ -43,7 +43,7 @@ class BaseClassifier(object):
         matched with the version received as part of job data before training
         the classifier.
 
-        The version of the algorithm changes everytime the classifier
+        The version of the algorithm changes every time the classifier
         algorithm is changed. The algorithm version helps Oppia to map the
         trained classifier models with their corresponding prediction API
         in the Oppia frontend.
@@ -72,7 +72,7 @@ class BaseClassifier(object):
         parameters.
 
         Returns:
-            FrozenModel object. A protobuf object of frozen model containing
+            FrozenModel. A protobuf object of frozen model containing
             trained model parameters. This data is used for prediction.
         """
         raise NotImplementedError
@@ -104,7 +104,7 @@ class BaseClassifier(object):
         parameters of the trained classifier model.
 
         Args:
-            frozen_model_proto: FrozenModel object of the frozen model protobuf
-                containing parameters of trained classifier model.
+            frozen_model_proto: The frozen model protobuf containing parameter
+            of trained classifier model.
         """
         raise NotImplementedError

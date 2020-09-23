@@ -126,8 +126,9 @@ def store_job_result(job_id, algorithm_id, frozen_model_proto):
     Args:
         job_id: str. ID of the job whose result is to be stored.
         algorithm_id: str. ID of the classifier algorithm.
-        frozen_model_proto: Object. A protobuf object that stores trained model
-            parameters.
+        frozen_model_proto: FrozenModel. A protobuf object that stores trained
+            model parameters.
+
     Returns:
         int. Status code of response.
     """
