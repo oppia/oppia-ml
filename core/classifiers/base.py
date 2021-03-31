@@ -38,6 +38,20 @@ class BaseClassifier(object):
 
     @property
     @abc.abstractproperty
+    def algorithm_version(self):
+        """Version of the classifier algorithm. The version of the algorithm is
+        matched with the version received as part of job data before training
+        the classifier.
+
+        The version of the algorithm changes every time the classifier
+        algorithm is changed. The algorithm version helps Oppia to map the
+        trained classifier models with their corresponding prediction API
+        in the Oppia frontend.
+        """
+        raise NotImplementedError
+
+    @property
+    @abc.abstractproperty
     def name_in_job_result_proto(self):
         """A property that identifies the attribute in job result proto message
         which will store this classifier's classifier data.
@@ -53,12 +67,13 @@ class BaseClassifier(object):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def to_dict(self):
-        """Returns a dict representing this classifier.
+    def to_proto(self):
+        """Returns a protobuf of the frozen model consisting of trained
+        parameters.
 
         Returns:
-            dict. A dictionary representation of classifier referred as
-            'classifier_data'. This data is used for prediction.
+            FrozenModel. A protobuf object of frozen model containing
+            trained model parameters. This data is used for prediction.
         """
         raise NotImplementedError
 
@@ -84,11 +99,12 @@ class BaseClassifier(object):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def validate(self, classifier_data):
-        """Validates classifier data.
+    def validate(self, frozen_model_proto):
+        """Validates the specified frozen model protobuf object containing
+        parameters of the trained classifier model.
 
         Args:
-            classifier_data: dict of the classifier attributes specific to
-                the classifier algorithm used.
+            frozen_model_proto: The frozen model protobuf containing parameter
+            of trained classifier model.
         """
         raise NotImplementedError

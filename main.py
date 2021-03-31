@@ -36,10 +36,12 @@ def main():
         if not job_data:
             logging.info('No pending job requests.')
             return
-        classifier_data = job_services.train_classifier(
+        frozen_model_proto = job_services.train_classifier(
             job_data['algorithm_id'], job_data['training_data'])
+
         status = job_services.store_job_result(
-            job_data['job_id'], classifier_data)
+            job_data['job_id'], job_data['algorithm_id'],
+            frozen_model_proto)
 
         if status != 200:
             logging.warning(

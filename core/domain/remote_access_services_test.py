@@ -17,6 +17,9 @@
 """Tests for remote access services."""
 
 from core.domain import remote_access_services
+from core.domain import training_job_result_domain
+from core.domain.proto import text_classifier_pb2
+from core.domain.proto import training_job_response_payload_pb2
 from core.tests import test_utils
 import vmconf
 
@@ -25,16 +28,13 @@ class RemoteAccessServicesTests(test_utils.GenericTestBase):
 
     def test_that_generate_signature_works_correctly(self):
         """Test that generate signature function is working as expected."""
-        data = {
-            'vm_id': 'vm_default'
-        }
-
         with self.swap(vmconf, 'DEFAULT_VM_SHARED_SECRET', '1a2b3c4e'):
-            sign = remote_access_services.generate_signature(data)
+            signature = remote_access_services.generate_signature(
+                'vm_default', vm_id='vm_default')
 
-        expected_sign = (
-            '45a6a6200a11d13d56ad5c505005e294f675f8c79943e5afd14b922e2f7a287d')
-        self.assertEqual(sign, expected_sign)
+        expected_signature = (
+            '740ed25befc87674a82844db7769436edb7d21c29d1c9cc87d7a1f3fdefe3610')
+        self.assertEqual(signature, expected_signature)
 
     def test_next_job_gets_fetched(self):
         """Test that next job is fetched correctly."""
@@ -48,7 +48,8 @@ class RemoteAccessServicesTests(test_utils.GenericTestBase):
             job_data = {
                 'job_id': '1',
                 'algorithm_id': 'ab',
-                'training_data': {}
+                'training_data': {},
+                'algorithm_version': 1
             }
             return job_data
 
@@ -58,62 +59,66 @@ class RemoteAccessServicesTests(test_utils.GenericTestBase):
         self.assertIn('job_id', resp.keys())
         self.assertIn('algorithm_id', resp.keys())
         self.assertIn('training_data', resp.keys())
+        self.assertIn('algorithm_version', resp.keys())
 
         self.assertEqual(resp['job_id'], '1')
         self.assertEqual(resp['algorithm_id'], 'ab')
+        self.assertEqual(resp['algorithm_version'], 1)
         self.assertDictEqual(resp['training_data'], {})
 
     def test_result_gets_stored_correctly(self):
         """Test that correct results are stored."""
 
-        job_result_dict = {
-            'job_id': '123',
-            'classifier_data_with_floats_stringified': {
-                'param': 'val'
-            }
-        }
+        frozen_model_proto = text_classifier_pb2.TextClassifierFrozenModel()
+        frozen_model_proto.model_json = 'model_json'
+        algorithm_id = 'TextClassifier'
+        job_id = '123'
+        job_result = training_job_result_domain.TrainingJobResult(
+            job_id, algorithm_id, frozen_model_proto)
 
         # Callback for post request.
         @self.callback
         def post_callback(request):
             """Callback for post request."""
-            self.assertEqual(request.payload['message']['job_id'], '123')
-            classifier_data = {
-                'param': 'val'
-            }
-            self.assertDictEqual(
-                classifier_data,
-                request.payload['message'][(
-                    'classifier_data_with_floats_stringified')])
+            payload = (
+                training_job_response_payload_pb2.TrainingJobResponsePayload())
+            payload.ParseFromString(request.body)
+            self.assertEqual(payload.job_result.job_id, '123')
+            self.assertEqual(
+                payload.job_result.WhichOneof('classifier_frozen_model'),
+                'text_classifier')
+            self.assertEqual(
+                payload.job_result.text_classifier.model_json, 'model_json')
 
         with self.set_job_result_post_callback(post_callback):
             status = remote_access_services.store_trained_classifier_model(
-                job_result_dict)
+                job_result)
         self.assertEqual(status, 200)
 
-    def test_exception_is_raised_when_classifier_data_is_inappropriate(self):
-        """Test that correct results are stored."""
-        job_result_dict = 123
+    def test_that_job_result_is_validated_before_storing(self):
+        """Ensure that JobResult domain object is validated before proceeding
+        to store it.
+        """
+        frozen_model_proto = text_classifier_pb2.TextClassifierFrozenModel()
+        frozen_model_proto.model_json = 'model_json'
+        algorithm_id = 'TextClassifier'
+        job_id = '123'
 
-        with self.assertRaisesRegexp(
-            Exception, 'job_result_dict must be in dict format'):
-            remote_access_services.store_trained_classifier_model(
-                job_result_dict)
+        job_result = training_job_result_domain.TrainingJobResult(
+            job_id, algorithm_id, frozen_model_proto)
 
-        job_result_dict = {}
+        check_valid_call = {'validate_has_been_called': False}
+        def validate_check():
+            """Assert that validate function is called."""
+            check_valid_call['validate_has_been_called'] = True
 
-        with self.assertRaisesRegexp(
-            Exception, 'job_result_dict must contain \'job_id\'.'):
-            remote_access_services.store_trained_classifier_model(
-                job_result_dict)
+        @self.callback
+        def post_callback(request): # pylint: disable=unused-argument
+            """Callback for post request."""
+            return
 
-        job_result_dict = {
-            'job_id': 'id'
-        }
-
-        with self.assertRaisesRegexp(
-            Exception,
-            'job_result_dict must contain '
-            '\'classifier_data_with_floats_stringified\'.'):
-            remote_access_services.store_trained_classifier_model(
-                job_result_dict)
+        with self.set_job_result_post_callback(post_callback):
+            with self.swap(job_result, 'validate', validate_check):
+                remote_access_services.store_trained_classifier_model(
+                    job_result)
+        self.assertTrue(check_valid_call['validate_has_been_called'])

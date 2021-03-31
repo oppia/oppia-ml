@@ -17,7 +17,7 @@
 """This module contains functions used for polling, training and saving jobs."""
 
 from core.classifiers import algorithm_registry
-from core.classifiers import classifier_utils
+from core.domain import training_job_result_domain
 from core.domain import remote_access_services
 
 # pylint: disable=too-many-branches
@@ -34,6 +34,9 @@ def _validate_job_data(job_data):
     if 'algorithm_id' not in job_data:
         raise Exception('job data should contain algorithm id')
 
+    if 'algorithm_version' not in job_data:
+        raise Exception('job data should contain algorithm version')
+
     if not isinstance(job_data['job_id'], unicode):
         raise Exception(
             'Expected job id to be unicode, received %s' %
@@ -44,6 +47,11 @@ def _validate_job_data(job_data):
             'Expected algorithm id to be unicode, received %s' %
             job_data['algorithm_id'])
 
+    if not isinstance(job_data['algorithm_version'], int):
+        raise Exception(
+            'Expected algorithm version to be integer, received %s' %
+            job_data['algorithm_version'])
+
     if not isinstance(job_data['training_data'], list):
         raise Exception(
             'Expected training data to be a list, received %s' %
@@ -53,6 +61,14 @@ def _validate_job_data(job_data):
         algorithm_registry.Registry.get_all_classifier_algorithm_ids())
     if job_data['algorithm_id'] not in algorithm_ids:
         raise Exception('Invalid algorithm id %s' % job_data['algorithm_id'])
+
+    classifier = algorithm_registry.Registry.get_classifier_by_algorithm_id(
+        job_data['algorithm_id'])
+    if classifier.algorithm_version != job_data['algorithm_version']:
+        raise Exception(
+            'Classifier version %d mismatches algorithm version %d received '
+            'in job data' % (
+                classifier.algorithm_version, job_data['algorithm_version']))
 
     for grouped_answers in job_data['training_data']:
         if 'answer_group_index' not in grouped_answers:
@@ -88,45 +104,36 @@ def train_classifier(algorithm_id, training_data):
 
     Args:
         algorithm_id: str. ID of classifier algorithm.
+        algorithm_version: int. Version of the classifier algorithm.
         training_data: list(dict). A list containing training data. Each dict
             stores 'answer_group_index' and 'answers'.
 
     Returns:
-        dict. Result of trained classifier algorithm.
+        FrozenModel. A protobuf object containing trained parameters of the
+        classifier algorithm.
     """
     classifier = algorithm_registry.Registry.get_classifier_by_algorithm_id(
         algorithm_id)
     classifier.train(training_data)
-    classifier_data = classifier.to_dict()
-    classifier.validate(classifier_data)
-    return classifier_data
+    frozen_model_proto = classifier.to_proto()
+    classifier.validate(frozen_model_proto)
+    return frozen_model_proto
 
 
-def store_job_result(job_id, classifier_data):
+def store_job_result(job_id, algorithm_id, frozen_model_proto):
     """Store result of job in the Oppia server.
 
     Args:
         job_id: str. ID of the job whose result is to be stored.
-        classifier_data: dict. A dictionary representing result of the job.
+        algorithm_id: str. ID of the classifier algorithm.
+        frozen_model_proto: FrozenModel. A protobuf object that stores trained
+            model parameters.
 
     Returns:
         int. Status code of response.
     """
-    # The classifier data to be sent in the payload should have all
-    # floating point values stored as strings. This is because floating point
-    # numbers are represented differently on GAE(Oppia) and GCE(Oppia-ml).
-    # Therefore, converting all floating point numbers to string keeps
-    # signature consistent on both Oppia and Oppia-ml.
-    # For more info visit: https://stackoverflow.com/q/40173295
-    classifier_data_with_floats_stringified = (
-        classifier_utils.encode_floats_in_classifier_data(
-            classifier_data))
-    job_result_dict = {
-        'job_id': job_id,
-        'classifier_data_with_floats_stringified': (
-            classifier_data_with_floats_stringified)
-    }
-
+    job_result = training_job_result_domain.TrainingJobResult(
+        job_id, algorithm_id, frozen_model_proto)
     status = remote_access_services.store_trained_classifier_model(
-        job_result_dict)
+        job_result)
     return status
