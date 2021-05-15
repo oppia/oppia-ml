@@ -68,14 +68,14 @@ def generate_signature(message, vm_id):
     """Generates digital signature for given message combined with vm_id.
 
     Args:
-        message: str. Message string.
-        vm_id: str. ID of the VM that trained the job.
+        message: bytes. Message string.
+        vm_id: bytes. ID of the VM that trained the job.
 
     Returns:
         str. The digital signature generated from request data.
     """
-    msg = '%s|%s' % (base64.b64encode(message), vm_id)
-    key = _get_shared_secret()
+    msg = b'%s|%s' % (base64.b64encode(message), vm_id)
+    key = _get_shared_secret().encode()
 
     # Generate signature and return it.
     return hmac.new(key, msg, digestmod=hashlib.sha256).hexdigest()
@@ -93,8 +93,8 @@ def fetch_next_job_request():
         _get_url(), _get_port(), vmconf.FETCH_NEXT_JOB_REQUEST_HANDLER)
 
     payload = {
-        'vm_id': _get_vm_id(),
-        'message': _get_vm_id(),
+        'vm_id': _get_vm_id().encode(),
+        'message': _get_vm_id().encode(),
     }
     signature = generate_signature(payload['message'], payload['vm_id'])
     payload['signature'] = signature
@@ -119,9 +119,9 @@ def store_trained_classifier_model(job_result):
     job_result.validate()
     payload = training_job_response_payload_pb2.TrainingJobResponsePayload()
     payload.job_result.CopyFrom(job_result.to_proto())
-    payload.vm_id = _get_vm_id()
-    signature = generate_signature(
-        payload.job_result.SerializeToString(), payload.vm_id)
+    payload.vm_id = _get_vm_id().encode()
+    message = payload.job_result.SerializeToString().encode()
+    signature = generate_signature(message, payload.vm_id)
     payload.signature = signature
 
     data = payload.SerializeToString()
