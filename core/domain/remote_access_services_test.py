@@ -37,7 +37,6 @@ class RemoteAccessServicesTests(test_utils.GenericTestBase):
         expected_signature = (
             '740ed25befc87674a82844db7769436edb7d21c29d1c9cc87d7a1f3fdefe3610')
         self.assertEqual(signature, expected_signature)
-        self.assertEqual(signature, "hi")
 
     def test_next_job_gets_fetched(self):
         """Test that next job is fetched correctly."""
