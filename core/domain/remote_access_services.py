@@ -93,8 +93,8 @@ def fetch_next_job_request():
         _get_url(), _get_port(), vmconf.FETCH_NEXT_JOB_REQUEST_HANDLER)
 
     payload = {
-        'vm_id': _get_vm_id().encode(),
-        'message': _get_vm_id().encode(),
+        'vm_id': _get_vm_id().encode('utf-8'),
+        'message': _get_vm_id().encode('utf-8'),
     }
     signature = generate_signature(payload['message'], payload['vm_id'])
     payload['signature'] = signature
@@ -119,8 +119,8 @@ def store_trained_classifier_model(job_result):
     job_result.validate()
     payload = training_job_response_payload_pb2.TrainingJobResponsePayload()
     payload.job_result.CopyFrom(job_result.to_proto())
-    payload.vm_id = _get_vm_id().encode()
-    message = payload.job_result.SerializeToString().encode()
+    payload.vm_id = _get_vm_id().encode('utf-8')
+    message = payload.job_result.SerializeToString().encode('utf-8')
     signature = generate_signature(message, payload.vm_id)
     payload.signature = signature
 
