@@ -32,7 +32,8 @@ class RemoteAccessServicesTests(test_utils.GenericTestBase):
             message = 'vm_default'
             vm_id = 'vm_default'
             signature = remote_access_services.generate_signature(
-                message.encode('utf-8'), vm_id.encode('utf-8'))
+                message.encode(encoding='utf-8'),
+                vm_id.encode(encoding='utf-8'))
 
         expected_signature = (
             '740ed25befc87674a82844db7769436edb7d21c29d1c9cc87d7a1f3fdefe3610')
