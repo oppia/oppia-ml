@@ -75,7 +75,7 @@ def generate_signature(message, vm_id):
         str. The digital signature generated from request data.
     """
     msg = b'%s|%s' % (base64.b64encode(message), vm_id)
-    key = _get_shared_secret().encode()
+    key = _get_shared_secret().encode(encoding='utf-8')
 
     # Generate signature and return it.
     return hmac.new(key, msg, digestmod=hashlib.sha256).hexdigest()
