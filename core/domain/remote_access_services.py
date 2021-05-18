@@ -69,12 +69,13 @@ def generate_signature(message, vm_id):
 
     Args:
         message: bytes. Message string.
-        vm_id: bytes. ID of the VM that trained the job.
+        vm_id: str. ID of the VM that trained the job.
 
     Returns:
         str. The digital signature generated from request data.
     """
-    msg = b'%s|%s' % (base64.b64encode(message), vm_id)
+    encoded_vm_id = vm_id.encode(encoding='utf-8')
+    msg = b'%s|%s' % (base64.b64encode(message), encoded_vm_id)
     key = _get_shared_secret().encode(encoding='utf-8')
 
     # Generate signature and return it.
