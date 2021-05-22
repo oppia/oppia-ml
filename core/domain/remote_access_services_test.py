@@ -29,8 +29,11 @@ class RemoteAccessServicesTests(test_utils.GenericTestBase):
     def test_that_generate_signature_works_correctly(self):
         """Test that generate signature function is working as expected."""
         with self.swap(vmconf, 'DEFAULT_VM_SHARED_SECRET', '1a2b3c4e'):
+            message = 'vm_default'
+            vm_id = 'vm_default'
             signature = remote_access_services.generate_signature(
-                'vm_default', vm_id='vm_default')
+                message.encode(encoding='utf-8'),
+                vm_id.encode(encoding='utf-8'))
 
         expected_signature = (
             '740ed25befc87674a82844db7769436edb7d21c29d1c9cc87d7a1f3fdefe3610')
