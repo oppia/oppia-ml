@@ -1,3 +1,7 @@
+# IMPORTANT NOTE
+
+The functionality in this repository is **deprecated**, and the corresponding code was removed from the main Oppia repository in https://github.com/oppia/oppia/pull/21356. This repository is now archived and is only used for reference purposes.
+
 # Oppia-ml
 
 Oppia-ml is a supplementary component which is used with Oppia for training machine learning models on a separate VM instance. Oppia puts job requests for training a classifier in database. Oppia-ml picks this job requests one by one, trains classifier for these requests and stores the result of training back into database. Oppia uses this stored results to predict outcome for answers.
